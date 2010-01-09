@@ -30,9 +30,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private static final int FAILED_PRESET_PICK = 5;
 	private static final int ADJUST_RUNNING_CLOCK = 6;
 	private static final int NEXT = 7;
-	
-//	private static final int TIME_CHANGE = 1;
-	
+		
 	private TextView timerText;
 	private TextView stepActionText;
 	private TextView clickText;

@@ -40,7 +40,6 @@ public class TimerPicker extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Log.v(TAG, "DarkroomPresets Loaded: " + darkroomPresets.size());
 		if(darkroomPresets.size() == 0) {
 			XmlResourceParser xrp = this.getResources().getXml(R.xml.presets);
 			XmlParser p = new XmlParser(xrp);
@@ -72,7 +71,6 @@ public class TimerPicker extends ListActivity {
 		Intent intent = new Intent(TimerPicker.this, DarkroomTimer.class);
 		intent.putExtra("com.webkist.android.DarkroomTimer.DarkroomPreset", darkroomPresets.indexOf(selectedPreset));
 		setResult(RESULT_OK, intent);
-//		startActivity(intent);
 		finish();
 	}
 
@@ -87,12 +85,9 @@ public class TimerPicker extends ListActivity {
 			try {
 				DarkroomPreset p = null;
 				DarkroomPreset.DarkroomStep step = null;
-				// Log.v(TAG, "Starting parser.");
 				while (xrp.getEventType() != XmlResourceParser.END_DOCUMENT) {
-					// Log.v(TAG, "event type: " + xrp.getEventType());
 					if (xrp.getEventType() == XmlResourceParser.START_TAG) {
 						String s = xrp.getName();
-						// Log.v(TAG, "Found a tag: " + s);
 						if (s.equals("preset")) {
 							p = new DarkroomPreset(
 									xrp.getAttributeValue(null, "id"), 
