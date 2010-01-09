@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?> 
+
+<preset-array>
+	<preset id="diafine" name="Diafine">
+		<step name="Part A" 
+				duration="225" 
+				agitate="60" 
+				promptBefore="Click when ready..." 				
+				pour="15" />
+		<step name="Part B" 
+				duration="225" 
+				agitate="60" 
+				promptBefore="Click when ready..." 
+				pour="15" />
+		<step name="Wash"   
+				duration="30" 
+				promptBefore="Click when full..." />
+		<step name="Fix"    
+				duration="130" 
+				agitate="60" 
+				promptBefore="Click when ready..." 
+				pour="15" />
+		<step name="Wash"   
+				duration="30" 
+				promptBefore="Click when full..." />
+		<step name="Hypo Clear" 
+				duration="130" 
+				agitate="60" 
+				promptBefore="Click when ready..." 
+				pour="15" />
+		<step name="Wash"   
+				duration="300" 
+				promptBefore="Click to continue..."/>
+		<step name="Photo-Flo" 
+				duration="30" 
+				promptBefore="Click to continue..."/>
+	</preset>
+	
+	<preset id="c41_tetenal_5L" name="C-41 (Tetenal Liquid Kit)">
+		<step name="Developer" duration="225" agitate="30" promptBefore="Click when ready..." pour="15" />
+		<step name="Blix" duration="225" agitate="30" promptBefore="Click when ready..." pour="15" />
+		<step name="Wash" duration="360" promptBefore="Click to continue..."/>
+		<step name="Stabilizer" duration="60" promptBefore="Click to continue..." />
+	</preset>
+</preset-array>

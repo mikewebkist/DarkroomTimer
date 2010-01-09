@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/mainLayout"
+	android:orientation="vertical" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" 
+	android:gravity="center_horizontal"
+	android:theme="@style/DarkroomTheme.RedLight">
+
+	<TextView android:id="@+id/presetName" 
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" 
+			style="@style/presetText"
+			android:text="Dummy Preset" />
+
+	<TextView android:id="@+id/stepActionText"
+			android:layout_width="wrap_content" 
+			android:layout_height="wrap_content" 
+			style="@style/actionText" />
+	
+	<TextView android:id="@+id/stepLabel" 
+		android:text="Dummy Step"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		style="@style/stepText" />
+
+	<TextView android:id="@+id/clickText"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		style="@style/stepText" />
+
+	<TextView android:id="@+id/stepClock" 
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content" 
+		style="@style/timer"
+		android:text="00:00" 
+		android:layout_weight="1" />
+
+</LinearLayout>

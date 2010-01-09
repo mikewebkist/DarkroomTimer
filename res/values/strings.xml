@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, DarkroomTimer!</string>
+    <string name="app_name">Darkroom Timer</string>
+    <string name="ControlButton">Start</string>
+    <string name="PauseButton">Pause</string>
+    <string name="presetPrompt">Choose a Preset</string>
+    <string name="stepLabel">Next step:</string>
+    <string name="time_picker_title">Adjust Time</string>
+    <string name="time_picker_ok">OK</string>
+    <string name="time_picker_cancel">Cancel</string>
+
+	<string-array name="step_actions">
+		<item>Agitate</item>
+		<item>Soak</item>
+		<item>Empty</item>
+		<item>Fill</item>
+	</string-array>
+
+	<string-array name="presets">
+		<item>Diafine</item>
+		<item>C-41</item>
+	</string-array>	
+</resources>
