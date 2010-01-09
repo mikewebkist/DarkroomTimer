@@ -23,6 +23,8 @@ import android.view.View.OnClickListener;
 
 public class DarkroomTimer extends Activity implements OnClickListener {
 	private static final String TAG = "DarkroomTimer";
+	
+	// TODO Organize these.
 	private static final int TICK = 1;
 	private static final int DONE = 2;
 	private static final int ADJUST_STOPPED_CLOCK = 3;
@@ -93,7 +95,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			case NEXT:
 				step = preset.nextStep();
 				if(step == null) {
-					stepHead.setText("Done!");
+					stepHead.setText(R.string.prompt_done);
 					timerText.setText("--:--");
 				} else {
 					stepHead.setText(step.name);
@@ -205,12 +207,11 @@ public class DarkroomTimer extends Activity implements OnClickListener {
     }
 
 	protected Dialog onCreateDialog(int id) {
-		Log.v(TAG, "in onCreateDialog");
 		LayoutInflater factory = LayoutInflater.from(this);
 		if(id == FAILED_PRESET_PICK) {
 			return new AlertDialog.Builder(DarkroomTimer.this)
-			.setTitle("Darkroom Timer")
-			.setMessage("Preset not picked! Quitting.")
+			.setTitle(R.string.app_name)
+			.setMessage(R.string.preset_pick_failed)
 			.setCancelable(false)
 			.setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog, int whichButton) {
@@ -237,7 +238,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 					int addseconds = addClock.getCurrent();
 
-					Log.v(TAG, String.format("in onCreateDialog, clicked OK: addming %d seconds", addseconds));
 					step.duration += addseconds;
 					Message m = new Message();
 					m.what = DarkroomTimer.TICK;
@@ -251,7 +251,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				}
 			})
 			.create();
-		} else if(id == ADJUST_STOPPED_CLOCK){
+		} else if(id == ADJUST_STOPPED_CLOCK) {
 
 			final View timePickerView = factory.inflate(R.layout.time_picker, null);
 
@@ -278,7 +278,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					int minutes = minClock.getCurrent();
 					int seconds = secClock.getCurrent();
 
-					Log.v(TAG, String.format("in onCreateDialog, clicked OK: %2d:%2d", minutes, seconds));
 					step.duration = minutes * 60 + seconds;
 					Message m = new Message();
 					m.what = DarkroomTimer.TICK;
