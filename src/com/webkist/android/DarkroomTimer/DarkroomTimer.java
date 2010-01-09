@@ -117,7 +117,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				clickText.setText("");
 				stepActionText.setText("");
 
-				// TODO promptAfter
+				// TODO Add optional promptAfter stuff
 								
 				Message m = new Message();
 				m.what = DarkroomTimer.NEXT;
