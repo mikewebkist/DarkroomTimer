@@ -2,9 +2,6 @@ package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
 
-import android.net.Uri;
-import android.util.Log;
-
 public class DarkroomPreset {
 	public String name;
 	public String id;
@@ -56,11 +53,6 @@ public class DarkroomPreset {
 		public int agitateFor = 10;
 		public String promptBefore = null;
 		public int pourFor = 0;
-
-//		public static final String NAME = "name";
-//		public static final String DURATION = "duration";
-//		public static final String TIME = "time";
-//		public static final String CLICK_PROMPT = "clickprompt";
 
 		DarkroomStep(String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
 			this.name = name;

@@ -61,11 +61,11 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
 
 				if(step.pourFor > 0 && elapsedSecs < step.pourFor) {
-					clickText.setText("Pour!");
+					clickText.setText(R.string.prompt_pour);
 					stepActionText.setText("");
 				} else if(step.agitateEvery > 0) {
 					if(elapsedSecs < (step.pourFor + 5 + step.agitateFor)) {
-						clickText.setText("Agitate!");
+						clickText.setText(R.string.prompt_agitate);
 						stepActionText.setText("");
 					} else {
 						double elapsedRemainder = elapsedSecs % step.agitateEvery;
@@ -73,12 +73,12 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 						if(elapsedRemainder < step.agitateFor) {
 							// Currently agitating
 							stepActionText.setText("");
-							clickText.setText("Agitate!");
+							clickText.setText(R.string.prompt_agitate);
 						} else if(elapsedRemainder > step.agitateEvery - 10) {
 							// Coming up on agitation
 							double agitateIn = step.agitateEvery - elapsedRemainder;
 							stepActionText.setText(String.format("%s in %02d:%02d", 
-									"Agitate", 
+									R.string.prompt_agitate, 
 									(int) agitateIn / 60, 
 									(int) agitateIn % 60));
 						} else {

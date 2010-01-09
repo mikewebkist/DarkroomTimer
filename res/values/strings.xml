@@ -9,6 +9,8 @@
     <string name="time_picker_title">Adjust Time</string>
     <string name="time_picker_ok">OK</string>
     <string name="time_picker_cancel">Cancel</string>
+    <string name="prompt_pour">Pour!</string>
+    <string name="prompt_agitate">Agitate!</string>
 
 	<string-array name="step_actions">
 		<item>Agitate</item>
