@@ -95,7 +95,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			case NEXT:
 				step = preset.nextStep();
 				if(step == null) {
-					// TODO Timer finished...
 					stepHead.setText("Done!");
 					timerText.setText("--:--");
 				} else {
@@ -193,7 +192,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	@Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-            // TODO Also add touch screen (so factor out the logic).
             switch (keyCode) {
             
             case KeyEvent.KEYCODE_DPAD_CENTER:
@@ -349,8 +347,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
 			this.mWakeLock.acquire();
 			Log.v(TAG, "in onResume()");
-			// TODO: If we are paused and resume, check the clock and see if
-			// the current step has time left. If so, restart the timer.
 			if(stepTimeRemaining() > 0) {
 				startThread();
 			} else {
@@ -366,6 +362,9 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		super.onPause();
 		Log.v(TAG, "in onPause()");
 		stopThread();
+		// TODO We don't actually run in the background at this point, so if
+		// someone starts another Activity we won't alert them when the timer
+		// expires. 
 		if(this.mWakeLock != null) { 
 			this.mWakeLock.release();
 			this.mWakeLock = null;
@@ -376,7 +375,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	public void onStop() {
 		super.onStop();
 		Log.v(TAG, "in onStop()");
-		// TODO: reset steps, perhaps? Exit process completely?
 	}
 	
 
