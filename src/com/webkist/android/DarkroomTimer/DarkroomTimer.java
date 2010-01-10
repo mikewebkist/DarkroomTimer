@@ -93,6 +93,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 							clickText.setText(R.string.prompt_agitate);
 						} else if(elapsedRemainder > step.agitateEvery - 10) {
 							// Coming up on agitation
+							// TODO R.string.prompt_agitate is not working here.
+							// Seeing the Android string ID instead of the string itself.
 							double agitateIn = step.agitateEvery - elapsedRemainder;
 							stepActionText.setText(String.format("%s in %02d:%02d", 
 									R.string.prompt_agitate, 
