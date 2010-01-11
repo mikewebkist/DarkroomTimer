@@ -26,6 +26,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
@@ -93,11 +94,10 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 							clickText.setText(R.string.prompt_agitate);
 						} else if(elapsedRemainder > step.agitateEvery - 10) {
 							// Coming up on agitation
-							// TODO R.string.prompt_agitate is not working here.
-							// Seeing the Android string ID instead of the string itself.
 							double agitateIn = step.agitateEvery - elapsedRemainder;
+							Resources res = getResources();
 							stepActionText.setText(String.format("%s in %02d:%02d", 
-									R.string.prompt_agitate, 
+									res.getString(R.string.prompt_agitate), 
 									(int) agitateIn / 60, 
 									(int) agitateIn % 60));
 						} else {
