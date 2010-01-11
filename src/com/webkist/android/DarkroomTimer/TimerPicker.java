@@ -30,6 +30,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -57,6 +59,7 @@ public class TimerPicker extends ListActivity {
 		super.onCreate(savedInstanceState);
 
 		if(darkroomPresets.size() == 0) {
+			darkroomPresets.add(new DarkroomPreset("addNew", "+ Add New"));
 			XmlResourceParser xrp = this.getResources().getXml(R.xml.presets);
 			XmlParser p = new XmlParser(xrp);
 			p.run();
@@ -65,6 +68,12 @@ public class TimerPicker extends ListActivity {
 		}
 	}
 
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.timerpicker, menu);
+		return true;
+	}
+	
 	public static DarkroomPreset getPreset(int index) {
 		return darkroomPresets.get(index);
 	}
@@ -83,11 +92,16 @@ public class TimerPicker extends ListActivity {
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		selectedPreset = (DarkroomPreset) getListView().getItemAtPosition(position);
-		Log.v(TAG, "List Item Clicked: preset=" + selectedPreset);
-		Intent intent = new Intent(TimerPicker.this, DarkroomTimer.class);
-		intent.putExtra("com.webkist.android.DarkroomTimer.DarkroomPreset", darkroomPresets.indexOf(selectedPreset));
-		setResult(RESULT_OK, intent);
-		finish();
+		if(selectedPreset.id == "addNew") {
+			Toast.makeText(this, "You picked + Add New", Toast.LENGTH_SHORT).show();
+			// TODO start new Activity here to create a new preset.
+		} else {
+			Log.v(TAG, "List Item Clicked: preset=" + selectedPreset);
+			Intent intent = new Intent(TimerPicker.this, DarkroomTimer.class);
+			intent.putExtra("com.webkist.android.DarkroomTimer.DarkroomPreset", darkroomPresets.indexOf(selectedPreset));
+			setResult(RESULT_OK, intent);
+			finish();
+		}
 	}
 
 	class XmlParser implements Runnable {
