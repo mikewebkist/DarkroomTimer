@@ -30,17 +30,23 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class TimerPicker extends ListActivity {
 	public static final String TAG = "DarkroomTimer.TimerPicker";
 	public static ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
 	private static final int XML_IMPORT_DONE = 1;
+	private static final int EDIT_ID = 2;
+	private static final int DELETE_ID = 3;
 	public DarkroomPreset selectedPreset = null;
 
 	Handler threadMessageHandler = new Handler() {
@@ -59,7 +65,6 @@ public class TimerPicker extends ListActivity {
 		super.onCreate(savedInstanceState);
 
 		if(darkroomPresets.size() == 0) {
-			darkroomPresets.add(new DarkroomPreset("addNew", "+ Add New"));
 			XmlResourceParser xrp = this.getResources().getXml(R.xml.presets);
 			XmlParser p = new XmlParser(xrp);
 			p.run();
@@ -68,10 +73,40 @@ public class TimerPicker extends ListActivity {
 		}
 	}
 
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.add(0, EDIT_ID, 0, "Edit");
+		menu.add(0, DELETE_ID, 0,  "Delete");
+	}
+
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		DarkroomPreset preset = (DarkroomPreset) getListView().getItemAtPosition(info.position);
+		switch (item.getItemId()) {
+		case EDIT_ID:
+			Log.v(TAG, "Edit preset: " + preset.name);
+			return true;
+		case DELETE_ID:
+			Log.v(TAG, "Delete preset: " + preset.name);
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+	
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.timerpicker, menu);
 		return true;
+	}
+	
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	    case R.id.add_preset:
+	    	Log.v(TAG, "Add preset.");
+	    	return true;
+	    }
+	    return false;
 	}
 	
 	public static DarkroomPreset getPreset(int index) {
@@ -83,6 +118,7 @@ public class TimerPicker extends ListActivity {
 
 		setListAdapter(new ArrayAdapter<DarkroomPreset>(this,
 				android.R.layout.simple_list_item_1, darkroomPresets));
+		registerForContextMenu(getListView());
 
 	}
 

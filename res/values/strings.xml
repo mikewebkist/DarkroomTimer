@@ -13,6 +13,11 @@
     <string name="prompt_agitate">Agitate!</string>
     <string name="prompt_done">Done!</string>
 	<string name="preset_pick_failed">Preset not picked! Quitting.</string>
+	<string name="ghostData_name">Preset Name</string>
+	<string name="menu_done">Save</string>
+	<string name="menu_doNotSave">Cancel</string>
+	<string name="editPreset_title_edit">Edit Existing Preset</string>
+	<string name="editPreset_title_insert">Create New Preset</string>
 
 	<string-array name="step_actions">
 		<item>Agitate</item>
