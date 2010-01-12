@@ -30,4 +30,23 @@
 		<item>Diafine</item>
 		<item>C-41</item>
 	</string-array>	
+	
+	<string name="sql_presets">
+	CREATE TABLE presets (
+		_id INTEGER PRIMARY KEY,
+		name TEXT
+	);
+	</string>
+	<string name="sql_steps">
+	CREATE TABLE steps (
+		_id INTEGER PRIMARY KEY,
+		name TEXT,
+		duration INTEGER,
+		agitation INTEGER,
+		pour INTEGER,
+		prompt_before TEXT,
+		prompt_after TEXT
+	);
+	</string>
+	
 </resources>
