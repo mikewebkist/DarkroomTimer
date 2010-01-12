@@ -37,6 +37,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ArrayAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -59,6 +60,7 @@ public class TimerPicker extends ListActivity {
 			}
 		}
 	};
+	private ArrayAdapter<DarkroomPreset> myAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,14 +85,14 @@ public class TimerPicker extends ListActivity {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		DarkroomPreset preset = (DarkroomPreset) getListView().getItemAtPosition(info.position);
 		switch (item.getItemId()) {
-		case EDIT_ID:
-			Log.v(TAG, "Edit preset: " + preset.name);
-			return true;
-		case DELETE_ID:
-			Log.v(TAG, "Delete preset: " + preset.name);
-			return true;
-		default:
-			return super.onContextItemSelected(item);
+			case EDIT_ID:
+				editPreset(preset);
+				return true;
+			case DELETE_ID:
+				deletePreset(preset);
+				return true;
+			default:
+				return super.onContextItemSelected(item);
 		}
 	}
 	
@@ -99,6 +101,20 @@ public class TimerPicker extends ListActivity {
 		inflater.inflate(R.menu.timerpicker, menu);
 		return true;
 	}
+	
+	public void editPreset(DarkroomPreset preset) {
+		// TODO
+		Log.v(TAG, "Edit preset: " + preset.name);
+	}
+	
+	public void deletePreset(DarkroomPreset preset) {
+		// TODO popup a dialog to confirm.
+		Log.v(TAG, "Delete preset: " + preset.name);
+		myAdapter.remove(preset);
+	}
+	
+//	Intent intent = new Intent(this, TimerPicker.class);
+//	startActivityForResult(intent, GET_PRESET);
 	
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    switch (item.getItemId()) {
@@ -116,8 +132,8 @@ public class TimerPicker extends ListActivity {
 	void XMLLoaded() {
 		Toast.makeText(this, "XML Loaded!", Toast.LENGTH_LONG);
 
-		setListAdapter(new ArrayAdapter<DarkroomPreset>(this,
-				android.R.layout.simple_list_item_1, darkroomPresets));
+		myAdapter = new ArrayAdapter<DarkroomPreset>(this, android.R.layout.simple_list_item_1, darkroomPresets);
+		setListAdapter(myAdapter);
 		registerForContextMenu(getListView());
 
 	}
