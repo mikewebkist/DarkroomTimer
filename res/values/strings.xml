@@ -40,6 +40,8 @@
 	<string name="sql_steps">
 	CREATE TABLE steps (
 		_id INTEGER PRIMARY KEY,
+		preset INTEGER,
+		step INTEGER,
 		name TEXT,
 		duration INTEGER,
 		agitation INTEGER,
