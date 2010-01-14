@@ -24,8 +24,12 @@ import org.xmlpull.v1.XmlPullParserException;
 import com.webkist.android.DarkroomTimer.DarkroomPreset;
 
 import android.app.ListActivity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.res.XmlResourceParser;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -37,7 +41,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -165,7 +168,33 @@ public class TimerPicker extends ListActivity {
 
 		public void run() {
 			try {
+				String[] projection = new String[] { DarkroomPreset._ID, DarkroomPreset.PRESET_NAME };
+				
+				Uri presets = DarkroomPreset.CONTENT_URI_PRESET;
+				ContentResolver cr = getContentResolver();
+				
+				Cursor cur = managedQuery(presets, projection, null,
+						null, DarkroomPreset.PRESET_NAME + " ASC");
+				
+				Log.v(TAG, "Got " + cur.getCount() + " rows.");
+				int idCol = cur.getColumnIndex(DarkroomPreset._ID);
+				int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
+				
+				if(cur.moveToFirst()) {
+					do {
+						String id = cur.getString(idCol);
+						Uri uri = Uri.withAppendedPath(DarkroomPreset.CONTENT_URI_PRESET, id);
+						Log.v(TAG, "Uri for " + cur.getString(nameCol) + " is " + uri);
+						cr.delete(uri, null, null);
+						
+					} while(cur.moveToNext());
+
+//					getContentResolver().delete(DarkroomPreset.CONTENT_URI_PRESET, null, null);
+//					Log.v(TAG, "Got " + cur.getCount() + " rows.");
+				}
+
 				DarkroomPreset p = null;
+				@SuppressWarnings("unused")
 				DarkroomPreset.DarkroomStep step = null;
 				while (xrp.getEventType() != XmlResourceParser.END_DOCUMENT) {
 					if (xrp.getEventType() == XmlResourceParser.START_TAG) {
@@ -186,6 +215,14 @@ public class TimerPicker extends ListActivity {
 					}
 					xrp.next();
 				}
+				
+				for(int i=0; i<darkroomPresets.size(); i++) {
+					ContentValues vals = new ContentValues();
+					vals.put(DarkroomPreset.PRESET_NAME, darkroomPresets.get(i).name);
+					Uri uri = getContentResolver().insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+					Log.v(TAG, "Inserted " + uri);
+				}
+				
 				Message m = new Message();
 				m.what = TimerPicker.XML_IMPORT_DONE;
 				TimerPicker.this.threadMessageHandler.sendMessage(m);

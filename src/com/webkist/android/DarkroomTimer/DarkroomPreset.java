@@ -18,7 +18,28 @@ package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
 
-public class DarkroomPreset {
+import android.net.Uri;
+import android.provider.BaseColumns;
+
+public class DarkroomPreset implements BaseColumns {
+	public static final String AUTHORITY = "com.webkist.android.DarkroomTimer";
+	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
+	public static final Uri CONTENT_URI_PRESET = Uri.parse("content://" + AUTHORITY + "/preset");
+
+	public static final String PRESET_CONTENT_TYPE = "vnd.android.cursor.item/vnd.webkist.preset";
+	public static final String PRESET_CONTENT_TYPE_LIST = "vnd.android.cursor.dir/vnd.webkist.preset";
+	
+	public static final String PRESET_NAME = "name";
+	
+	public static final String STEP_PRESET = "preset";
+	public static final String STEP_STEP = "step";
+	public static final String STEP_NAME = "name";
+	public static final String STEP_DURATION = "duration";
+	public static final String STEP_AGITATION = "agitation";
+	public static final String STEP_POUR = "pour";
+	public static final String STEP_PROMPT_BEFORE = "prompt_before";
+	public static final String STEP_PROMPT_AFTER = "prompt_after";
+	
 	public String name;
 	public String id;
 	private int currentStep = 0;

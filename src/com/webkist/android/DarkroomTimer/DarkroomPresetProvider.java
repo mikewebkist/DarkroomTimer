@@ -17,33 +17,18 @@ import android.util.Log;
 import java.lang.*;
 
 public class DarkroomPresetProvider extends ContentProvider {
-	public static final String AUTHORITY = "com.webkist.android.DarkroomTimer";
-	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
-	public static final Uri CONTENT_URI_PRESET = Uri.parse("content://" + AUTHORITY + "/preset");
 	private static final String TAG = "DarkroomPresetProvider";
 	
 	private static final String DATABASE_NAME = "presets.db";
 	private static final int DATABASE_VERSION = 1;
 
-	public static final String PRESET_CONTENT_TYPE = "vnd.android.cursor.item/vnd.webkist.preset";
-	public static final String PRESET_CONTENT_TYPE_LIST = "vnd.android.cursor.dir/vnd.webkist.preset";
 	private static final int URI_PRESETS = 1;
 	private static final int URI_PRESET_ID = 2;
 	private static final int URI_STEP_ID = 3;
 	private static final UriMatcher sUriMatcher;
 
 	private static final String PRESET_TABLE_NAME = "presets";
-	public static final String PRESET_NAME = "name";
-	
 	private static final String STEP_TABLE_NAME = "steps";
-	public static final String STEP_PRESET = "preset";
-	public static final String STEP_STEP = "step";
-	public static final String STEP_NAME = "name";
-	public static final String STEP_DURATION = "duration";
-	public static final String STEP_AGITATION = "agitation";
-	public static final String STEP_POUR = "pour";
-	public static final String STEP_PROMPT_BEFORE = "prompt_before";
-	public static final String STEP_PROMPT_AFTER = "prompt_after";
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
 		private Resources res;
@@ -55,6 +40,8 @@ public class DarkroomPresetProvider extends ContentProvider {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
+			Log.v(TAG, "Creating db tables.");
+			
 			db.execSQL(res.getString(R.string.sql_presets));
 			db.execSQL(res.getString(R.string.sql_steps));			
 		}
@@ -86,7 +73,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 		int count;
 		switch(sUriMatcher.match(uri)) {
 		case URI_PRESETS:
-			Log.w(TAG, "Deleting all presets is not allowed!");
+			Log.w(TAG, "Deleting all presets is not allowed! Do it one at a time! " + uri);
 			break;
 		case URI_PRESET_ID:
 			Log.w(TAG, "Deleting preset id=" + uri.getPathSegments().get(1));
@@ -101,9 +88,9 @@ public class DarkroomPresetProvider extends ContentProvider {
 	public String getType(Uri uri) {
 		switch(sUriMatcher.match(uri)) {
 		case URI_PRESETS:
-			return PRESET_CONTENT_TYPE_LIST;
+			return DarkroomPreset.PRESET_CONTENT_TYPE_LIST;
 		case URI_PRESET_ID:
-			return PRESET_CONTENT_TYPE;
+			return DarkroomPreset.PRESET_CONTENT_TYPE;
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -123,19 +110,19 @@ public class DarkroomPresetProvider extends ContentProvider {
 		long rowId;
 				
 		switch(sUriMatcher.match(uri)) {
-		case URI_PRESET_ID:
-			rowId = db.insert(PRESET_TABLE_NAME, PRESET_NAME, values);
+		case URI_PRESETS:
+			rowId = db.insert(PRESET_TABLE_NAME, DarkroomPreset.PRESET_NAME, values);
 			if(rowId > 0) {
-				Uri presetUri = ContentUris.withAppendedId(CONTENT_URI_PRESET, rowId);
+				Uri presetUri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, rowId);
 				getContext().getContentResolver().notifyChange(presetUri, null);
 				return presetUri;
 			}
 			break;
 		case URI_STEP_ID:
 			// Deal with default values in the DarkroomPreset class.
-			rowId = db.insert(STEP_TABLE_NAME, STEP_NAME, values);
+			rowId = db.insert(STEP_TABLE_NAME, DarkroomPreset.STEP_NAME, values);
 			if(rowId > 0) {
-				Uri presetUri = ContentUris.withAppendedId(CONTENT_URI_PRESET, Long.decode(values.get(STEP_PRESET).toString()));
+				Uri presetUri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, Integer.parseInt(values.get(DarkroomPreset.STEP_PRESET).toString()));
 				getContext().getContentResolver().notifyChange(presetUri, null);
 				return presetUri;
 			}
@@ -156,13 +143,13 @@ public class DarkroomPresetProvider extends ContentProvider {
 		switch(sUriMatcher.match(uri)) {
 		case URI_PRESETS: // Get all presets
 			qb.setTables(PRESET_TABLE_NAME);
-			orderBy = PRESET_NAME;
+			orderBy = DarkroomPreset.PRESET_NAME;
 			break;
 		
 		case URI_PRESET_ID: // Get steps associated with a preset
 			qb.setTables(STEP_TABLE_NAME);
-			qb.appendWhere(STEP_PRESET + "=" + uri.getPathSegments().get(1));
-			orderBy = STEP_STEP;
+			qb.appendWhere(DarkroomPreset.STEP_PRESET + "=" + uri.getPathSegments().get(1));
+			orderBy = DarkroomPreset.STEP_STEP;
 			break;
 			
 		default:
@@ -176,15 +163,16 @@ public class DarkroomPresetProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
+	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
 		// TODO Auto-generated method stub
+		Log.w(TAG, "Updating unimplemented: " + uri);
 		return 0;
 	}
 	
 	static {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-		sUriMatcher.addURI(AUTHORITY, "presets", URI_PRESETS);
-		sUriMatcher.addURI(AUTHORITY, "preset/#", URI_PRESET_ID);
-		sUriMatcher.addURI(AUTHORITY, "step/#", URI_STEP_ID);
+		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset", URI_PRESETS);
+		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset/#", URI_PRESET_ID);
+		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "step/#", URI_STEP_ID);
 	}
 }
