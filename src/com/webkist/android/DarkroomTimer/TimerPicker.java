@@ -176,21 +176,22 @@ public class TimerPicker extends ListActivity {
 				Cursor cur = managedQuery(presets, projection, null,
 						null, DarkroomPreset.PRESET_NAME + " ASC");
 				
-				Log.v(TAG, "Got " + cur.getCount() + " rows.");
-				int idCol = cur.getColumnIndex(DarkroomPreset._ID);
-				int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
-				
-				if(cur.moveToFirst()) {
-					do {
-						String id = cur.getString(idCol);
-						Uri uri = Uri.withAppendedPath(DarkroomPreset.CONTENT_URI_PRESET, id);
-						Log.v(TAG, "Uri for " + cur.getString(nameCol) + " is " + uri);
-						cr.delete(uri, null, null);
-						
-					} while(cur.moveToNext());
+				if(cur.getCount() != 0) {
+					int idCol = cur.getColumnIndex(DarkroomPreset._ID);
+					int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
 
-//					getContentResolver().delete(DarkroomPreset.CONTENT_URI_PRESET, null, null);
-//					Log.v(TAG, "Got " + cur.getCount() + " rows.");
+					if(cur.moveToFirst()) {
+						do {
+							String id = cur.getString(idCol);
+							Uri uri = Uri.withAppendedPath(DarkroomPreset.CONTENT_URI_PRESET, id);
+							Log.v(TAG, "Uri for " + cur.getString(nameCol) + " is: " + uri);
+							cr.delete(uri, null, null);
+
+						} while(cur.moveToNext());
+
+						//					getContentResolver().delete(DarkroomPreset.CONTENT_URI_PRESET, null, null);
+						//					Log.v(TAG, "Got " + cur.getCount() + " rows.");
+					}
 				}
 
 				DarkroomPreset p = null;
@@ -217,9 +218,14 @@ public class TimerPicker extends ListActivity {
 				}
 				
 				for(int i=0; i<darkroomPresets.size(); i++) {
+					DarkroomPreset preset = darkroomPresets.get(i);
 					ContentValues vals = new ContentValues();
-					vals.put(DarkroomPreset.PRESET_NAME, darkroomPresets.get(i).name);
-					Uri uri = getContentResolver().insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+					vals.put(DarkroomPreset.PRESET_NAME, preset.name);
+					Uri uri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+					String presetId = uri.getLastPathSegment();
+					for(int j=0; j<preset.steps.size(); j++) {
+						cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues());
+					}
 					Log.v(TAG, "Inserted " + uri);
 				}
 				

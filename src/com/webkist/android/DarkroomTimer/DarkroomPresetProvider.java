@@ -72,16 +72,21 @@ public class DarkroomPresetProvider extends ContentProvider {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int count;
 		switch(sUriMatcher.match(uri)) {
-		case URI_PRESETS:
-			Log.w(TAG, "Deleting all presets is not allowed! Do it one at a time! " + uri);
-			break;
+//		case URI_PRESETS:
+//			Log.w(TAG, "Deleting all presets is not allowed! Do it one at a time! " + uri);
+//			break;
 		case URI_PRESET_ID:
 			Log.w(TAG, "Deleting preset id=" + uri.getPathSegments().get(1));
+			String presetId = uri.getPathSegments().get(1);
+            count = db.delete(PRESET_TABLE_NAME, DarkroomPreset._ID + "=" + presetId
+                    + (!TextUtils.isEmpty(where) ? " AND (" + where + ')' : ""), whereArgs);
+
 			break;
 		default:
 			throw new IllegalArgumentException("Unknown URI " + uri);
 		}
-		return 0;
+		getContext().getContentResolver().notifyChange(uri, null);
+        return count;
 	}
 
 	@Override
@@ -173,6 +178,6 @@ public class DarkroomPresetProvider extends ContentProvider {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset", URI_PRESETS);
 		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset/#", URI_PRESET_ID);
-		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "step/#", URI_STEP_ID);
+		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset/#/step", URI_STEP_ID);
 	}
 }

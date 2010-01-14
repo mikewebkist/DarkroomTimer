@@ -18,6 +18,7 @@ package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
 
+import android.content.ContentValues;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -31,19 +32,11 @@ public class DarkroomPreset implements BaseColumns {
 	
 	public static final String PRESET_NAME = "name";
 	
-	public static final String STEP_PRESET = "preset";
-	public static final String STEP_STEP = "step";
-	public static final String STEP_NAME = "name";
-	public static final String STEP_DURATION = "duration";
-	public static final String STEP_AGITATION = "agitation";
-	public static final String STEP_POUR = "pour";
-	public static final String STEP_PROMPT_BEFORE = "prompt_before";
-	public static final String STEP_PROMPT_AFTER = "prompt_after";
 	
 	public String name;
 	public String id;
 	private int currentStep = 0;
-	private ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
+	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
 	public static final String TAG = "DarkroomPreset";
 
@@ -83,6 +76,12 @@ public class DarkroomPreset implements BaseColumns {
 		return total;
 	}
 	
+	public ContentValues toContentValues() {
+		ContentValues vals = new ContentValues();
+		vals.put(DarkroomPreset.PRESET_NAME, name);
+		return vals;
+	}
+	
 	public class DarkroomStep {
 		public String name;
 		public int duration;
@@ -91,12 +90,33 @@ public class DarkroomPreset implements BaseColumns {
 		public String promptBefore = null;
 		public int pourFor = 0;
 
+		public static final String STEP_PRESET = "preset";
+		public static final String STEP_STEP = "step";
+		public static final String STEP_NAME = "name";
+		public static final String STEP_DURATION = "duration";
+		public static final String STEP_AGITATION = "agitation";
+		public static final String STEP_POUR = "pour";
+		public static final String STEP_PROMPT_BEFORE = "prompt_before";
+		public static final String STEP_PROMPT_AFTER = "prompt_after";
+
 		DarkroomStep(String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
 			this.name = name;
 			this.duration = duration;
 			this.promptBefore = clickPrompt;
 			this.agitateEvery = agitateEvery;
 			this.pourFor = pourFor;
+		}
+
+		public ContentValues toContentValues() {
+			ContentValues vals = new ContentValues();
+			vals.put(STEP_NAME, name);
+			vals.put(STEP_STEP, name);
+			vals.put(STEP_DURATION, name);
+			vals.put(STEP_AGITATION, name);
+			vals.put(STEP_POUR, name);
+			vals.put(STEP_PROMPT_BEFORE, name);
+			vals.put(STEP_PROMPT_AFTER, name);
+			return vals;
 		}
 
 		public String toString() {
