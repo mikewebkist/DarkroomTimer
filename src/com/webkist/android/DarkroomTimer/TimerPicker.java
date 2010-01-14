@@ -25,6 +25,7 @@ import com.webkist.android.DarkroomTimer.DarkroomPreset;
 
 import android.app.ListActivity;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -149,12 +150,10 @@ public class TimerPicker extends ListActivity {
 	// }
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		DarkroomPreset selectedPreset = (DarkroomPreset) getListView().getItemAtPosition(position);
-		Log.v(TAG, "List Item Clicked: preset=" + selectedPreset);
-//		Intent intent = new Intent(TimerPicker.this, DarkroomTimer.class);
-//		intent.putExtra("com.webkist.android.DarkroomTimer.DarkroomPreset", darkroomPresets.indexOf(selectedPreset));
-//		setResult(RESULT_OK, intent);
-//		finish();
+		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
+		Log.v(TAG, "List Item Clicked: preset=" + uri);
+		setResult(RESULT_OK, new Intent().setData(uri));
+		finish();
 	}
 
 	class XmlParser implements Runnable {

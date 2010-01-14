@@ -17,6 +17,7 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
@@ -192,12 +193,14 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		    	stopThread();
 		    	step=null;
 
-				int index = data.getExtras().getInt("com.webkist.android.DarkroomTimer.DarkroomPreset");
+		    	Uri uri = data.getData();
+		    	Log.v(TAG, "URI: " + uri);
+		    	
 //				preset = TimerPicker.getPreset(index);
 //				preset.reset();
 
-				TextView header = (TextView) findViewById(R.id.presetName);
-				header.setText(preset.name);
+//				TextView header = (TextView) findViewById(R.id.presetName);
+//				header.setText(preset.name);
 
 				timerText = (TextView) findViewById(R.id.stepClock);
 				timerText.setOnClickListener(this);
