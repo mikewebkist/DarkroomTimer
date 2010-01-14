@@ -45,8 +45,8 @@ public class DarkroomPreset implements BaseColumns {
 		this.id = id;
 	}
 
-	public DarkroomStep addStep(String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
-		DarkroomStep s = new DarkroomStep(name, duration, agitateEvery, clickPrompt, pourFor);
+	public DarkroomStep addStep(int stepNum, String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
+		DarkroomStep s = new DarkroomStep(stepNum, name, duration, agitateEvery, clickPrompt, pourFor);
 		steps.add(s);
 		return s;
 	}
@@ -82,12 +82,14 @@ public class DarkroomPreset implements BaseColumns {
 		return vals;
 	}
 	
-	public class DarkroomStep {
+	public class DarkroomStep implements BaseColumns {
 		public String name;
+		public int stepNum = 0;
 		public int duration;
 		public int agitateEvery = 0;
 		public int agitateFor = 10;
 		public String promptBefore = null;
+		public String promptAfter = null;
 		public int pourFor = 0;
 
 		public static final String STEP_PRESET = "preset";
@@ -99,7 +101,8 @@ public class DarkroomPreset implements BaseColumns {
 		public static final String STEP_PROMPT_BEFORE = "prompt_before";
 		public static final String STEP_PROMPT_AFTER = "prompt_after";
 
-		DarkroomStep(String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
+		DarkroomStep(int stepNum, String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
+			this.stepNum = stepNum;
 			this.name = name;
 			this.duration = duration;
 			this.promptBefore = clickPrompt;
@@ -110,12 +113,12 @@ public class DarkroomPreset implements BaseColumns {
 		public ContentValues toContentValues() {
 			ContentValues vals = new ContentValues();
 			vals.put(STEP_NAME, name);
-			vals.put(STEP_STEP, name);
-			vals.put(STEP_DURATION, name);
-			vals.put(STEP_AGITATION, name);
-			vals.put(STEP_POUR, name);
-			vals.put(STEP_PROMPT_BEFORE, name);
-			vals.put(STEP_PROMPT_AFTER, name);
+			vals.put(STEP_STEP, stepNum);
+			vals.put(STEP_DURATION, duration);
+			vals.put(STEP_AGITATION, agitateEvery);
+			vals.put(STEP_POUR, pourFor);
+			vals.put(STEP_PROMPT_BEFORE, promptBefore);
+			vals.put(STEP_PROMPT_AFTER, promptAfter);
 			return vals;
 		}
 

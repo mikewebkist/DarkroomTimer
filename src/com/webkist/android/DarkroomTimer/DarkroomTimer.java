@@ -193,8 +193,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		    	step=null;
 
 				int index = data.getExtras().getInt("com.webkist.android.DarkroomTimer.DarkroomPreset");
-				preset = TimerPicker.getPreset(index);
-				preset.reset();
+//				preset = TimerPicker.getPreset(index);
+//				preset.reset();
 
 				TextView header = (TextView) findViewById(R.id.presetName);
 				header.setText(preset.name);

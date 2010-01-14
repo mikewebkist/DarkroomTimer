@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
+ */
 
 package com.webkist.android.DarkroomTimer;
 
@@ -26,6 +26,7 @@ import com.webkist.android.DarkroomTimer.DarkroomPreset;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
@@ -39,49 +40,47 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class TimerPicker extends ListActivity {
-	public static final String TAG = "DarkroomTimer.TimerPicker";
-	public static ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
-	private static final int XML_IMPORT_DONE = 1;
-	private static final int EDIT_ID = 2;
-	private static final int DELETE_ID = 3;
-	public DarkroomPreset selectedPreset = null;
+	public static final String				TAG						= "DarkroomTimer.TimerPicker";
+	public static ArrayList<DarkroomPreset>	presetList				= new ArrayList<DarkroomPreset>();
+	private static final int				XML_IMPORT_DONE			= 1;
+	private static final int				EDIT_ID					= 2;
+	private static final int				DELETE_ID				= 3;
+	// public DarkroomPreset selectedPreset = null;
 
-	Handler threadMessageHandler = new Handler() {
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case XML_IMPORT_DONE:
-				Log.v(TAG, "XML Import Finished...");
-				XMLLoaded();
-				break;
-			}
-		}
-	};
-	private ArrayAdapter<DarkroomPreset> myAdapter;
-
+	Handler									threadMessageHandler	= new Handler() {
+																		public void handleMessage(Message msg) {
+																			switch (msg.what) {
+																				case XML_IMPORT_DONE:
+																					Log.v(TAG, "XML Import Finished...");
+																					XMLLoaded();
+																					break;
+																			}
+																		}
+																	};
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if(darkroomPresets.size() == 0) {
-			XmlResourceParser xrp = this.getResources().getXml(R.xml.presets);
-			XmlParser p = new XmlParser(xrp);
-			p.run();
-		} else {
-			XMLLoaded();
-		}
+		XmlResourceParser xrp = this.getResources().getXml(R.xml.presets);
+		XmlParser p = new XmlParser(xrp);
+		p.run();
 	}
 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, EDIT_ID, 0, "Edit");
-		menu.add(0, DELETE_ID, 0,  "Delete");
+		menu.add(0, DELETE_ID, 0, "Delete");
 	}
 
 	public boolean onContextItemSelected(MenuItem item) {
@@ -98,102 +97,137 @@ public class TimerPicker extends ListActivity {
 				return super.onContextItemSelected(item);
 		}
 	}
-	
+
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.timerpicker, menu);
 		return true;
 	}
-	
+
 	public void editPreset(DarkroomPreset preset) {
 		// TODO
 		Log.v(TAG, "Edit preset: " + preset.name);
 	}
-	
+
 	public void deletePreset(DarkroomPreset preset) {
 		// TODO popup a dialog to confirm.
 		Log.v(TAG, "Delete preset: " + preset.name);
-		myAdapter.remove(preset);
+//		myAdapter.remove(preset);
 	}
-	
-//	Intent intent = new Intent(this, TimerPicker.class);
-//	startActivityForResult(intent, GET_PRESET);
-	
+
+	// Intent intent = new Intent(this, TimerPicker.class);
+	// startActivityForResult(intent, GET_PRESET);
+
 	public boolean onOptionsItemSelected(MenuItem item) {
-	    switch (item.getItemId()) {
-	    case R.id.add_preset:
-	    	Log.v(TAG, "Add preset.");
-	    	return true;
-	    }
-	    return false;
+		switch (item.getItemId()) {
+			case R.id.add_preset:
+				Log.v(TAG, "Add preset.");
+				return true;
+		}
+		return false;
 	}
-	
-	public static DarkroomPreset getPreset(int index) {
-		return darkroomPresets.get(index);
-	}
-	
+
+	// public static DarkroomPreset getPreset(int index) {
+	// return darkroomPresets.get(index);
+	// }
+
 	void XMLLoaded() {
 		Toast.makeText(this, "XML Loaded!", Toast.LENGTH_LONG);
 
-		myAdapter = new ArrayAdapter<DarkroomPreset>(this, android.R.layout.simple_list_item_1, darkroomPresets);
-		setListAdapter(myAdapter);
+		Cursor cursor = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, cursor,
+                new String[] { DarkroomPreset.PRESET_NAME }, new int[] { android.R.id.text1 });
+        setListAdapter(adapter);
+
+		setListAdapter(adapter);
 		registerForContextMenu(getListView());
 
 	}
 
-	public DarkroomPreset getById(int id) {
-		return darkroomPresets.get(id);
-	}
+	// public DarkroomPreset getById(int id) {
+	// return darkroomPresets.get(id);
+	// }
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		selectedPreset = (DarkroomPreset) getListView().getItemAtPosition(position);
-		if(selectedPreset.id == "addNew") {
-			Toast.makeText(this, "You picked + Add New", Toast.LENGTH_SHORT).show();
-			// TODO start new Activity here to create a new preset.
-		} else {
-			Log.v(TAG, "List Item Clicked: preset=" + selectedPreset);
-			Intent intent = new Intent(TimerPicker.this, DarkroomTimer.class);
-			intent.putExtra("com.webkist.android.DarkroomTimer.DarkroomPreset", darkroomPresets.indexOf(selectedPreset));
-			setResult(RESULT_OK, intent);
-			finish();
-		}
+		DarkroomPreset selectedPreset = (DarkroomPreset) getListView().getItemAtPosition(position);
+		Log.v(TAG, "List Item Clicked: preset=" + selectedPreset);
+//		Intent intent = new Intent(TimerPicker.this, DarkroomTimer.class);
+//		intent.putExtra("com.webkist.android.DarkroomTimer.DarkroomPreset", darkroomPresets.indexOf(selectedPreset));
+//		setResult(RESULT_OK, intent);
+//		finish();
 	}
 
 	class XmlParser implements Runnable {
-		private XmlResourceParser xrp;
+		private XmlResourceParser	xrp;
 
 		public XmlParser(XmlResourceParser xrp) {
 			this.xrp = xrp;
 		}
 
 		public void run() {
+			// String[] projection = new String[] { DarkroomPreset._ID,
+			// DarkroomPreset.PRESET_NAME };
+
+			// Cursor curDel = managedQuery(DarkroomPreset.CONTENT_URI_PRESET,
+			// null, null, null, DarkroomPreset.PRESET_NAME);
+			//
+			// if (curDel.getCount() != 0) {
+			// int idCol = curDel.getColumnIndex(DarkroomPreset._ID);
+			// int nameCol = curDel.getColumnIndex(DarkroomPreset.PRESET_NAME);
+			//
+			// if (curDel.moveToFirst()) {
+			// do {
+			// String id = curDel.getString(idCol);
+			// Uri uri = Uri.withAppendedPath(
+			// DarkroomPreset.CONTENT_URI_PRESET, id);
+			// Log.v(TAG, "Uri for " + curDel.getString(nameCol)
+			// + " is: " + uri);
+			// cr.delete(uri, null, null);
+			//
+			// } while (curDel.moveToNext());
+			// }
+			// }
+
+			Cursor cur = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
+
+			if (cur.getCount() == 0) {
+				fillDatabaseFromXML();
+			}
+			
+//			cur.requery();
+//
+//			int idCol = cur.getColumnIndex(DarkroomPreset._ID);
+//			int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
+//			int step_nameCol = cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_NAME);
+//
+//			if (cur.moveToFirst()) {
+//				do {
+//					String id = cur.getString(idCol);
+//					Uri uri = Uri.withAppendedPath(DarkroomPreset.CONTENT_URI_PRESET, id);
+//					Uri stepUri = Uri.withAppendedPath(uri, "step");
+//					Log.v(TAG, "Step uri for " + cur.getString(nameCol) + " is: " + stepUri);
+//					Cursor step_cur = managedQuery(stepUri, null, null, null, DarkroomPreset.DarkroomStep.STEP_STEP);
+//					Log.v(TAG, "Steps found: " + step_cur.getCount());
+//					if (step_cur.moveToFirst()) {
+//						do {
+//							String name = step_cur.getString(step_nameCol);
+//							Log.v(TAG, "Step: " + name);
+//						} while (step_cur.moveToNext());
+//					}
+//				} while (cur.moveToNext());
+//			}
+
+			Message m = new Message();
+			m.what = TimerPicker.XML_IMPORT_DONE;
+			TimerPicker.this.threadMessageHandler.sendMessage(m);
+
+		}
+
+		private void fillDatabaseFromXML() {
+			ContentResolver cr = getContentResolver();
+
+			ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
 			try {
-				String[] projection = new String[] { DarkroomPreset._ID, DarkroomPreset.PRESET_NAME };
-				
-				Uri presets = DarkroomPreset.CONTENT_URI_PRESET;
-				ContentResolver cr = getContentResolver();
-				
-				Cursor cur = managedQuery(presets, projection, null,
-						null, DarkroomPreset.PRESET_NAME + " ASC");
-				
-				if(cur.getCount() != 0) {
-					int idCol = cur.getColumnIndex(DarkroomPreset._ID);
-					int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
-
-					if(cur.moveToFirst()) {
-						do {
-							String id = cur.getString(idCol);
-							Uri uri = Uri.withAppendedPath(DarkroomPreset.CONTENT_URI_PRESET, id);
-							Log.v(TAG, "Uri for " + cur.getString(nameCol) + " is: " + uri);
-							cr.delete(uri, null, null);
-
-						} while(cur.moveToNext());
-
-						//					getContentResolver().delete(DarkroomPreset.CONTENT_URI_PRESET, null, null);
-						//					Log.v(TAG, "Got " + cur.getCount() + " rows.");
-					}
-				}
-
 				DarkroomPreset p = null;
 				@SuppressWarnings("unused")
 				DarkroomPreset.DarkroomStep step = null;
@@ -201,43 +235,32 @@ public class TimerPicker extends ListActivity {
 					if (xrp.getEventType() == XmlResourceParser.START_TAG) {
 						String s = xrp.getName();
 						if (s.equals("preset")) {
-							p = new DarkroomPreset(
-									xrp.getAttributeValue(null, "id"), 
-									xrp.getAttributeValue(null, "name"));
+							p = new DarkroomPreset(xrp.getAttributeValue(null, "id"), xrp.getAttributeValue(null, "name"));
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
-							step = p.addStep(
-									xrp.getAttributeValue(null, "name"),
-									xrp.getAttributeIntValue(null, "duration", 120),
-									xrp.getAttributeIntValue(null, "agitate", 0),
-									xrp.getAttributeValue(null, "promptBefore"),
-									xrp.getAttributeIntValue(null, "pour", 0));
+							step = p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
+									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
+									.getAttributeValue(null, "promptBefore"), xrp.getAttributeIntValue(null, "pour", 0));
 						}
 					}
 					xrp.next();
 				}
-				
-				for(int i=0; i<darkroomPresets.size(); i++) {
-					DarkroomPreset preset = darkroomPresets.get(i);
-					ContentValues vals = new ContentValues();
-					vals.put(DarkroomPreset.PRESET_NAME, preset.name);
-					Uri uri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
-					String presetId = uri.getLastPathSegment();
-					for(int j=0; j<preset.steps.size(); j++) {
-						cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues());
-					}
-					Log.v(TAG, "Inserted " + uri);
-				}
-				
-				Message m = new Message();
-				m.what = TimerPicker.XML_IMPORT_DONE;
-				TimerPicker.this.threadMessageHandler.sendMessage(m);
 			} catch (XmlPullParserException xppe) {
 				Log.e(TAG, "XML Parser Problem: " + xppe);
 			} catch (IOException e) {
 				Log.e(TAG, "XML Parser Problem: " + e);
 			}
 
+			for (int i = 0; i < darkroomPresets.size(); i++) {
+				DarkroomPreset preset = darkroomPresets.get(i);
+				ContentValues vals = new ContentValues();
+				vals.put(DarkroomPreset.PRESET_NAME, preset.name);
+				Uri uri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				for (int j = 0; j < preset.steps.size(); j++) {
+					cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues());
+				}
+				Log.v(TAG, "Inserted " + uri);
+			}
 		}
 	}
 
