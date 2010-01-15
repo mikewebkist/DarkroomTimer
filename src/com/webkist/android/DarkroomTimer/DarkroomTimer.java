@@ -226,8 +226,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 				preset.reset();
 
-				// TextView header = (TextView) findViewById(R.id.presetName);
-				// header.setText(preset.name);
+				 TextView header = (TextView) findViewById(R.id.presetName);
+				 header.setText(preset.name);
 
 				timerText = (TextView) findViewById(R.id.stepClock);
 				timerText.setOnClickListener(this);

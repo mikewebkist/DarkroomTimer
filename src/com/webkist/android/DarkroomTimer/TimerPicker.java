@@ -160,57 +160,11 @@ public class TimerPicker extends ListActivity {
 		}
 
 		public void run() {
-			// String[] projection = new String[] { DarkroomPreset._ID,
-			// DarkroomPreset.PRESET_NAME };
-
-			// Cursor curDel = managedQuery(DarkroomPreset.CONTENT_URI_PRESET,
-			// null, null, null, DarkroomPreset.PRESET_NAME);
-			//
-			// if (curDel.getCount() != 0) {
-			// int idCol = curDel.getColumnIndex(DarkroomPreset._ID);
-			// int nameCol = curDel.getColumnIndex(DarkroomPreset.PRESET_NAME);
-			//
-			// if (curDel.moveToFirst()) {
-			// do {
-			// String id = curDel.getString(idCol);
-			// Uri uri = Uri.withAppendedPath(
-			// DarkroomPreset.CONTENT_URI_PRESET, id);
-			// Log.v(TAG, "Uri for " + curDel.getString(nameCol)
-			// + " is: " + uri);
-			// cr.delete(uri, null, null);
-			//
-			// } while (curDel.moveToNext());
-			// }
-			// }
-
 			Cursor cur = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
 
 			if (cur.getCount() == 0) {
 				fillDatabaseFromXML();
 			}
-			
-//			cur.requery();
-//
-//			int idCol = cur.getColumnIndex(DarkroomPreset._ID);
-//			int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
-//			int step_nameCol = cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_NAME);
-//
-//			if (cur.moveToFirst()) {
-//				do {
-//					String id = cur.getString(idCol);
-//					Uri uri = Uri.withAppendedPath(DarkroomPreset.CONTENT_URI_PRESET, id);
-//					Uri stepUri = Uri.withAppendedPath(uri, "step");
-//					Log.v(TAG, "Step uri for " + cur.getString(nameCol) + " is: " + stepUri);
-//					Cursor step_cur = managedQuery(stepUri, null, null, null, DarkroomPreset.DarkroomStep.STEP_STEP);
-//					Log.v(TAG, "Steps found: " + step_cur.getCount());
-//					if (step_cur.moveToFirst()) {
-//						do {
-//							String name = step_cur.getString(step_nameCol);
-//							Log.v(TAG, "Step: " + name);
-//						} while (step_cur.moveToNext());
-//					}
-//				} while (cur.moveToNext());
-//			}
 
 			Message m = new Message();
 			m.what = TimerPicker.XML_IMPORT_DONE;
@@ -251,8 +205,9 @@ public class TimerPicker extends ListActivity {
 				ContentValues vals = new ContentValues();
 				vals.put(DarkroomPreset.PRESET_NAME, preset.name);
 				Uri uri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				String presetId = uri.getPathSegments().get(1);
 				for (int j = 0; j < preset.steps.size(); j++) {
-					cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues());
+					cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues(presetId));
 				}
 				Log.v(TAG, "Inserted " + uri);
 			}

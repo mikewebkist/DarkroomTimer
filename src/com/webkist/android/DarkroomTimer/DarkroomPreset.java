@@ -52,18 +52,35 @@ public class DarkroomPreset implements BaseColumns {
 
 		int idCol = cur.getColumnIndex(DarkroomPreset._ID);
 		int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
-		int step_nameCol = cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_NAME);
 
 		if (cur.moveToFirst()) {
 			String id = cur.getString(idCol);
 			Uri stepUri = Uri.withAppendedPath(uri, "step");
-			Log.v(TAG, "Step uri for " + cur.getString(nameCol) + " is: " + stepUri);
+			this.name = cur.getString(nameCol);
+			this.id = cur.getString(idCol);
+			Log.v(TAG, "Creating " + this.name + " preset.");
 			Cursor step_cur = ctx.managedQuery(stepUri, null, null, null, DarkroomPreset.DarkroomStep.STEP_STEP);
+
+			int step_nameCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_NAME);
+			int step_stepNumCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_STEP);
+			int step_durationCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_DURATION);
+			int step_agitageEveryCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_AGITATION);
+			int step_clickPromptCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_PROMPT_BEFORE);
+			int step_pourForCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_POUR);
+
 			Log.v(TAG, "Steps found: " + step_cur.getCount());
 			if (step_cur.moveToFirst()) {
 				do {
+					int stepNum = step_cur.getInt(step_stepNumCol);
 					String name = step_cur.getString(step_nameCol);
+					int duration = step_cur.getInt(step_durationCol);
+					int agitateEvery = step_cur.getInt(step_agitageEveryCol);
+					String clickPrompt = step_cur.getString(step_clickPromptCol);
+					int pourFor = step_cur.getInt(step_pourForCol);
+
+					DarkroomStep step = this.addStep(stepNum, name, duration, agitateEvery, clickPrompt, pourFor);
 					Log.v(TAG, "Step: " + name);
+
 				} while (step_cur.moveToNext());
 			}
 		}
@@ -133,8 +150,9 @@ public class DarkroomPreset implements BaseColumns {
 			this.pourFor = pourFor;
 		}
 
-		public ContentValues toContentValues() {
+		public ContentValues toContentValues(String presetId) {
 			ContentValues vals = new ContentValues();
+			vals.put(STEP_PRESET, presetId);
 			vals.put(STEP_NAME, name);
 			vals.put(STEP_STEP, stepNum);
 			vals.put(STEP_DURATION, duration);
