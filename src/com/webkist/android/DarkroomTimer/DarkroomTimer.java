@@ -41,139 +41,122 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 public class DarkroomTimer extends Activity implements OnClickListener {
-	private static final String			TAG						= "DarkroomTimer";
+	private static final String TAG = "DarkroomTimer";
 
 	// TODO Organize these.
-	private static final int			TICK					= 1;
-	private static final int			DONE					= 2;
-	private static final int			ADJUST_STOPPED_CLOCK	= 3;
-	private static final int			GET_PRESET				= 4;
-	private static final int			FAILED_PRESET_PICK		= 5;
-	private static final int			ADJUST_RUNNING_CLOCK	= 6;
-	private static final int			NEXT					= 7;
+	private static final int TICK = 1;
+	private static final int DONE = 2;
+	private static final int ADJUST_STOPPED_CLOCK = 3;
+	private static final int GET_PRESET = 4;
+	private static final int FAILED_PRESET_PICK = 5;
+	private static final int ADJUST_RUNNING_CLOCK = 6;
+	private static final int NEXT = 7;
 
-	private TextView					timerText;
-	private TextView					stepActionText;
-	private TextView					clickText;
-	private TextView					stepHead;
+	private TextView timerText;
+	private TextView stepActionText;
+	private TextView clickText;
+	private TextView stepHead;
 
-	private long						startTime				= 0;
+	private long startTime = 0;
 
-	private DarkroomPreset				preset					= null;
-	private DarkroomPreset.DarkroomStep	step;
+	private DarkroomPreset preset = null;
+	private DarkroomPreset.DarkroomStep step;
 
-	private Thread						timer					= null;
-	protected PowerManager.WakeLock		mWakeLock				= null;
-	private boolean						timerRunning			= false;
+	private Thread timer = null;
+	protected PowerManager.WakeLock mWakeLock = null;
+	private boolean timerRunning = false;
 
-	Handler								threadMessageHandler	= new Handler() {
-																	// TODO Move
-																	// all this
-																	// to an
-																	// onDraw()
-																	// method?
-																	public void handleMessage(Message msg) {
-																		switch (msg.what) {
-																			case TICK:
-																				long remaining = stepTimeRemaining();
+	Handler threadMessageHandler = new Handler() {
+		// TODO Move
+		// all this
+		// to an
+		// onDraw()
+		// method?
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case TICK:
+					long remaining = stepTimeRemaining();
 
-																				int minutes = (int) remaining / 60000;
-																				int seconds = (int) ((remaining % 60000) / 1000);
+					int minutes = (int) remaining / 60000;
+					int seconds = (int) ((remaining % 60000) / 1000);
 
-																				timerText.setText(String.format("%02d:%02d",
-																						minutes, seconds));
-																				double elapsedSecs = (System
-																						.currentTimeMillis() - startTime) / 1000;
+					timerText.setText(String.format("%02d:%02d", minutes, seconds));
+					double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
 
-																				if (step.pourFor > 0
-																						&& elapsedSecs < step.pourFor) {
-																					clickText.setText(R.string.prompt_pour);
-																					stepActionText.setText("");
-																				} else if (step.agitateEvery > 0) {
-																					if (elapsedSecs < (step.pourFor + 5 + step.agitateFor)) {
-																						clickText
-																								.setText(R.string.prompt_agitate);
-																						stepActionText.setText("");
-																					} else {
-																						double elapsedRemainder = elapsedSecs
-																								% step.agitateEvery;
+					if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
+						clickText.setText(R.string.prompt_pour);
+						stepActionText.setText("");
+					} else if (step.agitateEvery > 0) {
+						if (elapsedSecs < (step.pourFor + 5 + step.agitateFor)) {
+							clickText.setText(R.string.prompt_agitate);
+							stepActionText.setText("");
+						} else {
+							double elapsedRemainder = elapsedSecs % step.agitateEvery;
 
-																						if (elapsedRemainder < step.agitateFor) {
-																							// Currently
-																							// agitating
-																							stepActionText.setText("");
-																							clickText
-																									.setText(R.string.prompt_agitate);
-																						} else if (elapsedRemainder > step.agitateEvery - 10) {
-																							// Coming
-																							// up
-																							// on
-																							// agitation
-																							double agitateIn = step.agitateEvery
-																									- elapsedRemainder;
-																							Resources res = getResources();
-																							stepActionText
-																									.setText(String
-																											.format(
-																													"%s in %02d:%02d",
-																													res
-																															.getString(R.string.prompt_agitate),
-																													(int) agitateIn / 60,
-																													(int) agitateIn % 60));
-																						} else {
-																							stepActionText.setText("");
-																							clickText.setText("");
-																						}
-																					}
-																				} else {
-																					clickText.setText("");
-																					stepActionText.setText("");
-																				}
+							if (elapsedRemainder < step.agitateFor) {
+								// Currently
+								// agitating
+								stepActionText.setText("");
+								clickText.setText(R.string.prompt_agitate);
+							} else if (elapsedRemainder > step.agitateEvery - 10) {
+								// Coming
+								// up
+								// on
+								// agitation
+								double agitateIn = step.agitateEvery - elapsedRemainder;
+								Resources res = getResources();
+								stepActionText.setText(String.format("%s in %02d:%02d", res
+										.getString(R.string.prompt_agitate), (int) agitateIn / 60, (int) agitateIn % 60));
+							} else {
+								stepActionText.setText("");
+								clickText.setText("");
+							}
+						}
+					} else {
+						clickText.setText("");
+						stepActionText.setText("");
+					}
 
-																				break;
-																			case NEXT:
-																				step = preset.nextStep();
-																				if (step == null) {
-																					stepHead.setText(R.string.prompt_done);
-																					timerText.setText("--:--");
-																				} else {
-																					stepHead.setText(step.name);
-																					timerText.setText(String.format(
-																							"%02d:%02d",
-																							(int) step.duration / 60,
-																							(int) step.duration % 60));
+					break;
+				case NEXT:
+					step = preset.nextStep();
+					if (step == null) {
+						stepHead.setText(R.string.prompt_done);
+						timerText.setText("--:--");
+					} else {
+						stepHead.setText(step.name);
+						timerText.setText(String.format("%02d:%02d", (int) step.duration / 60, (int) step.duration % 60));
 
-																					if (step.promptBefore == null) {
-																						handleClick();
-																					} else {
-																						clickText.setText(step.promptBefore);
+						if (step.promptBefore == null) {
+							handleClick();
+						} else {
+							clickText.setText(step.promptBefore);
 
-																					}
-																				}
+						}
+					}
 
-																				break;
+					break;
 
-																			case DONE:
-																				timerRunning = false;
-																				startTime = 0;
-																				clickText.setText("");
-																				stepActionText.setText("");
+				case DONE:
+					timerRunning = false;
+					startTime = 0;
+					clickText.setText("");
+					stepActionText.setText("");
 
-																				// TODO
-																				// Add
-																				// optional
-																				// promptAfter
-																				// stuff
+					// TODO
+					// Add
+					// optional
+					// promptAfter
+					// stuff
 
-																				Message m = new Message();
-																				m.what = DarkroomTimer.NEXT;
-																				DarkroomTimer.this.threadMessageHandler
-																						.sendMessage(m);
+					Message m = new Message();
+					m.what = DarkroomTimer.NEXT;
+					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
 
-																				break;
-																		}
-																	}
-																};
+					break;
+			}
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -226,8 +209,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 				preset.reset();
 
-				 TextView header = (TextView) findViewById(R.id.presetName);
-				 header.setText(preset.name);
+				TextView header = (TextView) findViewById(R.id.presetName);
+				header.setText(preset.name);
 
 				timerText = (TextView) findViewById(R.id.stepClock);
 				timerText.setOnClickListener(this);

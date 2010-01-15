@@ -26,21 +26,21 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 public class DarkroomPreset implements BaseColumns {
-	public static final String		AUTHORITY					= "com.webkist.android.DarkroomTimer";
-	public static final Uri			CONTENT_URI					= Uri.parse("content://" + AUTHORITY);
-	public static final Uri			CONTENT_URI_PRESET			= Uri.parse("content://" + AUTHORITY + "/preset");
+	public static final String AUTHORITY = "com.webkist.android.DarkroomTimer";
+	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
+	public static final Uri CONTENT_URI_PRESET = Uri.parse("content://" + AUTHORITY + "/preset");
 
-	public static final String		PRESET_CONTENT_TYPE			= "vnd.android.cursor.item/vnd.webkist.preset";
-	public static final String		PRESET_CONTENT_TYPE_LIST	= "vnd.android.cursor.dir/vnd.webkist.preset";
+	public static final String PRESET_CONTENT_TYPE = "vnd.android.cursor.item/vnd.webkist.preset";
+	public static final String PRESET_CONTENT_TYPE_LIST = "vnd.android.cursor.dir/vnd.webkist.preset";
 
-	public static final String		PRESET_NAME					= "name";
+	public static final String PRESET_NAME = "name";
 
-	public String					name;
-	public String					id;
-	private int						currentStep					= 0;
-	public ArrayList<DarkroomStep>	steps						= new ArrayList<DarkroomStep>();
+	public String name;
+	public String id;
+	private int currentStep = 0;
+	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
-	public static final String		TAG							= "DarkroomPreset";
+	public static final String TAG = "DarkroomPreset";
 
 	DarkroomPreset(String id, String name) {
 		this.name = name;
@@ -123,23 +123,23 @@ public class DarkroomPreset implements BaseColumns {
 	}
 
 	public class DarkroomStep implements BaseColumns {
-		public String				name;
-		public int					stepNum				= 0;
-		public int					duration;
-		public int					agitateEvery		= 0;
-		public int					agitateFor			= 10;
-		public String				promptBefore		= null;
-		public String				promptAfter			= null;
-		public int					pourFor				= 0;
+		public String name;
+		public int stepNum = 0;
+		public int duration;
+		public int agitateEvery = 0;
+		public int agitateFor = 10;
+		public String promptBefore = null;
+		public String promptAfter = null;
+		public int pourFor = 0;
 
-		public static final String	STEP_PRESET			= "preset";
-		public static final String	STEP_STEP			= "step";
-		public static final String	STEP_NAME			= "name";
-		public static final String	STEP_DURATION		= "duration";
-		public static final String	STEP_AGITATION		= "agitation";
-		public static final String	STEP_POUR			= "pour";
-		public static final String	STEP_PROMPT_BEFORE	= "prompt_before";
-		public static final String	STEP_PROMPT_AFTER	= "prompt_after";
+		public static final String STEP_PRESET = "preset";
+		public static final String STEP_STEP = "step";
+		public static final String STEP_NAME = "name";
+		public static final String STEP_DURATION = "duration";
+		public static final String STEP_AGITATION = "agitation";
+		public static final String STEP_POUR = "pour";
+		public static final String STEP_PROMPT_BEFORE = "prompt_before";
+		public static final String STEP_PROMPT_AFTER = "prompt_after";
 
 		DarkroomStep(int stepNum, String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
 			this.stepNum = stepNum;

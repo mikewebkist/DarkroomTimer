@@ -116,6 +116,8 @@ public class DarkroomPresetProvider extends ContentProvider {
 				if (rowId > 0) {
 					Uri presetUri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, rowId);
 					getContext().getContentResolver().notifyChange(presetUri, null);
+					getContext().getContentResolver().notifyChange(DarkroomPreset.CONTENT_URI_PRESET, null);
+					
 					return presetUri;
 				}
 				break;

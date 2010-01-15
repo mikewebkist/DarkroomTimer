@@ -47,31 +47,41 @@ import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class TimerPicker extends ListActivity {
-	public static final String				TAG						= "DarkroomTimer.TimerPicker";
-	public static ArrayList<DarkroomPreset>	presetList				= new ArrayList<DarkroomPreset>();
-	private static final int				XML_IMPORT_DONE			= 1;
-	private static final int				EDIT_ID					= 2;
-	private static final int				DELETE_ID				= 3;
-	// public DarkroomPreset selectedPreset = null;
+	public static final String TAG = "DarkroomTimer.TimerPicker";
+	public static ArrayList<DarkroomPreset> presetList = new ArrayList<DarkroomPreset>();
+	private static final int XML_IMPORT_DONE = 1;
+	private static final int EDIT_ID = 2;
+	private static final int DELETE_ID = 3;
+	private Cursor listViewCursor;
 
-	Handler									threadMessageHandler	= new Handler() {
-																		public void handleMessage(Message msg) {
-																			switch (msg.what) {
-																				case XML_IMPORT_DONE:
-																					Log.v(TAG, "XML Import Finished...");
-																					XMLLoaded();
-																					break;
-																			}
-																		}
-																	};
+	Handler threadMessageHandler = new Handler() {
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case XML_IMPORT_DONE:
+					Log.v(TAG, "XML Import Finished...");
+					listViewCursor.requery();
+					// getListAdapter().notifyAll();
+					// XMLLoaded();
+					break;
+			}
+		}
+	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		XmlResourceParser xrp = this.getResources().getXml(R.xml.presets);
-		XmlParser p = new XmlParser(xrp);
-		p.run();
+		listViewCursor = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
+		if (listViewCursor.getCount() == 0) {
+			XmlResourceParser xrp = this.getResources().getXml(R.xml.presets);
+			XmlParser p = new XmlParser(xrp);
+			p.run();
+		}
+
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, listViewCursor,
+				new String[] { DarkroomPreset.PRESET_NAME }, new int[] { android.R.id.text1 });
+		setListAdapter(adapter);
+		registerForContextMenu(getListView());
 	}
 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -104,8 +114,7 @@ public class TimerPicker extends ListActivity {
 
 	public void editPreset(Uri uri) {
 		// TODO create a new Activity to deal with this.
-		Log.v(TAG, "UNIMPLEMENTED edit preset: " + uri);
-		Toast.makeText(this, "Unimplemented EDIT", Toast.LENGTH_SHORT.show();
+		Toast.makeText(this, "Unimplemented EDIT", Toast.LENGTH_SHORT).show();
 	}
 
 	public void deletePreset(Uri uri) {
@@ -123,19 +132,6 @@ public class TimerPicker extends ListActivity {
 		return false;
 	}
 
-	void XMLLoaded() {
-		Toast.makeText(this, "XML Loaded!", Toast.LENGTH_LONG);
-
-		Cursor cursor = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, cursor,
-				new String[] { DarkroomPreset.PRESET_NAME }, new int[] { android.R.id.text1 });
-		setListAdapter(adapter);
-
-		setListAdapter(adapter);
-		registerForContextMenu(getListView());
-
-	}
-
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
 		Log.v(TAG, "List Item Clicked: preset=" + uri);
@@ -144,26 +140,13 @@ public class TimerPicker extends ListActivity {
 	}
 
 	class XmlParser implements Runnable {
-		private XmlResourceParser	xrp;
+		private XmlResourceParser xrp;
 
 		public XmlParser(XmlResourceParser xrp) {
 			this.xrp = xrp;
 		}
 
 		public void run() {
-			Cursor cur = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
-
-			if (cur.getCount() == 0) {
-				fillDatabaseFromXML();
-			}
-
-			Message m = new Message();
-			m.what = TimerPicker.XML_IMPORT_DONE;
-			TimerPicker.this.threadMessageHandler.sendMessage(m);
-
-		}
-
-		private void fillDatabaseFromXML() {
 			ContentResolver cr = getContentResolver();
 
 			ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
@@ -202,7 +185,11 @@ public class TimerPicker extends ListActivity {
 				}
 				Log.v(TAG, "Inserted " + uri);
 			}
+
+			Message m = new Message();
+			m.what = TimerPicker.XML_IMPORT_DONE;
+			TimerPicker.this.threadMessageHandler.sendMessage(m);
+
 		}
 	}
-
 }
