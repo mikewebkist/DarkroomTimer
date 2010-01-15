@@ -64,7 +64,7 @@ public class TimerPicker extends ListActivity {
 																			}
 																		}
 																	};
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -82,13 +82,14 @@ public class TimerPicker extends ListActivity {
 
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		DarkroomPreset preset = (DarkroomPreset) getListView().getItemAtPosition(info.position);
+		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, info.id);
+		Log.v(TAG, "Context menu selection for: " + uri);
 		switch (item.getItemId()) {
 			case EDIT_ID:
-				editPreset(preset);
+				editPreset(uri);
 				return true;
 			case DELETE_ID:
-				deletePreset(preset);
+				deletePreset(uri);
 				return true;
 			default:
 				return super.onContextItemSelected(item);
@@ -101,19 +102,17 @@ public class TimerPicker extends ListActivity {
 		return true;
 	}
 
-	public void editPreset(DarkroomPreset preset) {
-		// TODO
-		Log.v(TAG, "Edit preset: " + preset.name);
+	public void editPreset(Uri uri) {
+		// TODO create a new Activity to deal with this.
+		Log.v(TAG, "UNIMPLEMENTED edit preset: " + uri);
+		Toast.makeText(this, "Unimplemented EDIT", Toast.LENGTH_SHORT.show();
 	}
 
-	public void deletePreset(DarkroomPreset preset) {
+	public void deletePreset(Uri uri) {
 		// TODO popup a dialog to confirm.
-		Log.v(TAG, "Delete preset: " + preset.name);
-//		myAdapter.remove(preset);
+		Log.v(TAG, "Delete preset: " + uri);
+		getContentResolver().delete(uri, null, null);
 	}
-
-	// Intent intent = new Intent(this, TimerPicker.class);
-	// startActivityForResult(intent, GET_PRESET);
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -124,26 +123,18 @@ public class TimerPicker extends ListActivity {
 		return false;
 	}
 
-	// public static DarkroomPreset getPreset(int index) {
-	// return darkroomPresets.get(index);
-	// }
-
 	void XMLLoaded() {
 		Toast.makeText(this, "XML Loaded!", Toast.LENGTH_LONG);
 
 		Cursor cursor = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, cursor,
-                new String[] { DarkroomPreset.PRESET_NAME }, new int[] { android.R.id.text1 });
-        setListAdapter(adapter);
+				new String[] { DarkroomPreset.PRESET_NAME }, new int[] { android.R.id.text1 });
+		setListAdapter(adapter);
 
 		setListAdapter(adapter);
 		registerForContextMenu(getListView());
 
 	}
-
-	// public DarkroomPreset getById(int id) {
-	// return darkroomPresets.get(id);
-	// }
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
