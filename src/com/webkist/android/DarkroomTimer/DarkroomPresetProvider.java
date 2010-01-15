@@ -143,20 +143,22 @@ public class DarkroomPresetProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
-		String orderBy;
-
+		String orderBy = DarkroomPreset.PRESET_NAME;
+		
 		switch (sUriMatcher.match(uri)) {
 			case URI_PRESETS: // Get all presets
 				Log.w(TAG, "query/URI_PRESETS: " + uri);
-				
 				qb.setTables(PRESET_TABLE_NAME);
-				orderBy = DarkroomPreset.PRESET_NAME;
 				break;
 
+			case URI_PRESET_ID:
+				Log.w(TAG, "query/URI_PRESET_ID: " + uri);
+				qb.setTables(PRESET_TABLE_NAME);
+				qb.appendWhere(DarkroomPreset._ID + "=" + uri.getPathSegments().get(1));
+				break;
+				
 			case URI_STEP_ID: // Get steps associated with a preset
 				Log.w(TAG, "query/URI_STEP_ID: " + uri);
-				Log.w(TAG, "query SQL: " + DarkroomPreset.DarkroomStep.STEP_PRESET + "=" + uri.getPathSegments().get(1));
-				
 				
 				qb.setTables(STEP_TABLE_NAME);
 				qb.appendWhere(DarkroomPreset.DarkroomStep.STEP_PRESET + "=" + uri.getPathSegments().get(1));
