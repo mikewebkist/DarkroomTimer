@@ -23,10 +23,14 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
@@ -48,24 +52,23 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class TimerPicker extends ListActivity {
 	public static final String TAG = "DarkroomTimer.TimerPicker";
-	public static ArrayList<DarkroomPreset> presetList = new ArrayList<DarkroomPreset>();
 	private static final int XML_IMPORT_DONE = 1;
 	private static final int EDIT_ID = 2;
 	private static final int DELETE_ID = 3;
+	private static final int DIALOG_DELETE_CONFIRM = 1;
 	private Cursor listViewCursor;
 
 	Handler threadMessageHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case XML_IMPORT_DONE:
-					Log.v(TAG, "XML Import Finished...");
-					listViewCursor.requery();
-					// getListAdapter().notifyAll();
-					// XMLLoaded();
-					break;
+			case XML_IMPORT_DONE:
+				Log.v(TAG, "XML Import Finished...");
+				listViewCursor.requery();
+				break;
 			}
 		}
 	};
+	private Uri longClickUri = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -95,14 +98,15 @@ public class TimerPicker extends ListActivity {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, info.id);
 		Log.v(TAG, "Context menu selection for: " + uri);
 		switch (item.getItemId()) {
-			case EDIT_ID:
-				editPreset(uri);
-				return true;
-			case DELETE_ID:
-				deletePreset(uri);
-				return true;
-			default:
-				return super.onContextItemSelected(item);
+		case EDIT_ID:
+			editPreset(uri);
+			return true;
+		case DELETE_ID:
+			longClickUri = uri;
+			showDialog(DIALOG_DELETE_CONFIRM);
+			return true;
+		default:
+			return super.onContextItemSelected(item);
 		}
 	}
 
@@ -112,22 +116,50 @@ public class TimerPicker extends ListActivity {
 		return true;
 	}
 
+	protected Dialog onCreateDialog(int id) {
+		// LayoutInflater factory = LayoutInflater.from(this);
+		if (id == DIALOG_DELETE_CONFIRM) {
+			return new AlertDialog.Builder(TimerPicker.this).setTitle(R.string.app_name).setMessage(
+					R.string.preset_confirm_delete).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+							Toast.makeText(TimerPicker.this, "Delete confirmed.", Toast.LENGTH_SHORT).show();
+							deletePreset();
+						}
+					}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
+					longClickUri = null;
+				}
+			}).setOnCancelListener(new DialogInterface.OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
+					longClickUri = null;
+				}
+			}).create();
+		}
+		return null;
+	}
+
 	public void editPreset(Uri uri) {
 		// TODO create a new Activity to deal with this.
 		Toast.makeText(this, "Unimplemented EDIT", Toast.LENGTH_SHORT).show();
 	}
 
-	public void deletePreset(Uri uri) {
-		// TODO popup a dialog to confirm.
-		Log.v(TAG, "Delete preset: " + uri);
-		getContentResolver().delete(uri, null, null);
+	public void deletePreset() {
+		if (longClickUri != null) {
+			Log.v(TAG, "Delete preset: " + longClickUri);
+			getContentResolver().delete(longClickUri, null, null);
+		}
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.add_preset:
-				Log.v(TAG, "Add preset.");
-				return true;
+		case R.id.add_preset:
+			Log.v(TAG, "Add preset.");
+			return true;
 		}
 		return false;
 	}

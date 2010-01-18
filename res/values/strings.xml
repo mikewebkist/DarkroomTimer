@@ -13,6 +13,7 @@
     <string name="prompt_agitate">Agitate!</string>
     <string name="prompt_done">Done!</string>
 	<string name="preset_pick_failed">Preset not picked! Quitting.</string>
+	<string name="preset_confirm_delete">Are you sure you want to delete "%s"?</string>
 	<string name="ghostData_name">Preset Name</string>
 	<string name="menu_done">Save</string>
 	<string name="menu_doNotSave">Cancel</string>
