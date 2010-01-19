@@ -18,15 +18,20 @@ package com.webkist.android.DarkroomTimer;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 public class PresetEditor extends Activity implements OnClickListener {
 	public static final String TAG = "PresetEditor";
 	private Uri uri;
+	// private DarkroomPreset preset;
+	private Cursor listViewCursor;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -36,7 +41,14 @@ public class PresetEditor extends Activity implements OnClickListener {
 
 		Intent intent = getIntent();
 		uri = intent.getData();
+		// preset = new DarkroomPreset(this, uri);
 		Log.v(TAG, "We have a uri: " + uri);
+		ListView listView = (ListView) findViewById(R.id.list);
+		listViewCursor = managedQuery(Uri.withAppendedPath(uri, "step"), null, null, null,
+				DarkroomPreset.DarkroomStep.STEP_NAME);
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, listViewCursor,
+				new String[] { DarkroomPreset.DarkroomStep.STEP_NAME }, new int[] { android.R.id.text1 });
+		listView.setAdapter(adapter);
 	}
 
 	@Override
