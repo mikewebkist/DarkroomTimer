@@ -18,6 +18,7 @@ package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -37,6 +38,7 @@ public class DarkroomPreset implements BaseColumns {
 
 	public String name;
 	public String id;
+	public Uri uri;
 	private int currentStep = 0;
 	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
@@ -47,14 +49,14 @@ public class DarkroomPreset implements BaseColumns {
 		this.id = id;
 	}
 
-	public DarkroomPreset(DarkroomTimer ctx, Uri uri) {
+	public DarkroomPreset(Activity ctx, Uri uri) {
+		this.uri = uri;
 		Cursor cur = ctx.managedQuery(uri, null, null, null, DarkroomPreset.PRESET_NAME);
 
 		int idCol = cur.getColumnIndex(DarkroomPreset._ID);
 		int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
 
 		if (cur.moveToFirst()) {
-			String id = cur.getString(idCol);
 			Uri stepUri = Uri.withAppendedPath(uri, "step");
 			this.name = cur.getString(nameCol);
 			this.id = cur.getString(idCol);
@@ -78,8 +80,7 @@ public class DarkroomPreset implements BaseColumns {
 					String clickPrompt = step_cur.getString(step_clickPromptCol);
 					int pourFor = step_cur.getInt(step_pourForCol);
 
-					DarkroomStep step = this.addStep(stepNum, name, duration, agitateEvery, clickPrompt, pourFor);
-					Log.v(TAG, "Step: " + name);
+					this.addStep(stepNum, name, duration, agitateEvery, clickPrompt, pourFor);
 
 				} while (step_cur.moveToNext());
 			}

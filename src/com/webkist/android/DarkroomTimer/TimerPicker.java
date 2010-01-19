@@ -68,7 +68,7 @@ public class TimerPicker extends ListActivity {
 			}
 		}
 	};
-	private Uri longClickUri = null;
+	private DarkroomPreset longClickPreset;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -102,7 +102,7 @@ public class TimerPicker extends ListActivity {
 			editPreset(uri);
 			return true;
 		case DELETE_ID:
-			longClickUri = uri;
+			longClickPreset = new DarkroomPreset(this, uri);
 			showDialog(DIALOG_DELETE_CONFIRM);
 			return true;
 		default:
@@ -123,36 +123,39 @@ public class TimerPicker extends ListActivity {
 					R.string.preset_confirm_delete).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
-							Toast.makeText(TimerPicker.this, "Delete confirmed.", Toast.LENGTH_SHORT).show();
-							deletePreset();
+							if (longClickPreset != null) {
+								getContentResolver().delete(longClickPreset.uri, null, null);
+								Toast.makeText(TimerPicker.this, "Deleted.", Toast.LENGTH_SHORT).show();
+								longClickPreset = null;
+							}
 						}
 					}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
-					longClickUri = null;
+					longClickPreset = null;
 				}
 			}).setOnCancelListener(new DialogInterface.OnCancelListener() {
 				@Override
 				public void onCancel(DialogInterface dialog) {
 					Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
-					longClickUri = null;
+					longClickPreset = null;
 				}
 			}).create();
 		}
 		return null;
 	}
 
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		if (id == DIALOG_DELETE_CONFIRM) {
+			String message = String.format(getResources().getString(R.string.preset_confirm_delete), longClickPreset.name);
+			((AlertDialog) dialog).setMessage(message);
+		}
+	}
+
 	public void editPreset(Uri uri) {
 		// TODO create a new Activity to deal with this.
 		Toast.makeText(this, "Unimplemented EDIT", Toast.LENGTH_SHORT).show();
-	}
-
-	public void deletePreset() {
-		if (longClickUri != null) {
-			Log.v(TAG, "Delete preset: " + longClickUri);
-			getContentResolver().delete(longClickUri, null, null);
-		}
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
