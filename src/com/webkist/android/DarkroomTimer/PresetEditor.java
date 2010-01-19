@@ -16,72 +16,91 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
+import android.app.ListActivity;
+import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-public class PresetEditor extends Activity implements OnClickListener {
+public class PresetEditor extends ListActivity {
 	public static final String TAG = "PresetEditor";
 	private Uri uri;
-	// private DarkroomPreset preset;
-	private Cursor listViewCursor;
+	private DarkroomPreset preset;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		setContentView(R.layout.preseteditor);
-
+//		getListView().setEmptyView(findViewById(R.id.empty));
+		
 		Intent intent = getIntent();
 		uri = intent.getData();
-		DarkroomPreset preset = new DarkroomPreset(this, uri);
+		preset = new DarkroomPreset(this, uri);
+		
 		((TextView) findViewById(R.id.name)).setText(preset.name);
 		Log.v(TAG, "We have a uri: " + uri);
-		ListView listView = (ListView) findViewById(R.id.list);
-		listViewCursor = managedQuery(Uri.withAppendedPath(uri, "step"), null, null, null,
-				DarkroomPreset.DarkroomStep.STEP_NAME);
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.two_line_list_item, listViewCursor,
-				new String[] { DarkroomPreset.DarkroomStep.STEP_NAME, DarkroomPreset.DarkroomStep.STEP_DURATION,
-						DarkroomPreset.DarkroomStep.STEP_POUR, DarkroomPreset.DarkroomStep.STEP_AGITATION }, new int[] {
-						android.R.id.text1, android.R.id.text2 });
-		adapter.setViewBinder(new EditListBinder());
-		listView.setAdapter(adapter);
+		
+		ArrayAdapter<DarkroomPreset.DarkroomStep> adapter = new MyAdapter(this, preset.steps);
+		getListView().setAdapter(adapter);
 	}
 
-	@Override
-	public void onClick(View v) {
-		// TODO Auto-generated method stub
-
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + id);
 	}
 
-	private class EditListBinder implements SimpleCursorAdapter.ViewBinder {
+	private class MyAdapter extends ArrayAdapter<DarkroomPreset.DarkroomStep> {
 
-		@Override
-		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-			if (columnIndex == cursor.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_DURATION)) {
-				int time = cursor.getInt(columnIndex);
-				int pour = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_POUR));
-				int agitate = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_AGITATION));
-				String details = String.format("Duration: %d:%02d", time / 60, time % 60);
-				if (pour > 0) {
-					details += String.format(", pour: %ds", pour);
-				}
-				if (agitate > 0) {
-					details += String.format(", agitate: %ds", agitate);
-				}
-				((TextView) view).setText(details);
-				return true;
-			}
-			return false;
+		public MyAdapter(Context context, ArrayList<DarkroomPreset.DarkroomStep> steps) {
+			super(context, 0, steps);
 		}
+		
+		public View getView(int position, View convertView, ViewGroup parent) {		
+			DarkroomPreset.DarkroomStep step = preset.steps.get(position);
+			
+//			if(step.pourFor == 0 && step.agitateEvery == 0) {
+//				
+//			}
+			
+			if(convertView == null) {
+				convertView = getLayoutInflater().inflate(android.R.layout.two_line_list_item, parent, false);
+			}
 
+			String name = String.format("%s for %d:%02d", step.name, step.duration / 60, step.duration % 60);
+			((TextView) convertView.findViewById(android.R.id.text1)).setText(name);
+
+			String details = "";
+			if (step.pourFor > 0) {
+				details += String.format("pour: %ds", step.pourFor);
+			}
+			if (step.agitateEvery > 0) {
+				details += step.pourFor > 0 ? ", " : "";
+				details += String.format("agitate: %ds", step.agitateEvery);
+			}
+			TextView tv = (TextView) convertView.findViewById(android.R.id.text2);
+			tv.setGravity(Gravity.RIGHT);
+			tv.setText(details);
+			
+			return convertView;
+		}
 	}
+
+
 }

@@ -19,6 +19,7 @@
 	<string name="menu_doNotSave">Cancel</string>
 	<string name="editPreset_title_edit">Edit Existing Preset</string>
 	<string name="editPreset_title_insert">Create New Preset</string>
+	<string name="preseteditor_noSteps">Add a step.</string>
 
 	<string-array name="step_actions">
 		<item>Agitate</item>
