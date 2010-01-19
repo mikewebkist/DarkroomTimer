@@ -55,6 +55,7 @@ public class TimerPicker extends ListActivity {
 	private static final int EDIT_ID = 2;
 	private static final int DELETE_ID = 3;
 	private static final int DIALOG_DELETE_CONFIRM = 1;
+	private static final int EDIT_PRESET = 0;
 	private Cursor listViewCursor;
 
 	Handler threadMessageHandler = new Handler() {
@@ -153,8 +154,18 @@ public class TimerPicker extends ListActivity {
 	}
 
 	public void editPreset(Uri uri) {
-		// TODO create a new Activity to deal with this.
-		Toast.makeText(this, "Unimplemented EDIT", Toast.LENGTH_SHORT).show();
+		Intent intent = new Intent(this, PresetEditor.class);
+		intent.setData(uri);
+//		intent.setAction(Intent.ACTION_EDIT);
+		startActivityForResult(intent, EDIT_PRESET);
+	}
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == EDIT_PRESET) {
+			if (resultCode == RESULT_OK) {
+				listViewCursor.requery();
+			}
+		}
 	}
 
 	public boolean onOptionsItemSelected(MenuItem item) {
