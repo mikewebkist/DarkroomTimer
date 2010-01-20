@@ -42,6 +42,7 @@ import android.view.View.OnClickListener;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -55,6 +56,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	private static final int EDIT_STEP = 0;
 	private Uri uri;
 	private DarkroomPreset preset;
+	private ViewFlipper vf;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -74,16 +76,29 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		MyAdapter adapter = new MyAdapter(this, preset.steps);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
+		
+		vf = (ViewFlipper) findViewById(R.id.details);
+
+		// Set an animation from res/anim: I pick push left in
+		vf.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
+		
+		Button saveBtn = (Button) findViewById(R.id.saveButton);
+		Button cancelBtn = (Button) findViewById(R.id.discardButton);
+		Button saveBtnEdit = (Button) findViewById(R.id.saveButtonEdit);
+		Button cancelBtnEdit = (Button) findViewById(R.id.discardButtonEdit);
+		cancelBtnEdit.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Log.v(TAG, "Cancel edit.");
+				vf.showPrevious();
+			}
+		});
+
 	}
 
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
 		DarkroomStep selectedStep = preset.steps.get(position);
 		Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);
 		// Get the ViewFlipper from the layout
-		ViewFlipper vf = (ViewFlipper) findViewById(R.id.details);
-
-		// Set an animation from res/anim: I pick push left in
-		vf.setAnimation(AnimationUtils.loadAnimation(v.getContext(), android.R.anim.slide_in_left));
 		fillEditor(selectedStep);
 		vf.showNext();
 	}
