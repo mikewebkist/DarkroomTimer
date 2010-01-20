@@ -53,6 +53,11 @@
 				android:stretchColumns="1">
 
 				<TableRow>
+					<TextView android:layout_column="1" android:text="Duration (seconds):" />
+					<EditText android:id="@+id/durationEdit" android:hint="300"
+						android:gravity="left" android:layout_weight="1" />
+				</TableRow>
+				<TableRow>
 					<TextView android:layout_column="1" android:text="Every Every (seconds):" />
 					<EditText android:id="@+id/agitateEdit" android:hint="60"
 						android:gravity="left" android:layout_weight="1" />
@@ -64,7 +69,7 @@
 				</TableRow>
 				<TableRow>
 					<TextView android:layout_column="1" android:text="Prompt After Text:" />
-					<EditText android:id="@+id/promptBeforeEdit" android:hint="Click to continue"
+					<EditText android:id="@+id/promptBeforeEdit" android:hint="Click to continue..."
 						android:gravity="left" android:layout_weight="1" />
 				</TableRow>
 

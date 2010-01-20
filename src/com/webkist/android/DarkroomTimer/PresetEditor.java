@@ -25,7 +25,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -35,6 +37,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,6 +60,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	private Uri uri;
 	private DarkroomPreset preset;
 	private ViewFlipper vf;
+	private DarkroomStep selectedStep;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -83,8 +87,41 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		vf.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
 		
 		Button saveBtn = (Button) findViewById(R.id.saveButton);
+		saveBtn.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				ContentValues vals = new ContentValues();
+				ContentResolver cr = getContentResolver();
+				Log.v(TAG, "Deleting: " + preset.uri);
+				cr.delete(uri, null, null);
+				vals.put(DarkroomPreset.PRESET_NAME, preset.name);
+				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				String presetId = newUri.getPathSegments().get(1);
+				for (int j = 0; j < preset.steps.size(); j++) {
+					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
+				}
+				Log.v(TAG, "Inserted " + newUri);
+				finish();
+			}
+		});
+
 		Button cancelBtn = (Button) findViewById(R.id.discardButton);
+		cancelBtn.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				finish();
+			}
+		});
 		Button saveBtnEdit = (Button) findViewById(R.id.saveButtonEdit);
+		saveBtnEdit.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				Log.v(TAG, "Save edit.");
+				selectedStep.name = ((EditText) findViewById(R.id.nameEdit)).getText().toString();
+				selectedStep.duration = Integer.parseInt(((EditText) findViewById(R.id.durationEdit)).getText().toString());
+				selectedStep.agitateEvery = Integer.parseInt(((EditText) findViewById(R.id.agitateEdit)).getText().toString());
+				selectedStep.pourFor = Integer.parseInt(((EditText) findViewById(R.id.pourEdit)).getText().toString());
+				selectedStep.promptBefore = ((EditText) findViewById(R.id.promptBeforeEdit)).getText().toString();
+				vf.showPrevious();
+			}
+		});
 		Button cancelBtnEdit = (Button) findViewById(R.id.discardButtonEdit);
 		cancelBtnEdit.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -95,8 +132,18 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	}
 
+	public boolean onKeyDown(int keyCode, KeyEvent event)  {
+	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && vf.getDisplayedChild() == 1) {
+	        // Hijack BACK only if we're on the second view.
+	    	vf.showPrevious();
+	        return true;
+	    }
+
+	    return super.onKeyDown(keyCode, event);
+	}
+	
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
-		DarkroomStep selectedStep = preset.steps.get(position);
+		selectedStep = preset.steps.get(position);
 		Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);
 		// Get the ViewFlipper from the layout
 		fillEditor(selectedStep);
@@ -105,6 +152,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	protected void fillEditor(DarkroomPreset.DarkroomStep step) {
 		((EditText) findViewById(R.id.nameEdit)).setText(step.name);
+		((EditText) findViewById(R.id.durationEdit)).setText(String.format("%d", step.duration));
 		((EditText) findViewById(R.id.agitateEdit)).setText(String.format("%d", step.agitateEvery));
 		((EditText) findViewById(R.id.pourEdit)).setText(String.format("%d", step.pourFor));
 		((EditText) findViewById(R.id.promptBeforeEdit)).setText(step.promptBefore);
