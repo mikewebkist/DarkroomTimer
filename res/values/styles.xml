@@ -7,6 +7,7 @@
 		<item name="android:textSize">36sp</item>
 		<item name="android:textColor">#F00</item>
 	</style>
+	
 	<style name="presetText">
 		<item name="android:textSize">24sp</item>
 		<item name="android:textColor">#ff0000</item>
@@ -30,4 +31,7 @@
 		<item name="android:textSize">24sp</item>
 	</style>
 
+	<style name="DarkroomTheme.StepEditor">
+		<item name="android:textSize">12dip</item>
+	</style>
 </resources>
