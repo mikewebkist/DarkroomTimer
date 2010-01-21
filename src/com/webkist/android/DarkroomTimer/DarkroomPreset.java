@@ -48,6 +48,10 @@ public class DarkroomPreset implements BaseColumns {
 		this.id = id;
 	}
 
+	DarkroomPreset(String name) {
+		this.name = name;
+	}
+
 	public DarkroomPreset(Activity ctx, Uri uri) {
 		this.uri = uri;
 		Cursor cur = ctx.managedQuery(uri, null, null, null, DarkroomPreset.PRESET_NAME);

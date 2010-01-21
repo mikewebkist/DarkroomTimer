@@ -47,6 +47,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleCursorAdapter;
@@ -72,27 +73,39 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 		Intent intent = getIntent();
 		uri = intent.getData();
-		preset = new DarkroomPreset(this, uri);
+
+		if (uri == null) {
+			preset = new DarkroomPreset("New Preset");
+		} else {
+			Log.v(TAG, "We have a uri: " + uri);
+			preset = new DarkroomPreset(this, uri);
+		}
 
 		((TextView) findViewById(R.id.name)).setText(preset.name);
-		Log.v(TAG, "We have a uri: " + uri);
 
 		MyAdapter adapter = new MyAdapter(this, preset.steps);
+		TextView t = new TextView(this);
+//		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.simple_list_item_1, lv, false);
+		t.setText("Add a step...");
+//		((TextView) v.findViewById(android.R.id.text1)).setText("Add a step...");
+		lv.addFooterView(t);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
-		
+
 		vf = (ViewFlipper) findViewById(R.id.details);
 
 		// Set an animation from res/anim: I pick push left in
 		vf.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
-		
+
 		Button saveBtn = (Button) findViewById(R.id.saveButton);
 		saveBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				ContentValues vals = new ContentValues();
 				ContentResolver cr = getContentResolver();
 				Log.v(TAG, "Deleting: " + preset.uri);
-				cr.delete(uri, null, null);
+				if(uri != null) {
+					cr.delete(uri, null, null);
+				}
 				vals.put(DarkroomPreset.PRESET_NAME, preset.name);
 				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
 				String presetId = newUri.getPathSegments().get(1);
@@ -116,7 +129,8 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				Log.v(TAG, "Save edit.");
 				selectedStep.name = ((EditText) findViewById(R.id.nameEdit)).getText().toString();
 				selectedStep.duration = Integer.parseInt(((EditText) findViewById(R.id.durationEdit)).getText().toString());
-				selectedStep.agitateEvery = Integer.parseInt(((EditText) findViewById(R.id.agitateEdit)).getText().toString());
+				selectedStep.agitateEvery = Integer.parseInt(((EditText) findViewById(R.id.agitateEdit)).getText()
+						.toString());
 				selectedStep.pourFor = Integer.parseInt(((EditText) findViewById(R.id.pourEdit)).getText().toString());
 				selectedStep.promptBefore = ((EditText) findViewById(R.id.promptBeforeEdit)).getText().toString();
 				vf.showPrevious();
@@ -132,16 +146,16 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	}
 
-	public boolean onKeyDown(int keyCode, KeyEvent event)  {
-	    if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && vf.getDisplayedChild() == 1) {
-	        // Hijack BACK only if we're on the second view.
-	    	vf.showPrevious();
-	        return true;
-	    }
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && vf.getDisplayedChild() == 1) {
+			// Hijack BACK only if we're on the second view.
+			vf.showPrevious();
+			return true;
+		}
 
-	    return super.onKeyDown(keyCode, event);
+		return super.onKeyDown(keyCode, event);
 	}
-	
+
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
 		selectedStep = preset.steps.get(position);
 		Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);

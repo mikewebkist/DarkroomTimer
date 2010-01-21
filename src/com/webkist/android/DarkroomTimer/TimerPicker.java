@@ -172,6 +172,9 @@ public class TimerPicker extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.add_preset:
 			Log.v(TAG, "Add preset.");
+			Intent intent = new Intent(this, PresetEditor.class);
+			intent.setData(null);
+			startActivityForResult(intent, EDIT_PRESET);
 			return true;
 		}
 		return false;
