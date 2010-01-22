@@ -18,9 +18,9 @@
 				android:layout_height="0dip" android:layout_weight="1">
 				<ListView android:id="@+id/list" android:layout_width="fill_parent"
 					android:layout_height="fill_parent" android:drawSelectorOnTop="false" />
-				<TextView android:id="@+id/empty" android:layout_width="fill_parent"
+				<!--<TextView android:id="@+id/empty" android:layout_width="fill_parent"
 					android:layout_height="fill_parent" android:text="@string/preseteditor_noSteps" />
-			</FrameLayout>
+			--></FrameLayout>
 
 
 			<LinearLayout android:layout_width="fill_parent"
@@ -54,22 +54,22 @@
 
 				<TableRow>
 					<TextView android:layout_column="1" android:text="Duration (seconds):" />
-					<EditText android:id="@+id/durationEdit" android:hint="300"
+					<EditText android:id="@+id/durationEdit"
 						android:gravity="left" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
 					<TextView android:layout_column="1" android:text="Every Every (seconds):" />
-					<EditText android:id="@+id/agitateEdit" android:hint="60"
+					<EditText android:id="@+id/agitateEdit"
 						android:gravity="left" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
 					<TextView android:layout_column="1" android:text="Pour For (seconds):" />
-					<EditText android:id="@+id/pourEdit" android:hint="0"
+					<EditText android:id="@+id/pourEdit"
 						android:gravity="left" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
-					<TextView android:layout_column="1" android:text="Prompt After Text:" />
-					<EditText android:id="@+id/promptBeforeEdit" android:hint="Click to continue..."
+					<TextView android:layout_column="1" android:text="Prompt Before Text:" />
+					<EditText android:id="@+id/promptBeforeEdit"
 						android:gravity="left" android:layout_weight="1" />
 				</TableRow>
 

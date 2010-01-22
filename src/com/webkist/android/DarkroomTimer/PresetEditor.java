@@ -17,28 +17,19 @@ limitations under the License.
 package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ListActivity;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -49,15 +40,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.ViewFlipper;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class PresetEditor extends Activity implements OnItemClickListener {
 	public static final String TAG = "PresetEditor";
-	private static final int EDIT_STEP = 0;
 	private Uri uri;
 	private DarkroomPreset preset;
 	private ViewFlipper vf;
@@ -69,7 +57,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 		setContentView(R.layout.preseteditor);
 		ListView lv = (ListView) findViewById(R.id.list);
-		lv.setEmptyView(findViewById(R.id.empty));
+//		lv.setEmptyView(findViewById(R.id.empty));
 
 		Intent intent = getIntent();
 		uri = intent.getData();
@@ -84,11 +72,14 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		((TextView) findViewById(R.id.name)).setText(preset.name);
 
 		MyAdapter adapter = new MyAdapter(this, preset.steps);
-		TextView t = new TextView(this);
-//		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.simple_list_item_1, lv, false);
+		// TextView t = new TextView(this);
+		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.two_line_list_item, lv, false);
+		TextView t = (TextView) v.findViewById(android.R.id.text1);
 		t.setText("Add a step...");
-//		((TextView) v.findViewById(android.R.id.text1)).setText("Add a step...");
-		lv.addFooterView(t);
+		// t.setTextColor(0x00999999);
+		// t.setBackgroundColor(0x000);
+		lv.addFooterView(v);
+		lv.setFooterDividersEnabled(true);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
 
@@ -103,7 +94,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				ContentValues vals = new ContentValues();
 				ContentResolver cr = getContentResolver();
 				Log.v(TAG, "Deleting: " + preset.uri);
-				if(uri != null) {
+				if (uri != null) {
 					cr.delete(uri, null, null);
 				}
 				vals.put(DarkroomPreset.PRESET_NAME, preset.name);
@@ -156,22 +147,28 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	private void setField(int id, String val) {
+		EditText v = (EditText) findViewById(id);
+		((EditText) v).setText(val);
+	}
+
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
-		selectedStep = preset.steps.get(position);
-		Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);
-		// Get the ViewFlipper from the layout
-		fillEditor(selectedStep);
+		if (id == -1) {
+			selectedStep = preset.addStep();
+			Log.v(TAG, "Add step clicked: id=" + id + ", position=" + position);
+		} else {
+			selectedStep = (DarkroomPreset.DarkroomStep) parent.getItemAtPosition(position);
+			Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);
+		}
+		setField(R.id.nameEdit, selectedStep.name);
+		setField(R.id.durationEdit, String.format("%d", selectedStep.duration));
+		setField(R.id.agitateEdit, String.format("%d", selectedStep.agitateEvery));
+		setField(R.id.pourEdit, String.format("%d", selectedStep.pourFor));
+		setField(R.id.promptBeforeEdit, selectedStep.promptBefore);
 		vf.showNext();
 	}
 
-	protected void fillEditor(DarkroomPreset.DarkroomStep step) {
-		((EditText) findViewById(R.id.nameEdit)).setText(step.name);
-		((EditText) findViewById(R.id.durationEdit)).setText(String.format("%d", step.duration));
-		((EditText) findViewById(R.id.agitateEdit)).setText(String.format("%d", step.agitateEvery));
-		((EditText) findViewById(R.id.pourEdit)).setText(String.format("%d", step.pourFor));
-		((EditText) findViewById(R.id.promptBeforeEdit)).setText(step.promptBefore);
-	}
-
+	
 	private class MyAdapter extends ArrayAdapter<DarkroomPreset.DarkroomStep> {
 
 		public MyAdapter(Context context, ArrayList<DarkroomPreset.DarkroomStep> steps) {

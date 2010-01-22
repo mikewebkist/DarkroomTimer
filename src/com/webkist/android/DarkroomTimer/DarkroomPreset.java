@@ -90,6 +90,11 @@ public class DarkroomPreset implements BaseColumns {
 		}
 	}
 
+	public DarkroomStep addStep() {
+		DarkroomStep s = new DarkroomStep();
+		steps.add(s);
+		return s;
+	}
 	public DarkroomStep addStep(int stepNum, String name, int duration, int agitateEvery, String clickPrompt, int pourFor) {
 		DarkroomStep s = new DarkroomStep(stepNum, name, duration, agitateEvery, clickPrompt, pourFor);
 		steps.add(s);
@@ -129,7 +134,7 @@ public class DarkroomPreset implements BaseColumns {
 	public class DarkroomStep implements BaseColumns {
 		public String name;
 		public int stepNum = 0;
-		public int duration;
+		public int duration = 0;
 		public int agitateEvery = 0;
 		public int agitateFor = 10;
 		public String promptBefore = null;
@@ -154,6 +159,14 @@ public class DarkroomPreset implements BaseColumns {
 			this.pourFor = pourFor;
 		}
 
+		DarkroomStep() {
+			this.name = "New Step";
+			this.duration = 300;
+			this.agitateEvery = 50;
+			this.pourFor = 15;
+			this.promptBefore = "Click to continue...";
+		}
+		
 		public ContentValues toContentValues(String presetId) {
 			ContentValues vals = new ContentValues();
 			vals.put(STEP_PRESET, presetId);
