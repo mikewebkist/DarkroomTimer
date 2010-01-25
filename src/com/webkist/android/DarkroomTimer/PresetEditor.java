@@ -50,6 +50,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	private DarkroomPreset preset;
 	private ViewFlipper vf;
 	private DarkroomStep selectedStep;
+	private MyAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +71,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 		((TextView) findViewById(R.id.name)).setText(preset.name);
 
-		MyAdapter adapter = new MyAdapter(this, preset.steps);
+		adapter = new MyAdapter(this, preset.steps);
 		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.two_line_list_item, lv, false);
 		TextView t = (TextView) v.findViewById(android.R.id.text1);
 		t.setText("Add a step...");
@@ -78,7 +79,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		lv.setFooterDividersEnabled(true);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
-
 		vf = (ViewFlipper) findViewById(R.id.details);
 		vf.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
 
@@ -122,6 +122,10 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 						.toString());
 				selectedStep.pourFor = Integer.parseInt(((EditText) findViewById(R.id.pourEdit)).getText().toString());
 				selectedStep.promptBefore = ((EditText) findViewById(R.id.promptBeforeEdit)).getText().toString();
+				if(selectedStep.fromBlank) {
+					preset.addStep(selectedStep);
+					adapter.notifyDataSetChanged();
+				}
 				vf.showPrevious();
 			}
 		});
@@ -153,7 +157,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
 		if (id == -1) {
-			selectedStep = preset.addStep();
+			selectedStep = preset.blankStep();
 			Log.v(TAG, "Add step clicked: id=" + id + ", position=" + position);
 		} else {
 			selectedStep = (DarkroomPreset.DarkroomStep) parent.getItemAtPosition(position);
