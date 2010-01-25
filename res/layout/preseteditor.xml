@@ -46,7 +46,7 @@
 			<EditText android:id="@+id/nameEdit" android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
 				android:gravity="center_vertical" android:inputType="textPersonName|textCapWords"
-				android:hint="@string/ghostData_name" />
+				android:hint="Step Name" />
 
 			<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
 						android:gravity="left" android:layout_weight="1" />
 				</TableRow>
 				<TableRow>
-					<TextView android:layout_column="1" android:text="Every Every (seconds):" />
+					<TextView android:layout_column="1" android:text="Agitate Every (seconds):" />
 					<EditText android:id="@+id/agitateEdit"
 						android:gravity="left" android:layout_weight="1" />
 				</TableRow>

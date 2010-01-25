@@ -48,9 +48,12 @@ public class DarkroomPreset implements BaseColumns {
 		this.id = id;
 	}
 
-	DarkroomPreset(String name) {
-		this.name = name;
+	DarkroomPreset() {
 	}
+
+//	DarkroomPreset(String name) {
+////		this.name = name;
+//	}
 
 	public DarkroomPreset(Activity ctx, Uri uri) {
 		this.uri = uri;
@@ -133,13 +136,13 @@ public class DarkroomPreset implements BaseColumns {
 
 	public class DarkroomStep implements BaseColumns {
 		public String name;
-		public int stepNum = 0;
-		public int duration = 0;
-		public int agitateEvery = 0;
-		public int agitateFor = 10;
-		public String promptBefore = null;
-		public String promptAfter = null;
-		public int pourFor = 0;
+		public int stepNum;
+		public int duration;
+		public int agitateEvery;
+		public int agitateFor;
+		public String promptBefore;
+		public String promptAfter;
+		public int pourFor;
 
 		public static final String STEP_PRESET = "preset";
 		public static final String STEP_STEP = "step";
@@ -160,11 +163,11 @@ public class DarkroomPreset implements BaseColumns {
 		}
 
 		DarkroomStep() {
-			this.name = "New Step";
-			this.duration = 300;
-			this.agitateEvery = 50;
-			this.pourFor = 15;
-			this.promptBefore = "Click to continue...";
+//			this.name = "New Step";
+//			this.duration = 300;
+//			this.agitateEvery = 50;
+//			this.pourFor = 15;
+//			this.promptBefore = "Click to continue...";
 		}
 		
 		public ContentValues toContentValues(String presetId) {

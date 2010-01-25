@@ -57,13 +57,12 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 		setContentView(R.layout.preseteditor);
 		ListView lv = (ListView) findViewById(R.id.list);
-//		lv.setEmptyView(findViewById(R.id.empty));
 
 		Intent intent = getIntent();
 		uri = intent.getData();
 
 		if (uri == null) {
-			preset = new DarkroomPreset("New Preset");
+			preset = new DarkroomPreset();
 		} else {
 			Log.v(TAG, "We have a uri: " + uri);
 			preset = new DarkroomPreset(this, uri);
@@ -72,22 +71,18 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		((TextView) findViewById(R.id.name)).setText(preset.name);
 
 		MyAdapter adapter = new MyAdapter(this, preset.steps);
-		// TextView t = new TextView(this);
 		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.two_line_list_item, lv, false);
 		TextView t = (TextView) v.findViewById(android.R.id.text1);
 		t.setText("Add a step...");
-		// t.setTextColor(0x00999999);
-		// t.setBackgroundColor(0x000);
 		lv.addFooterView(v);
 		lv.setFooterDividersEnabled(true);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
 
 		vf = (ViewFlipper) findViewById(R.id.details);
-
-		// Set an animation from res/anim: I pick push left in
 		vf.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
 
+		// Save entire preset.
 		Button saveBtn = (Button) findViewById(R.id.saveButton);
 		saveBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -108,12 +103,15 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			}
 		});
 
+		// Cancel entire preset.
 		Button cancelBtn = (Button) findViewById(R.id.discardButton);
 		cancelBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				finish();
 			}
 		});
+
+		// Remember step (but don't write it out until we save the preset).
 		Button saveBtnEdit = (Button) findViewById(R.id.saveButtonEdit);
 		saveBtnEdit.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -127,6 +125,8 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				vf.showPrevious();
 			}
 		});
+		
+		// Cancel step.
 		Button cancelBtnEdit = (Button) findViewById(R.id.discardButtonEdit);
 		cancelBtnEdit.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
@@ -143,7 +143,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			vf.showPrevious();
 			return true;
 		}
-
 		return super.onKeyDown(keyCode, event);
 	}
 
