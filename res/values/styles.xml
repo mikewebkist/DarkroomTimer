@@ -32,6 +32,6 @@
 	</style>
 
 	<style name="DarkroomTheme.StepEditor">
-		<item name="android:textSize">12dip</item>
+		<item name="android:textSize">24dip</item>
 	</style>
 </resources>

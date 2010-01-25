@@ -18,9 +18,13 @@
 				android:layout_height="0dip" android:layout_weight="1">
 				<ListView android:id="@+id/list" android:layout_width="fill_parent"
 					android:layout_height="fill_parent" android:drawSelectorOnTop="false" />
-				<!--<TextView android:id="@+id/empty" android:layout_width="fill_parent"
-					android:layout_height="fill_parent" android:text="@string/preseteditor_noSteps" />
-			--></FrameLayout>
+				<!--
+					<TextView android:id="@+id/empty"
+					android:layout_width="fill_parent"
+					android:layout_height="fill_parent"
+					android:text="@string/preseteditor_noSteps" />
+				-->
+			</FrameLayout>
 
 
 			<LinearLayout android:layout_width="fill_parent"
@@ -48,32 +52,27 @@
 				android:gravity="center_vertical" android:inputType="textPersonName|textCapWords"
 				android:hint="Step Name" />
 
-			<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:stretchColumns="1">
+			<!--
+				<ListView android:id="@+id/editList"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				android:drawSelectorOnTop="false" />
+			-->
 
-				<TableRow>
-					<TextView android:layout_column="1" android:text="Duration (seconds):" />
-					<EditText android:id="@+id/durationEdit"
-						android:gravity="left" android:layout_weight="1" />
-				</TableRow>
-				<TableRow>
-					<TextView android:layout_column="1" android:text="Agitate Every (seconds):" />
-					<EditText android:id="@+id/agitateEdit"
-						android:gravity="left" android:layout_weight="1" />
-				</TableRow>
-				<TableRow>
-					<TextView android:layout_column="1" android:text="Pour For (seconds):" />
-					<EditText android:id="@+id/pourEdit"
-						android:gravity="left" android:layout_weight="1" />
-				</TableRow>
-				<TableRow>
-					<TextView android:layout_column="1" android:text="Prompt Before Text:" />
-					<EditText android:id="@+id/promptBeforeEdit"
-						android:gravity="left" android:layout_weight="1" />
-				</TableRow>
+			<LinearLayout android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:orientation="vertical">
+				<TextView android:id="@+id/durationEdit" android:text="Duration: %d:%02d" />
+				<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+					style="?android:attr/listSeparatorTextViewStyle" />
+				<TextView android:id="@+id/agitateEdit" android:text="Agitate Every %d seconds" />
+				<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+					style="?android:attr/listSeparatorTextViewStyle" />
+				<TextView android:id="@+id/pourEdit" android:text="Pour For %d seconds" />
+				<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+					style="?android:attr/listSeparatorTextViewStyle" />
+				<TextView android:id="@+id/promptBeforeEdit" android:text="Prompt Before Text: %s" />
+			</LinearLayout>
 
-			</TableLayout>
 			<LinearLayout android:layout_width="fill_parent"
 				android:layout_height="fill_parent" android:orientation="vertical"
 				android:gravity="bottom">

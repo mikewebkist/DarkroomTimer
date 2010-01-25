@@ -17,6 +17,7 @@ limitations under the License.
 package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
 
@@ -51,7 +52,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	private ViewFlipper vf;
 	private DarkroomStep selectedStep;
 	private MyAdapter adapter;
-
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -151,8 +152,8 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	}
 
 	private void setField(int id, String val) {
-		EditText v = (EditText) findViewById(id);
-		((EditText) v).setText(val);
+		TextView v = (TextView) findViewById(id);
+		v.setText(val);
 	}
 
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
