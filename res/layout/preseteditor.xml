@@ -61,16 +61,13 @@
 
 			<LinearLayout android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:orientation="vertical">
-				<TextView android:id="@+id/durationEdit" android:text="Duration: %d:%02d" />
-				<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-					style="?android:attr/listSeparatorTextViewStyle" />
-				<TextView android:id="@+id/agitateEdit" android:text="Agitate Every %d seconds" />
-				<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-					style="?android:attr/listSeparatorTextViewStyle" />
-				<TextView android:id="@+id/pourEdit" android:text="Pour For %d seconds" />
-				<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-					style="?android:attr/listSeparatorTextViewStyle" />
-				<TextView android:id="@+id/promptBeforeEdit" android:text="Prompt Before Text: %s" />
+				<TextView android:id="@+id/durationEdit" android:text="Duration: %d:%02d" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+				<TextView style="?android:attr/listSeparatorTextViewStyle" />
+				<TextView android:id="@+id/agitateEdit" android:text="Agitate Every %d seconds" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+				<TextView style="?android:attr/listSeparatorTextViewStyle" />
+				<TextView android:id="@+id/pourEdit" android:text="Pour For %d seconds" android:layout_width="fill_parent" android:layout_height="wrap_content" />
+				<TextView style="?android:attr/listSeparatorTextViewStyle" />
+				<TextView android:id="@+id/promptBeforeEdit" android:text="Prompt Before Text: %s" android:layout_width="fill_parent" android:layout_height="wrap_content" />
 			</LinearLayout>
 
 			<LinearLayout android:layout_width="fill_parent"
