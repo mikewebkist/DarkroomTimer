@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -118,6 +119,9 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			public void onClick(View v) {
 				Log.v(TAG, "Save edit.");
 				selectedStep.name = ((EditText) findViewById(R.id.nameEdit)).getText().toString();
+//				Resources r = getResources();
+//				int dur = Integer.parseInt(((EditText) findViewById(R.id.durationEdit)).getText().toString());
+//				selectedStep.duration = String.format(r.getString(R.id.durationEdit),)
 				selectedStep.duration = Integer.parseInt(((EditText) findViewById(R.id.durationEdit)).getText().toString());
 				selectedStep.agitateEvery = Integer.parseInt(((EditText) findViewById(R.id.agitateEdit)).getText()
 						.toString());
@@ -164,11 +168,13 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			selectedStep = (DarkroomPreset.DarkroomStep) parent.getItemAtPosition(position);
 			Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);
 		}
+		Resources r = getResources();
+
 		setField(R.id.nameEdit, selectedStep.name);
-		setField(R.id.durationEdit, String.format("%d", selectedStep.duration));
-		setField(R.id.agitateEdit, String.format("%d", selectedStep.agitateEvery));
-		setField(R.id.pourEdit, String.format("%d", selectedStep.pourFor));
-		setField(R.id.promptBeforeEdit, selectedStep.promptBefore);
+		setField(R.id.durationEdit, String.format(r.getString(R.string.durationEdit), selectedStep.duration / 60, selectedStep.duration % 60));
+		setField(R.id.agitateEdit, String.format(r.getString(R.string.agitateEdit), selectedStep.agitateEvery));
+		setField(R.id.pourEdit, String.format(r.getString(R.string.pourEdit), selectedStep.pourFor));
+		setField(R.id.promptBeforeEdit, String.format(r.getString(R.string.promptBeforeEdit), selectedStep.promptBefore));
 		vf.showNext();
 	}
 
