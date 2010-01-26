@@ -350,12 +350,12 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	private void updateFields() {
 		Resources r = getResources();
-		setField(R.id.nameEdit, String.format(r.getString(R.string.nameEdit), modifiedStep.name));
+		setField(R.id.nameEdit, String.format(r.getString(R.string.nameEdit), modifiedStep.name == null ? "[unset]" : modifiedStep.name));
 		setField(R.id.durationEdit, String.format(r.getString(R.string.durationEdit), modifiedStep.duration / 60,
 				modifiedStep.duration % 60));
 		setField(R.id.agitateEdit, String.format(r.getString(R.string.agitateEdit), modifiedStep.agitateEvery));
 		setField(R.id.pourEdit, String.format(r.getString(R.string.pourEdit), modifiedStep.pourFor));
-		setField(R.id.promptBeforeEdit, String.format(r.getString(R.string.promptBeforeEdit), modifiedStep.promptBefore));
+		setField(R.id.promptBeforeEdit, String.format(r.getString(R.string.promptBeforeEdit), modifiedStep.promptBefore == null ? "[unset]" : modifiedStep.promptBefore));
 	}
 
 	private class MyAdapter extends ArrayAdapter<DarkroomPreset.DarkroomStep> {
