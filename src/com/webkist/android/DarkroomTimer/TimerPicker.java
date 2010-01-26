@@ -89,6 +89,7 @@ public class TimerPicker extends ListActivity {
 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.setHeaderTitle("Modify Preset");
 		menu.add(0, EDIT_ID, 0, "Edit");
 		menu.add(0, DELETE_ID, 0, "Delete");
 	}
