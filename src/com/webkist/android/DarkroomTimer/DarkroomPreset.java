@@ -170,11 +170,26 @@ public class DarkroomPreset implements BaseColumns {
 
 		DarkroomStep() {
 			this.fromBlank = true;
-//			this.name = "New Step";
-//			this.duration = 300;
-//			this.agitateEvery = 50;
-//			this.pourFor = 15;
-//			this.promptBefore = "Click to continue...";
+		}
+		
+		public DarkroomStep clone() {
+			DarkroomStep newStep = new DarkroomStep();
+			newStep.fromBlank = this.fromBlank;
+			newStep.name = this.name;
+			newStep.duration = this.duration;
+			newStep.agitateEvery = this.agitateEvery;
+			newStep.pourFor = this.pourFor;
+			newStep.promptBefore = this.promptBefore;
+			return newStep;
+		}
+
+		public void overwrite(DarkroomStep newStep) {
+			this.fromBlank = newStep.fromBlank;
+			this.name = newStep.name;
+			this.duration = newStep.duration;
+			this.agitateEvery = newStep.agitateEvery;
+			this.pourFor = newStep.pourFor;
+			this.promptBefore = newStep.promptBefore;
 		}
 		
 		public ContentValues toContentValues(String presetId) {

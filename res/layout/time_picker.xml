@@ -10,13 +10,11 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content" 
 		style="@style/timer.total"
-		android:text="00:00" 
 		android:layout_weight="1" />
 		
 	<com.webkist.android.DarkroomTimer.NumberPicker android:id="@+id/secondClock"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content" 
 		style="@style/timer.total"
-		android:text="00:00" 
 		android:layout_weight="1" />
 </LinearLayout>
