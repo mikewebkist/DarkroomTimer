@@ -17,14 +17,20 @@ limitations under the License.
 package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -32,6 +38,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -53,7 +60,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	private ViewFlipper vf;
 	private DarkroomStep selectedStep;
 	private MyAdapter adapter;
-	
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -119,22 +126,24 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			public void onClick(View v) {
 				Log.v(TAG, "Save edit.");
 				selectedStep.name = ((EditText) findViewById(R.id.nameEdit)).getText().toString();
-//				Resources r = getResources();
-//				int dur = Integer.parseInt(((EditText) findViewById(R.id.durationEdit)).getText().toString());
-//				selectedStep.duration = String.format(r.getString(R.id.durationEdit),)
+				// Resources r = getResources();
+				// int dur = Integer.parseInt(((EditText)
+				// findViewById(R.id.durationEdit)).getText().toString());
+				// selectedStep.duration =
+				// String.format(r.getString(R.id.durationEdit),)
 				selectedStep.duration = Integer.parseInt(((EditText) findViewById(R.id.durationEdit)).getText().toString());
 				selectedStep.agitateEvery = Integer.parseInt(((EditText) findViewById(R.id.agitateEdit)).getText()
 						.toString());
 				selectedStep.pourFor = Integer.parseInt(((EditText) findViewById(R.id.pourEdit)).getText().toString());
 				selectedStep.promptBefore = ((EditText) findViewById(R.id.promptBeforeEdit)).getText().toString();
-				if(selectedStep.fromBlank) {
+				if (selectedStep.fromBlank) {
 					preset.addStep(selectedStep);
 					adapter.notifyDataSetChanged();
 				}
 				vf.showPrevious();
 			}
 		});
-		
+
 		// Cancel step.
 		Button cancelBtnEdit = (Button) findViewById(R.id.discardButtonEdit);
 		cancelBtnEdit.setOnClickListener(new OnClickListener() {
@@ -155,8 +164,45 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		return super.onKeyDown(keyCode, event);
 	}
 
+	protected Dialog onCreateDialog(int id) {
+		Dialog dialog;
+		LayoutInflater factory = LayoutInflater.from(this);
+		switch (id) {
+			case R.id.durationEdit:
+				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle(R.string.app_name).setMessage("Testing")
+						.setCancelable(false).setPositiveButton(R.string.time_picker_ok,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog, int whichButton) {
+										// finish();
+									}
+								}).create();
+				break;
+			default:
+				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle(R.string.app_name).setMessage("UNDEFINED DIALOG")
+				.setCancelable(false).setPositiveButton(R.string.time_picker_ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								// finish();
+							}
+						}).create();
+		}
+		return dialog;
+	}
+
+	static final List<Integer> dialogFields = Arrays.asList(new Integer[] { R.id.durationEdit, R.id.agitateEdit,
+			R.id.pourEdit, R.id.promptBeforeEdit });
+
 	private void setField(int id, String val) {
 		TextView v = (TextView) findViewById(id);
+		v.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (dialogFields.contains(v.getId())) {
+					showDialog(v.getId());
+				}
+			}
+
+		});
 		v.setText(val);
 	}
 
@@ -171,14 +217,14 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		Resources r = getResources();
 
 		setField(R.id.nameEdit, selectedStep.name);
-		setField(R.id.durationEdit, String.format(r.getString(R.string.durationEdit), selectedStep.duration / 60, selectedStep.duration % 60));
+		setField(R.id.durationEdit, String.format(r.getString(R.string.durationEdit), selectedStep.duration / 60,
+				selectedStep.duration % 60));
 		setField(R.id.agitateEdit, String.format(r.getString(R.string.agitateEdit), selectedStep.agitateEvery));
 		setField(R.id.pourEdit, String.format(r.getString(R.string.pourEdit), selectedStep.pourFor));
 		setField(R.id.promptBeforeEdit, String.format(r.getString(R.string.promptBeforeEdit), selectedStep.promptBefore));
 		vf.showNext();
 	}
 
-	
 	private class MyAdapter extends ArrayAdapter<DarkroomPreset.DarkroomStep> {
 
 		public MyAdapter(Context context, ArrayList<DarkroomPreset.DarkroomStep> steps) {

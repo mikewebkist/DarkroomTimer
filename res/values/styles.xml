@@ -7,7 +7,7 @@
 		<item name="android:textSize">36sp</item>
 		<item name="android:textColor">#F00</item>
 	</style>
-	
+
 	<style name="presetText">
 		<item name="android:textSize">24sp</item>
 		<item name="android:textColor">#ff0000</item>
@@ -26,12 +26,17 @@
 		<item name="android:textSize">36sp</item>
 		<item name="android:textColor">#aaaaaa</item>
 	</style>
-	
+
 	<style name="actionText">
 		<item name="android:textSize">24sp</item>
 	</style>
 
-	<style name="DarkroomTheme.StepEditor">
-		<item name="android:textSize">24dip</item>
+	<style name="DarkroomTheme.StepEditor" parent="@android:style/TextAppearance.Medium">
+		<item name="android:textSize">16sp</item>
+		<item name="android:paddingBottom">16sp</item>
+		<item name="android:clickable">true</item>
+		<item name="android:focusable">true</item>
+		<item name="android:background">@android:drawable/list_selector_background</item>
+		<item name="android:textColor">@color/bright_text_dark_focused</item>
 	</style>
 </resources>

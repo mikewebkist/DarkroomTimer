@@ -5,7 +5,8 @@
 	<ViewFlipper android:id="@+id/details"
 		android:layout_width="fill_parent" android:layout_height="fill_parent">
 
-		<LinearLayout android:layout_width="fill_parent" android:layout_marginRight="?android:attr/scrollbarSize"
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_marginRight="?android:attr/scrollbarSize"
 			android:layout_height="fill_parent" android:orientation="vertical">
 
 			<EditText android:id="@+id/name" android:layout_width="fill_parent"
@@ -49,19 +50,26 @@
 			<EditText android:id="@+id/nameEdit" android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
 				android:gravity="center_vertical" android:inputType="textPersonName|textCapWords"
-				android:hint="Step Name" />
+				android:hint="Step Name" android:paddingBottom="16sp" />
 
-			<TextView android:id="@+id/durationEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" />
-				<View android:id="@+id/divider" android:layout_width="fill_parent"
-	android:layout_height="1dip" android:background="@drawable/gradientdivider" /> 
-				<TextView android:id="@+id/agitateEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" />
-				<View android:id="@+id/divider" android:layout_width="fill_parent"
-	android:layout_height="1dip" android:background="@drawable/gradientdivider" /> 
-				<TextView android:id="@+id/pourEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" />
-				<View android:id="@+id/divider" android:layout_width="fill_parent"
-	android:layout_height="1dip" android:background="@drawable/gradientdivider" /> 
-				<TextView android:id="@+id/promptBeforeEdit" android:layout_width="fill_parent" android:layout_height="wrap_content" />
-			
+			<View android:layout_width="fill_parent" android:layout_height="1dip"
+				android:background="@drawable/gradientdivider" />
+			<TextView android:id="@+id/durationEdit" style="@style/DarkroomTheme.StepEditor"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content" />
+			<View android:layout_width="fill_parent" android:layout_height="1dip"
+				android:background="@drawable/gradientdivider" />
+			<TextView android:id="@+id/agitateEdit" style="@style/DarkroomTheme.StepEditor"
+				android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			<View android:layout_width="fill_parent" android:layout_height="1dip"
+				android:background="@drawable/gradientdivider" />
+			<TextView android:id="@+id/pourEdit" android:layout_width="fill_parent"
+				style="@style/DarkroomTheme.StepEditor" android:layout_height="wrap_content" />
+			<View android:layout_width="fill_parent" android:layout_height="1dip"
+				android:background="@drawable/gradientdivider" />
+			<TextView android:id="@+id/promptBeforeEdit" style="@style/DarkroomTheme.StepEditor"
+				android:layout_width="fill_parent" android:layout_height="wrap_content" />
+
 			<LinearLayout android:layout_width="fill_parent"
 				android:layout_height="fill_parent" android:orientation="vertical"
 				android:gravity="bottom">
