@@ -162,6 +162,23 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		Dialog dialog;
 		LayoutInflater factory = LayoutInflater.from(this);
 		switch (id) {
+			case R.id.nameEdit:
+				final View nameEditView = factory.inflate(R.layout.text_edit_dialog, null);
+
+				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Step name").setView(
+						nameEditView).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						EditText nameText = (EditText) nameEditView.findViewById(R.id.edit);
+						modifiedStep.name = nameText.getText().toString();
+						updateFields();
+					}
+				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						Log.v(TAG, "in onCreateDialog, clicked Cancel");
+					}
+				}).create();
+				break;
+				
 			case R.id.durationEdit:
 				final View durationEditView = factory.inflate(R.layout.time_picker, null);
 
@@ -274,6 +291,10 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	public void onPrepareDialog(int id, Dialog dialog) {
 		switch (id) {
+			case R.id.nameEdit:
+				EditText nameText = (EditText) dialog.findViewById(R.id.edit);
+				nameText.setText(modifiedStep.name);
+				break;
 			case R.id.durationEdit:
 				NumberPicker minClock = (NumberPicker) dialog.findViewById(R.id.minuteClock);
 				minClock.changeCurrent(modifiedStep.duration / 60);
@@ -296,7 +317,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		}
 	}
 
-	static final List<Integer> dialogFields = Arrays.asList(new Integer[] { R.id.durationEdit, R.id.agitateEdit,
+	static final List<Integer> dialogFields = Arrays.asList(new Integer[] { R.id.nameEdit, R.id.durationEdit, R.id.agitateEdit,
 			R.id.pourEdit, R.id.promptBeforeEdit });
 
 	private void setField(int id, String val) {
@@ -328,7 +349,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	private void updateFields() {
 		Resources r = getResources();
-		setField(R.id.nameEdit, modifiedStep.name);
+		setField(R.id.nameEdit, String.format(r.getString(R.string.nameEdit), modifiedStep.name));
 		setField(R.id.durationEdit, String.format(r.getString(R.string.durationEdit), modifiedStep.duration / 60,
 				modifiedStep.duration % 60));
 		setField(R.id.agitateEdit, String.format(r.getString(R.string.agitateEdit), modifiedStep.agitateEvery));

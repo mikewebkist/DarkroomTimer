@@ -47,11 +47,9 @@
 			android:layout_height="fill_parent" android:orientation="vertical"
 			android:visibility="gone" android:layout_marginRight="?android:attr/scrollbarSize">
 
-			<EditText android:id="@+id/nameEdit" android:layout_width="fill_parent"
-				android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
-				android:gravity="center_vertical" android:inputType="textPersonName|textCapWords"
-				android:hint="Step Name" android:paddingBottom="16sp" />
-
+			<TextView android:id="@+id/nameEdit" style="@style/DarkroomTheme.StepEditor"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content" />
 			<View android:layout_width="fill_parent" android:layout_height="1dip"
 				android:background="@drawable/gradientdivider" />
 			<TextView android:id="@+id/durationEdit" style="@style/DarkroomTheme.StepEditor"

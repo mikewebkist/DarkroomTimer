@@ -21,6 +21,7 @@
 	<string name="editPreset_title_insert">Create New Preset</string>
 	<string name="preseteditor_noSteps">Add a step.</string>
 
+	<string name="nameEdit">Step name: %s</string>
 	<string name="durationEdit">Duration: %d:%02d</string>
 	<string name="agitateEdit">Agitate every %d seconds</string>
 	<string name="pourEdit">Pour For %d seconds</string>
