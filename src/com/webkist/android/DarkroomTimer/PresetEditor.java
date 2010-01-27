@@ -193,6 +193,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				secClock.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
 				secClock.setRange(0, 59);
 				secClock.setSpeed(100);
+				secClock.setIncBy(5);
 				secClock.setEnabled(true);
 
 				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Step duration (MM:SS)").setView(
