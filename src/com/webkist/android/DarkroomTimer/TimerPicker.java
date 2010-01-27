@@ -211,8 +211,7 @@ public class TimerPicker extends ListActivity {
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
 							step = p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
-									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
-									.getAttributeValue(null, "promptBefore"), xrp.getAttributeIntValue(null, "pour", 0));
+									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0));
 						}
 					}
 					xrp.next();

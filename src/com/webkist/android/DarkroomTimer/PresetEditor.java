@@ -238,47 +238,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				}).create();
 				break;
 				
-			case R.id.pourEdit:
-				final View pourEditView = factory.inflate(R.layout.addseconds, null);
-
-				NumberPicker pourClock = (NumberPicker) pourEditView.findViewById(R.id.addSeconds);
-				pourClock.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-				pourClock.setRange(0, 360);
-				pourClock.setSpeed(100);
-				pourClock.setIncBy(5);
-				pourClock.setEnabled(true);
-
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Pour for (seconds)").setView(
-						pourEditView).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						NumberPicker pourClock = (NumberPicker) pourEditView.findViewById(R.id.addSeconds);
-						modifiedStep.pourFor = pourClock.getCurrent();
-						updateFields();
-					}
-				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						Log.v(TAG, "in onCreateDialog, clicked Cancel");
-					}
-				}).create();
-				break;
-
-			case R.id.promptBeforeEdit:
-				final View promptEditView = factory.inflate(R.layout.text_edit_dialog, null);
-
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Pour for (seconds)").setView(
-						promptEditView).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText promptText = (EditText) promptEditView.findViewById(R.id.edit);
-						modifiedStep.promptBefore = promptText.getText().toString();
-						updateFields();
-					}
-				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						Log.v(TAG, "in onCreateDialog, clicked Cancel");
-					}
-				}).create();
-				break;
-				
 			default:
 				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle(R.string.app_name).setMessage(
 						"UNDEFINED DIALOG").setCancelable(false).setPositiveButton(R.string.time_picker_ok,
@@ -308,19 +267,10 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				NumberPicker addClock = (NumberPicker) dialog.findViewById(R.id.addSeconds);
 				addClock.changeCurrent(modifiedStep.agitateEvery);
 				break;
-			case R.id.pourEdit:
-				NumberPicker pourClock = (NumberPicker) dialog.findViewById(R.id.addSeconds);
-				pourClock.changeCurrent(modifiedStep.pourFor);
-				break;
-			case R.id.promptBeforeEdit:
-				EditText promptText = (EditText) dialog.findViewById(R.id.edit);
-				promptText.setText(modifiedStep.promptBefore);
-				break;
 		}
 	}
 
-	static final List<Integer> dialogFields = Arrays.asList(new Integer[] { R.id.nameEdit, R.id.durationEdit, R.id.agitateEdit,
-			R.id.pourEdit, R.id.promptBeforeEdit });
+	static final List<Integer> dialogFields = Arrays.asList(new Integer[] { R.id.nameEdit, R.id.durationEdit, R.id.agitateEdit });
 
 	private void setField(int id, String val) {
 		TextView v = (TextView) findViewById(id);
@@ -355,8 +305,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		setField(R.id.durationEdit, String.format(r.getString(R.string.durationEdit), modifiedStep.duration / 60,
 				modifiedStep.duration % 60));
 		setField(R.id.agitateEdit, String.format(r.getString(R.string.agitateEdit), modifiedStep.agitateEvery));
-		setField(R.id.pourEdit, String.format(r.getString(R.string.pourEdit), modifiedStep.pourFor));
-		setField(R.id.promptBeforeEdit, String.format(r.getString(R.string.promptBeforeEdit), modifiedStep.promptBefore == null ? "[unset]" : modifiedStep.promptBefore));
 	}
 
 	private class MyAdapter extends ArrayAdapter<DarkroomPreset.DarkroomStep> {
@@ -375,14 +323,8 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			String name = String.format("%s for %d:%02d", step.name, step.duration / 60, step.duration % 60);
 			((TextView) convertView.findViewById(android.R.id.text1)).setText(name);
 
-			String details = "";
-			if (step.pourFor > 0) {
-				details += String.format("pour: %ds", step.pourFor);
-			}
-			if (step.agitateEvery > 0) {
-				details += step.pourFor > 0 ? ", " : "";
-				details += String.format("agitate: %ds", step.agitateEvery);
-			}
+			String details = step.agitateEvery > 0 ? String.format("agitate: %ds", step.agitateEvery) : "";
+			
 			TextView tv = (TextView) convertView.findViewById(android.R.id.text2);
 			tv.setGravity(Gravity.RIGHT);
 			tv.setText(details);

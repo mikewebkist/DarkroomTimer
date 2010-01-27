@@ -67,11 +67,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private boolean timerRunning = false;
 
 	Handler threadMessageHandler = new Handler() {
-		// TODO Move
-		// all this
-		// to an
-		// onDraw()
-		// method?
+
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case TICK:
@@ -83,11 +79,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					timerText.setText(String.format("%02d:%02d", minutes, seconds));
 					double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
 
-					if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
-						clickText.setText(R.string.prompt_pour);
-						stepActionText.setText("");
-					} else if (step.agitateEvery > 0) {
-						if (elapsedSecs < (step.pourFor + 5 + step.agitateFor)) {
+					if (step.agitateEvery > 0) {
+						if (elapsedSecs < step.agitateFor) {
 							clickText.setText(R.string.prompt_agitate);
 							stepActionText.setText("");
 						} else {
@@ -99,10 +92,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 								stepActionText.setText("");
 								clickText.setText(R.string.prompt_agitate);
 							} else if (elapsedRemainder > step.agitateEvery - 10) {
-								// Coming
-								// up
-								// on
-								// agitation
+								// Coming up on agitation
 								double agitateIn = step.agitateEvery - elapsedRemainder;
 								Resources res = getResources();
 								stepActionText.setText(String.format("%s in %02d:%02d", res
@@ -127,12 +117,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 						stepHead.setText(step.name);
 						timerText.setText(String.format("%02d:%02d", (int) step.duration / 60, (int) step.duration % 60));
 
-						if (step.promptBefore == null) {
-							handleClick();
-						} else {
-							clickText.setText(step.promptBefore);
-
-						}
+						clickText.setText("Click to start...");
 					}
 
 					break;
@@ -142,12 +127,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					startTime = 0;
 					clickText.setText("");
 					stepActionText.setText("");
-
-					// TODO
-					// Add
-					// optional
-					// promptAfter
-					// stuff
 
 					Message m = new Message();
 					m.what = DarkroomTimer.NEXT;
@@ -163,6 +142,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
 		setContentView(R.layout.main);
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);

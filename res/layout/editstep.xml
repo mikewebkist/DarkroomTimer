@@ -16,17 +16,6 @@
 			<EditText android:id="@+id/agitateEdit" android:hint="60"
 				android:gravity="left" android:layout_weight="1" />
 		</TableRow>
-		<TableRow>
-			<TextView android:layout_column="1" android:text="Pour For (seconds):" />
-			<EditText android:id="@+id/pourEdit" android:hint="0"
-				android:gravity="left" android:layout_weight="1" />
-		</TableRow>
-		<TableRow>
-			<TextView android:layout_column="1" android:text="Prompt After Text:" />
-			<EditText android:id="@+id/promptBeforeEdit" android:hint="Click to continue"
-				android:gravity="left" android:layout_weight="1" />
-		</TableRow>
-
 	</TableLayout>
 
 	<LinearLayout android:layout_width="fill_parent"

@@ -18,7 +18,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 	private static final String		TAG					= "DarkroomPresetProvider";
 
 	private static final String		DATABASE_NAME		= "presets.db";
-	private static final int		DATABASE_VERSION	= 1;
+	private static final int		DATABASE_VERSION	= 2;
 
 	private static final int		URI_PRESETS			= 1;
 	private static final int		URI_PRESET_ID		= 2;
