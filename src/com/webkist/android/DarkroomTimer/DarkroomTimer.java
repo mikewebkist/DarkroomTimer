@@ -154,6 +154,15 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	}
 
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+			Intent intent = new Intent(this, TimerPicker.class);
+			startActivityForResult(intent, GET_PRESET);
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.darkroomtimer, menu);
