@@ -16,6 +16,9 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import java.io.IOException;
+
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -70,73 +73,84 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case TICK:
-					long remaining = stepTimeRemaining();
+			case TICK:
+				long remaining = stepTimeRemaining();
 
-					int minutes = (int) remaining / 60000;
-					int seconds = (int) ((remaining % 60000) / 1000);
+				int minutes = (int) remaining / 60000;
+				int seconds = (int) ((remaining % 60000) / 1000);
 
-					timerText.setText(String.format("%02d:%02d", minutes, seconds));
-					double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
+				timerText.setText(String.format("%02d:%02d", minutes, seconds));
+				double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
 
-					if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
-						clickText.setText("Pour...");
-						stepActionText.setText("");
-					} else if (step.agitateEvery > 0) {
-						if (elapsedSecs < (step.pourFor + step.agitateFor)) {
-							clickText.setText(R.string.prompt_agitate);
-							stepActionText.setText("");
-						} else {
-							double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
-
-							if (elapsedRemainder < step.agitateFor) {
-								stepActionText.setText("");
-								clickText.setText(R.string.prompt_agitate);
-							} else if (elapsedRemainder > step.agitateEvery - 10) {
-								// Coming up on agitation
-								double agitateIn = step.agitateEvery - elapsedRemainder;
-								Resources res = getResources();
-								stepActionText.setText(String.format("%s in %02d:%02d", res
-										.getString(R.string.prompt_agitate), (int) agitateIn / 60, (int) agitateIn % 60));
-							} else {
-								stepActionText.setText("");
-								clickText.setText("");
-							}
+				if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
+					clickText.setText("Pour...");
+					stepActionText.setText("");
+				} else if (step.agitateEvery > 0) {
+					if (elapsedSecs < (step.pourFor + step.agitateFor)) {
+						try {
+							mp.reset();
+							mp.prepare();
+							mp.start();
+						} catch (IllegalStateException e) {
+							Log.v(TAG, "problem playing sound: " + e);
+						} catch (IOException e) {
+							Log.v(TAG, "problem playing sound: " + e);
 						}
-					} else {
-						clickText.setText("");
+						clickText.setText(R.string.prompt_agitate);
 						stepActionText.setText("");
-					}
-					break;
-				case NEXT:
-					step = preset.nextStep();
-					if (step == null) {
-						stepHead.setText(R.string.prompt_done);
-						timerText.setText("DONE");
 					} else {
-						long dur = stepTimeRemaining() / 1000;
-						stepHead.setText(step.name);
-						timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
+						double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
 
-						clickText.setText("Click to start...");
+						if (elapsedRemainder < step.agitateFor) {
+							stepActionText.setText("");
+							clickText.setText(R.string.prompt_agitate);
+						} else if (elapsedRemainder > step.agitateEvery - 10) {
+							// Coming up on agitation
+							double agitateIn = step.agitateEvery - elapsedRemainder;
+							Resources res = getResources();
+							stepActionText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
+									(int) agitateIn / 60, (int) agitateIn % 60));
+						} else {
+							stepActionText.setText("");
+							clickText.setText("");
+						}
 					}
-
-					break;
-
-				case DONE:
-					timerRunning = false;
-					startTime = 0;
+				} else {
 					clickText.setText("");
 					stepActionText.setText("");
+				}
+				break;
+			case NEXT:
+				step = preset.nextStep();
+				if (step == null) {
+					stepHead.setText(R.string.prompt_done);
+					timerText.setText("DONE");
+				} else {
+					long dur = stepTimeRemaining() / 1000;
+					stepHead.setText(step.name);
+					timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 
-					Message m = new Message();
-					m.what = DarkroomTimer.NEXT;
-					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+					clickText.setText("Click to start...");
+				}
 
-					break;
+				break;
+
+			case DONE:
+				timerRunning = false;
+				startTime = 0;
+				clickText.setText("");
+				stepActionText.setText("");
+
+				Message m = new Message();
+				m.what = DarkroomTimer.NEXT;
+				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+
+				break;
 			}
 		}
 	};
+
+	private MediaPlayer mp;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -148,6 +162,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		setContentView(R.layout.main);
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);
 		mainView.setOnClickListener(this);
+		mp = MediaPlayer.create(DarkroomTimer.this, R.raw.boop1);
 
 		if (preset == null) {
 			Intent intent = new Intent(this, TimerPicker.class);
@@ -164,13 +179,13 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.stop_timer:
-				stopThread();
-				return true;
-			case R.id.select_preset:
-				Intent intent = new Intent(this, TimerPicker.class);
-				startActivityForResult(intent, GET_PRESET);
-				return true;
+		case R.id.stop_timer:
+			stopThread();
+			return true;
+		case R.id.select_preset:
+			Intent intent = new Intent(this, TimerPicker.class);
+			startActivityForResult(intent, GET_PRESET);
+			return true;
 		}
 		return false;
 	}
@@ -205,13 +220,13 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		switch (keyCode) {
 
-			case KeyEvent.KEYCODE_DPAD_CENTER:
-				Log.v(TAG, "Key: " + event);
-				handleClick();
-				break;
+		case KeyEvent.KEYCODE_DPAD_CENTER:
+			Log.v(TAG, "Key: " + event);
+			handleClick();
+			break;
 
-			default:
-				return false;
+		default:
+			return false;
 
 		}
 		return true;
