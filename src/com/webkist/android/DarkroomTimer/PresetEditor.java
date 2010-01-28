@@ -152,6 +152,13 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						Log.v(TAG, "in onCreateDialog, clicked Cancel");
 					}
+				}).setNeutralButton("Delete", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						Log.v(TAG, "in onCreateDialog, clicked Delete");
+						// TODO						
+						preset.steps.remove(selectedStep);
+						adapter.notifyDataSetChanged();
+					}
 				}).create();
 				break;
 				
