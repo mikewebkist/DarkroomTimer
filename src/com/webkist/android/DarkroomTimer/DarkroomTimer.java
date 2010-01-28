@@ -16,17 +16,12 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
-import java.io.IOException;
-
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
-import android.os.PowerManager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -87,15 +82,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					stepActionText.setText("");
 				} else if (step.agitateEvery > 0) {
 					if (elapsedSecs < (step.pourFor + step.agitateFor)) {
-						try {
-							mp.reset();
-							mp.prepare();
-							mp.start();
-						} catch (IllegalStateException e) {
-							Log.v(TAG, "problem playing sound: " + e);
-						} catch (IOException e) {
-							Log.v(TAG, "problem playing sound: " + e);
-						}
 						clickText.setText(R.string.prompt_agitate);
 						stepActionText.setText("");
 					} else {
@@ -150,8 +136,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		}
 	};
 
-	private MediaPlayer mp;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -162,7 +146,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		setContentView(R.layout.main);
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);
 		mainView.setOnClickListener(this);
-		mp = MediaPlayer.create(DarkroomTimer.this, R.raw.boop1);
 
 		if (preset == null) {
 			Intent intent = new Intent(this, TimerPicker.class);
