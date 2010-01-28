@@ -31,6 +31,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.net.Uri;
@@ -56,6 +57,8 @@ public class TimerPicker extends ListActivity {
 	private static final int DELETE_ID = 3;
 	private static final int DIALOG_DELETE_CONFIRM = 1;
 	private static final int EDIT_PRESET = 0;
+	private static final String PREFS_NAME = "TimerPickerPrefs";
+	private static final int DIALOG_FIRST_RUN = 4;
 	private Cursor listViewCursor;
 
 	Handler threadMessageHandler = new Handler() {
@@ -84,6 +87,14 @@ public class TimerPicker extends ListActivity {
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, listViewCursor,
 				new String[] { DarkroomPreset.PRESET_NAME }, new int[] { android.R.id.text1 });
 		setListAdapter(adapter);
+		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
+		if (!alreadyRan) {
+			// SharedPreferences.Editor editor = settings.edit();
+			// editor.putBoolean("AlreadyRanFlag", true);
+			// editor.commit();
+			showDialog(DIALOG_FIRST_RUN);
+		}
 		registerForContextMenu(getListView());
 	}
 
@@ -119,32 +130,48 @@ public class TimerPicker extends ListActivity {
 
 	protected Dialog onCreateDialog(int id) {
 		// LayoutInflater factory = LayoutInflater.from(this);
-		if (id == DIALOG_DELETE_CONFIRM) {
-			return new AlertDialog.Builder(TimerPicker.this).setTitle(R.string.app_name).setMessage(
-					R.string.preset_confirm_delete).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int whichButton) {
-							if (longClickPreset != null) {
-								getContentResolver().delete(longClickPreset.uri, null, null);
-								Toast.makeText(TimerPicker.this, "Deleted.", Toast.LENGTH_SHORT).show();
-								longClickPreset = null;
+		Dialog dialog;
+		switch (id) {
+			case DIALOG_DELETE_CONFIRM:
+				dialog = new AlertDialog.Builder(TimerPicker.this).setTitle(R.string.app_name).setMessage(
+						R.string.preset_confirm_delete).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								if (longClickPreset != null) {
+									getContentResolver().delete(longClickPreset.uri, null, null);
+									Toast.makeText(TimerPicker.this, "Deleted.", Toast.LENGTH_SHORT).show();
+									longClickPreset = null;
+								}
 							}
-						}
-					}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
-					longClickPreset = null;
-				}
-			}).setOnCancelListener(new DialogInterface.OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
-					longClickPreset = null;
-				}
-			}).create();
+						}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
+						longClickPreset = null;
+					}
+				}).setOnCancelListener(new DialogInterface.OnCancelListener() {
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						Toast.makeText(TimerPicker.this, "Delete cancelled.", Toast.LENGTH_SHORT).show();
+						longClickPreset = null;
+					}
+				}).create();
+				break;
+			case DIALOG_FIRST_RUN:
+				dialog = new AlertDialog.Builder(TimerPicker.this).setTitle(R.string.app_name).setMessage(
+						R.string.first_run_message).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, 0).edit();
+								editor.putBoolean("AlreadyRanFlag", true);
+								editor.commit();
+							}
+						}).create();
+				break;
+			default:
+				dialog = null;
 		}
-		return null;
+		return dialog;
 	}
 
 	protected void onPrepareDialog(int id, Dialog dialog) {
@@ -176,6 +203,9 @@ public class TimerPicker extends ListActivity {
 				Intent intent = new Intent(this, PresetEditor.class);
 				intent.setData(null);
 				startActivityForResult(intent, EDIT_PRESET);
+				return true;
+			case R.id.info:
+				showDialog(DIALOG_FIRST_RUN);
 				return true;
 		}
 		return false;
