@@ -103,9 +103,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				if (uri != null) {
 					cr.delete(uri, null, null);
 				}
-				preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
-				vals.put(DarkroomPreset.PRESET_NAME, preset.name);
-				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
 				String presetId = newUri.getPathSegments().get(1);
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));

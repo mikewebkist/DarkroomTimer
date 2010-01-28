@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 
 <preset-array>
-    <preset id="trix400d76" name="Tri-X 400 in D76">
+    <preset id="trix400d76" name="Tri-X 400 in D76" temp="20.0" iso="400">
 	<step name="Developer" duration="405" agitate="60" pour="10"/>
 	<step name="Wash" duration="30" />
 	<step name="Fix" duration="130" agitate="60" pour="10"/>
@@ -22,7 +22,7 @@
 	<step name="Photo-Flo" duration="30" />
     </preset>
 
-    <preset id="c41_tetenal_5L" name="C-41 (Tetenal 5L Kit)">
+    <preset id="c41_tetenal_5L" name="C-41 (Tetenal 5L Kit)" temp="38.0">
 	<step name="Developer" duration="225" agitate="30" pour="10"/>
 	<step name="Blix" duration="225" agitate="30" pour="10"/>
 	<step name="Wash" duration="360" />

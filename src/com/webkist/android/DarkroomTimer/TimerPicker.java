@@ -29,6 +29,7 @@ import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -40,11 +41,16 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.ArrayAdapter;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -74,6 +80,7 @@ public class TimerPicker extends ListActivity {
 		}
 	};
 	private DarkroomPreset longClickPreset;
+	private boolean showTempsInF;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -86,11 +93,11 @@ public class TimerPicker extends ListActivity {
 			p.run();
 		}
 
-		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, android.R.layout.simple_list_item_1, listViewCursor,
-				new String[] { DarkroomPreset.PRESET_NAME }, new int[] { android.R.id.text1 });
+		MyOtherAdapter adapter = new MyOtherAdapter(this, listViewCursor);
 		setListAdapter(adapter);
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
+		showTempsInF = settings.getBoolean("showTempsInF", true);
 		if (!alreadyRan) {
 			// SharedPreferences.Editor editor = settings.edit();
 			// editor.putBoolean("AlreadyRanFlag", true);
@@ -235,6 +242,35 @@ public class TimerPicker extends ListActivity {
 		finish();
 	}
 
+	private class MyOtherAdapter extends CursorAdapter {
+
+		public MyOtherAdapter(Context context, Cursor c) {
+			super(context, c);
+			// TODO Auto-generated constructor stub
+		}
+
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			final LayoutInflater inflater = getLayoutInflater();
+			View view = inflater.inflate(R.layout.presetlist, parent, false);
+			return view;
+		}
+
+		@Override
+		public void bindView(View view, Context context, Cursor cursor) {
+			((TextView) view.findViewById(R.id.name)).setText(cursor.getString(cursor.getColumnIndex(DarkroomPreset.PRESET_NAME)));
+			int iso = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.PRESET_ISO));
+			((TextView) view.findViewById(R.id.iso)).setText(iso > 0 ? String.format("ISO %d", iso) : "");
+			float temp = cursor.getFloat(cursor.getColumnIndex(DarkroomPreset.PRESET_TEMP));
+			if(showTempsInF) {
+				((TextView) view.findViewById(R.id.temp)).setText(temp > 0 ? String.format(" @ %.0f¼F", temp * 9 / 5 + 32) : "");
+			} else {
+				((TextView) view.findViewById(R.id.temp)).setText(temp > 0 ? String.format(" @ %.1f¼C", temp) : "");
+			}
+		}
+
+	}
+
 	class XmlParser implements Runnable {
 		private XmlResourceParser xrp;
 
@@ -254,7 +290,8 @@ public class TimerPicker extends ListActivity {
 					if (xrp.getEventType() == XmlResourceParser.START_TAG) {
 						String s = xrp.getName();
 						if (s.equals("preset")) {
-							p = new DarkroomPreset(xrp.getAttributeValue(null, "id"), xrp.getAttributeValue(null, "name"));
+							p = new DarkroomPreset(xrp.getAttributeValue(null, "id"), xrp.getAttributeValue(null, "name"),
+									xrp.getAttributeIntValue(null, "iso", 0), xrp.getAttributeFloatValue(null, "temp", 0));
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
 							step = p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
@@ -272,9 +309,7 @@ public class TimerPicker extends ListActivity {
 
 			for (int i = 0; i < darkroomPresets.size(); i++) {
 				DarkroomPreset preset = darkroomPresets.get(i);
-				ContentValues vals = new ContentValues();
-				vals.put(DarkroomPreset.PRESET_NAME, preset.name);
-				Uri uri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				Uri uri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
 				String presetId = uri.getPathSegments().get(1);
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues(presetId));

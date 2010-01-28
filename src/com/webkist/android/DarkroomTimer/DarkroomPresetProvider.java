@@ -18,7 +18,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 	private static final String		TAG					= "DarkroomPresetProvider";
 
 	private static final String		DATABASE_NAME		= "presets.db";
-	private static final int		DATABASE_VERSION	= 3;
+	private static final int		DATABASE_VERSION	= 4;
 
 	private static final int		URI_PRESETS			= 1;
 	private static final int		URI_PRESET_ID		= 2;
@@ -168,7 +168,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 				break;
 
 			default:
-				throw new IllegalArgumentException("Unknown URI " + uri);
+				throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
 
 		SQLiteDatabase db = mOpenHelper.getReadableDatabase();

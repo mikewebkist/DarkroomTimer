@@ -34,8 +34,13 @@ public class DarkroomPreset implements BaseColumns {
 	public static final String PRESET_CONTENT_TYPE_LIST = "vnd.android.cursor.dir/vnd.webkist.preset";
 
 	public static final String PRESET_NAME = "name";
+	public static final String PRESET_TEMP = "temp";
+	public static final String PRESET_ISO = "iso";
+
 
 	public String name;
+	public int iso;
+	public float temp;
 	public String id;
 	public Uri uri;
 	private int currentStep = 0;
@@ -43,11 +48,18 @@ public class DarkroomPreset implements BaseColumns {
 
 	public static final String TAG = "DarkroomPreset";
 
-	DarkroomPreset(String id, String name) {
+	DarkroomPreset(String id, String name, int iso, float temp) {
 		this.name = name;
 		this.id = id;
+		this.iso = iso;
+		this.temp = temp;
 	}
-
+	
+//	DarkroomPreset(String id, String name) {
+//		this.name = name;
+//		this.id = id;
+//	}
+	
 	DarkroomPreset() {
 	}
 
@@ -61,11 +73,15 @@ public class DarkroomPreset implements BaseColumns {
 
 		int idCol = cur.getColumnIndex(DarkroomPreset._ID);
 		int nameCol = cur.getColumnIndex(DarkroomPreset.PRESET_NAME);
+		int tempCol = cur.getColumnIndex(DarkroomPreset.PRESET_TEMP);
+		int isoCol = cur.getColumnIndex(DarkroomPreset.PRESET_ISO);
 
 		if (cur.moveToFirst()) {
 			Uri stepUri = Uri.withAppendedPath(uri, "step");
 			this.name = cur.getString(nameCol);
 			this.id = cur.getString(idCol);
+			this.temp = cur.getFloat(tempCol);
+			this.iso = cur.getInt(isoCol);
 			Log.v(TAG, "Creating " + this.name + " preset.");
 			Cursor step_cur = ctx.managedQuery(stepUri, null, null, null, DarkroomPreset.DarkroomStep.STEP_STEP);
 
@@ -132,6 +148,8 @@ public class DarkroomPreset implements BaseColumns {
 	public ContentValues toContentValues() {
 		ContentValues vals = new ContentValues();
 		vals.put(DarkroomPreset.PRESET_NAME, name);
+		vals.put(DarkroomPreset.PRESET_ISO, iso);
+		vals.put(DarkroomPreset.PRESET_TEMP, temp);
 		return vals;
 	}
 

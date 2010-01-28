@@ -28,7 +28,9 @@
 	<string name="sql_presets">
 	CREATE TABLE presets (
 		_id INTEGER PRIMARY KEY,
-		name TEXT
+		name TEXT,
+		iso INTEGER,
+		temp FLOAT
 	);
 	</string>
 	<string name="sql_steps">
