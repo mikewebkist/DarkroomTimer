@@ -47,6 +47,7 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
@@ -55,6 +56,7 @@ public class TimerPicker extends ListActivity {
 	private static final int XML_IMPORT_DONE = 1;
 	private static final int EDIT_ID = 2;
 	private static final int DELETE_ID = 3;
+	private static final int DUPLICATE_ID = 4;
 	private static final int DIALOG_DELETE_CONFIRM = 1;
 	private static final int EDIT_PRESET = 0;
 	private static final String PREFS_NAME = "TimerPickerPrefs";
@@ -101,6 +103,7 @@ public class TimerPicker extends ListActivity {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.setHeaderTitle("Modify Preset");
+		menu.add(0, DUPLICATE_ID, 0, "Duplicate");
 		menu.add(0, EDIT_ID, 0, "Edit");
 		menu.add(0, DELETE_ID, 0, "Delete");
 	}
@@ -116,6 +119,20 @@ public class TimerPicker extends ListActivity {
 			case DELETE_ID:
 				longClickPreset = new DarkroomPreset(this, uri);
 				showDialog(DIALOG_DELETE_CONFIRM);
+				return true;
+			case DUPLICATE_ID:
+				// TODO
+				DarkroomPreset preset = new DarkroomPreset(this, uri);
+				ContentValues vals = new ContentValues();
+				ContentResolver cr = getContentResolver();
+				vals.put(DarkroomPreset.PRESET_NAME, preset.name + " copy");
+				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				String presetId = newUri.getPathSegments().get(1);
+				for (int j = 0; j < preset.steps.size(); j++) {
+					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
+				}
+				Log.v(TAG, "Inserted " + newUri);
+				editPreset(newUri);
 				return true;
 			default:
 				return super.onContextItemSelected(item);
