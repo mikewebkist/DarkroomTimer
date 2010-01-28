@@ -140,7 +140,7 @@ public class DarkroomPreset implements BaseColumns {
 		public int stepNum;
 		public int duration;
 		public int agitateEvery;
-		public int agitateFor;
+		public int agitateFor = 10;
 		public int pourFor;
 		public boolean fromBlank;
 

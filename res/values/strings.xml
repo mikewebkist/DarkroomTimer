@@ -9,7 +9,7 @@
     <string name="time_picker_title">Adjust Time</string>
     <string name="time_picker_ok">OK</string>
     <string name="time_picker_cancel">Cancel</string>
-    <string name="prompt_agitate">Agitate!</string>
+    <string name="prompt_agitate">Agitate</string>
     <string name="prompt_done">Done!</string>
 	<string name="preset_pick_failed">Preset not picked! Quitting.</string>
 	<string name="preset_confirm_delete">Are you sure you want to delete &#8220;<b>%s</b>&#8221;?</string>
@@ -19,10 +19,6 @@
 	<string name="editPreset_title_edit">Edit Existing Preset</string>
 	<string name="editPreset_title_insert">Create New Preset</string>
 	<string name="preseteditor_noSteps">Add a step.</string>
-
-	<string name="nameEdit">Step name: %s</string>
-	<string name="durationEdit">Duration: %d:%02d</string>
-	<string name="agitateEdit">Agitate every %d seconds</string>
 	
 	<string name="sql_presets">
 	CREATE TABLE presets (
