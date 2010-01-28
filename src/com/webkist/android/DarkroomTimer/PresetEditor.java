@@ -47,6 +47,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -56,9 +57,10 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class PresetEditor extends Activity implements OnItemClickListener {
 	public static final String TAG = "PresetEditor";
+	private static final int EDIT_STEP = 1;
+
 	private Uri uri;
 	private DarkroomPreset preset;
-	private ViewFlipper vf;
 	private DarkroomStep selectedStep;
 	private MyAdapter adapter;
 	private DarkroomStep modifiedStep;
@@ -90,8 +92,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		lv.setFooterDividersEnabled(true);
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
-		vf = (ViewFlipper) findViewById(R.id.details);
-		vf.setAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left));
 
 		// Save entire preset.
 		Button saveBtn = (Button) findViewById(R.id.saveButton);
@@ -123,113 +123,30 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			}
 		});
 
-		// Remember step (but don't write it out until we save the preset).
-		Button saveBtnEdit = (Button) findViewById(R.id.saveButtonEdit);
-		saveBtnEdit.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Log.v(TAG, "Save edit.");
-				selectedStep.overwrite(modifiedStep);
-
-				if (selectedStep.fromBlank) {
-					preset.addStep(selectedStep);
-				}
-
-				adapter.notifyDataSetChanged();
-				vf.showPrevious();
-			}
-		});
-
-		// Cancel step.
-		Button cancelBtnEdit = (Button) findViewById(R.id.discardButtonEdit);
-		cancelBtnEdit.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				Log.v(TAG, "Cancel edit.");
-				vf.showPrevious();
-			}
-		});
-
-	}
-
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && vf.getDisplayedChild() == 1) {
-			// Hijack BACK only if we're on the second view.
-			vf.showPrevious();
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
 	}
 
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog;
 		LayoutInflater factory = LayoutInflater.from(this);
 		switch (id) {
-			case R.id.nameEdit:
-				final View nameEditView = factory.inflate(R.layout.text_edit_dialog, null);
+			case EDIT_STEP:
+				final View v = factory.inflate(R.layout.editstep, null);
 
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Step name").setView(
-						nameEditView).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {
+				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("EditStep").setView(
+						v).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {							
 					public void onClick(DialogInterface dialog, int whichButton) {
-						EditText nameText = (EditText) nameEditView.findViewById(R.id.edit);
-						modifiedStep.name = nameText.getText().toString();
-						updateFields();
-					}
-				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						Log.v(TAG, "in onCreateDialog, clicked Cancel");
-					}
-				}).create();
-				break;
-				
-			case R.id.durationEdit:
-				final View durationEditView = factory.inflate(R.layout.time_picker, null);
-
-				NumberPicker minClock = (NumberPicker) durationEditView.findViewById(R.id.minuteClock);
-				minClock.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-				minClock.setRange(0, 60);
-				minClock.setSpeed(100);
-				minClock.setEnabled(true);
-
-				NumberPicker secClock = (NumberPicker) durationEditView.findViewById(R.id.secondClock);
-				secClock.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-				secClock.setRange(0, 59);
-				secClock.setSpeed(100);
-				secClock.setIncBy(5);
-				secClock.setEnabled(true);
-
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Step duration (MM:SS)").setView(
-						durationEditView).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						NumberPicker minClock = (NumberPicker) durationEditView.findViewById(R.id.minuteClock);
-						NumberPicker secClock = (NumberPicker) durationEditView.findViewById(R.id.secondClock);
-
-						int minutes = minClock.getCurrent();
-						int seconds = secClock.getCurrent();
+						modifiedStep.name = ((EditText) v.findViewById(R.id.nameEdit)).getText().toString();
+						String  newDuration = ((EditText) v.findViewById(R.id.durationEdit)).getText().toString();
+						int minutes = Integer.parseInt(newDuration.substring(0, newDuration.indexOf(":")));
+						int seconds = Integer.parseInt(newDuration.substring(newDuration.indexOf(":") + 1));
 						modifiedStep.duration = minutes * 60 + seconds;
-						updateFields();
-					}
-				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						Log.v(TAG, "in onCreateDialog, clicked Cancel");
-					}
-				}).create();
-				break;
-
-			case R.id.agitateEdit:
-				final View agitateEditView = factory.inflate(R.layout.addseconds, null);
-
-				NumberPicker addClock = (NumberPicker) agitateEditView.findViewById(R.id.addSeconds);
-				addClock.setFormatter(NumberPicker.TWO_DIGIT_FORMATTER);
-				addClock.setRange(0, 360);
-				addClock.setSpeed(100);
-				addClock.setIncBy(5);
-				addClock.setEnabled(true);
-
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Agitate every (seconds)").setView(
-						agitateEditView).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						NumberPicker addClock = (NumberPicker) agitateEditView.findViewById(R.id.addSeconds);
-						modifiedStep.agitateEvery = addClock.getCurrent();
-						updateFields();
+						modifiedStep.agitateEvery = Integer.parseInt(((EditText) v.findViewById(R.id.agitateEdit)).getText().toString());
+						CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
+						if(cb.isChecked()) {
+							modifiedStep.pourFor = 10;
+						}
+						selectedStep.overwrite(modifiedStep);
+						adapter.notifyDataSetChanged();
 					}
 				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
@@ -252,38 +169,18 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 	public void onPrepareDialog(int id, Dialog dialog) {
 		switch (id) {
-			case R.id.nameEdit:
-				EditText nameText = (EditText) dialog.findViewById(R.id.edit);
-				nameText.setText(modifiedStep.name);
-				break;
-			case R.id.durationEdit:
-				NumberPicker minClock = (NumberPicker) dialog.findViewById(R.id.minuteClock);
-				minClock.changeCurrent(modifiedStep.duration / 60);
-
-				NumberPicker secClock = (NumberPicker) dialog.findViewById(R.id.secondClock);
-				secClock.changeCurrent(modifiedStep.duration % 60);
-				break;
-			case R.id.agitateEdit:
-				NumberPicker addClock = (NumberPicker) dialog.findViewById(R.id.addSeconds);
-				addClock.changeCurrent(modifiedStep.agitateEvery);
+			case EDIT_STEP:
+				((EditText) dialog.findViewById(R.id.nameEdit)).setText(modifiedStep.name);
+				((EditText) dialog.findViewById(R.id.durationEdit)).setText(String.format("%d:%02d", modifiedStep.duration / 60, modifiedStep.duration % 60));
+				((EditText) dialog.findViewById(R.id.agitateEdit)).setText(String.format("%d", modifiedStep.agitateEvery));
+				CheckBox cb = (CheckBox) dialog.findViewById(R.id.pourCheck);
+				if(modifiedStep.pourFor > 0) {
+					cb.setChecked(true);
+				} else {
+					cb.setChecked(false);
+				}
 				break;
 		}
-	}
-
-	static final List<Integer> dialogFields = Arrays.asList(new Integer[] { R.id.nameEdit, R.id.durationEdit, R.id.agitateEdit });
-
-	private void setField(int id, String val) {
-		TextView v = (TextView) findViewById(id);
-		v.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (dialogFields.contains(v.getId())) {
-					showDialog(v.getId());
-				}
-			}
-
-		});
-		v.setText(val);
 	}
 
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
@@ -295,16 +192,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);
 		}
 		modifiedStep = selectedStep.clone();
-		updateFields();
-		vf.showNext();
-	}
-
-	private void updateFields() {
-		Resources r = getResources();
-		setField(R.id.nameEdit, String.format(r.getString(R.string.nameEdit), modifiedStep.name == null ? "[unset]" : modifiedStep.name));
-		setField(R.id.durationEdit, String.format(r.getString(R.string.durationEdit), modifiedStep.duration / 60,
-				modifiedStep.duration % 60));
-		setField(R.id.agitateEdit, String.format(r.getString(R.string.agitateEdit), modifiedStep.agitateEvery));
+		showDialog(EDIT_STEP);
 	}
 
 	private class MyAdapter extends ArrayAdapter<DarkroomPreset.DarkroomStep> {
@@ -321,6 +209,9 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			}
 
 			String name = String.format("%s for %d:%02d", step.name, step.duration / 60, step.duration % 60);
+			if(step.pourFor > 0) {
+				name = String.format("%s + %d sec pour", name, step.pourFor);
+			}
 			((TextView) convertView.findViewById(android.R.id.text1)).setText(name);
 
 			String details = step.agitateEvery > 0 ? String.format("agitate: %ds", step.agitateEvery) : "";

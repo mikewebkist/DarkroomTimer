@@ -73,6 +73,7 @@ public class DarkroomPreset implements BaseColumns {
 			int step_stepNumCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_STEP);
 			int step_durationCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_DURATION);
 			int step_agitageEveryCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_AGITATION);
+			int step_pourForCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_POUR);
 
 			Log.v(TAG, "Steps found: " + step_cur.getCount());
 			if (step_cur.moveToFirst()) {
@@ -81,7 +82,8 @@ public class DarkroomPreset implements BaseColumns {
 					String name = step_cur.getString(step_nameCol);
 					int duration = step_cur.getInt(step_durationCol);
 					int agitateEvery = step_cur.getInt(step_agitageEveryCol);
-					this.addStep(stepNum, name, duration, agitateEvery);
+					int pourFor = step_cur.getInt(step_pourForCol);
+					this.addStep(stepNum, name, duration, agitateEvery, pourFor);
 
 				} while (step_cur.moveToNext());
 			}
@@ -97,8 +99,8 @@ public class DarkroomPreset implements BaseColumns {
 		s.fromBlank = false;
 	}
 	
-	public DarkroomStep addStep(int stepNum, String name, int duration, int agitateEvery) {
-		DarkroomStep s = new DarkroomStep(stepNum, name, duration, agitateEvery);
+	public DarkroomStep addStep(int stepNum, String name, int duration, int agitateEvery, int pourFor) {
+		DarkroomStep s = new DarkroomStep(stepNum, name, duration, agitateEvery, pourFor);
 		steps.add(s);
 		return s;
 	}
@@ -139,6 +141,7 @@ public class DarkroomPreset implements BaseColumns {
 		public int duration;
 		public int agitateEvery;
 		public int agitateFor;
+		public int pourFor;
 		public boolean fromBlank;
 
 		public static final String STEP_PRESET = "preset";
@@ -146,12 +149,14 @@ public class DarkroomPreset implements BaseColumns {
 		public static final String STEP_NAME = "name";
 		public static final String STEP_DURATION = "duration";
 		public static final String STEP_AGITATION = "agitation";
+		public static final String STEP_POUR = "pour";
 
-		DarkroomStep(int stepNum, String name, int duration, int agitateEvery) {
+		DarkroomStep(int stepNum, String name, int duration, int agitateEvery, int pourFor) {
 			this.stepNum = stepNum;
 			this.name = name;
 			this.duration = duration;
 			this.agitateEvery = agitateEvery;
+			this.pourFor = pourFor;
 			this.fromBlank = false;
 		}
 
@@ -165,6 +170,7 @@ public class DarkroomPreset implements BaseColumns {
 			newStep.name = this.name;
 			newStep.duration = this.duration;
 			newStep.agitateEvery = this.agitateEvery;
+			newStep.pourFor = this.pourFor;
 			return newStep;
 		}
 
@@ -173,6 +179,7 @@ public class DarkroomPreset implements BaseColumns {
 			this.name = newStep.name;
 			this.duration = newStep.duration;
 			this.agitateEvery = newStep.agitateEvery;
+			this.pourFor = newStep.pourFor;
 		}
 		
 		public ContentValues toContentValues(String presetId) {
@@ -182,6 +189,7 @@ public class DarkroomPreset implements BaseColumns {
 			vals.put(STEP_STEP, stepNum);
 			vals.put(STEP_DURATION, duration);
 			vals.put(STEP_AGITATION, agitateEvery);
+			vals.put(STEP_POUR, pourFor);
 			return vals;
 		}
 

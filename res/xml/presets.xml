@@ -4,19 +4,19 @@
 	<preset id="diafine" name="Diafine">
 		<step name="Part A" 
 				duration="225" 
-				agitate="60"  />
+				agitate="60" pour="10" />
 		<step name="Part B" 
 				duration="225" 
-				agitate="60" />
+				agitate="60" pour="10"/>
 			    <step name="Wash"   duration="30" />
 		<step name="Fix"    
 				duration="130" 
-				agitate="60" />
+				agitate="60" pour="10"/>
 		<step name="Wash"   
 		    duration="30" />
 		<step name="Hypo Clear" 
 				duration="130" 
-				agitate="60" />
+				agitate="60" pour="10"/>
 		<step name="Wash"   
 		    duration="300" />
 		<step name="Photo-Flo" 
@@ -24,8 +24,8 @@
 	</preset>
 	
 	<preset id="c41_tetenal_5L" name="C-41 (Tetenal Liquid Kit)">
-	    <step name="Developer" duration="225" agitate="30" />
-	    <step name="Blix" duration="225" agitate="30" />
+	    <step name="Developer" duration="225" agitate="30" pour="10"/>
+	    <step name="Blix" duration="225" agitate="30" pour="10"/>
 	    <step name="Wash" duration="360" />
 	    <step name="Stabilizer" duration="60" />
 	</preset>

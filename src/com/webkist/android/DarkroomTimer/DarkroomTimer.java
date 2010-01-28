@@ -63,7 +63,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private DarkroomPreset.DarkroomStep step;
 
 	private Thread timer = null;
-//	protected PowerManager.WakeLock mWakeLock = null;
+	// protected PowerManager.WakeLock mWakeLock = null;
 	private boolean timerRunning = false;
 
 	Handler threadMessageHandler = new Handler() {
@@ -79,12 +79,15 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					timerText.setText(String.format("%02d:%02d", minutes, seconds));
 					double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
 
-					if (step.agitateEvery > 0) {
-						if (elapsedSecs < step.agitateFor) {
+					if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
+						clickText.setText("Pour...");
+						stepActionText.setText("");
+					} else if (step.agitateEvery > 0) {
+						if (elapsedSecs < (step.pourFor + step.agitateFor)) {
 							clickText.setText(R.string.prompt_agitate);
 							stepActionText.setText("");
 						} else {
-							double elapsedRemainder = elapsedSecs % step.agitateEvery;
+							double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
 
 							if (elapsedRemainder < step.agitateFor) {
 								// Currently
@@ -105,8 +108,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					} else {
 						clickText.setText("");
 						stepActionText.setText("");
-					}
 
+					}
 					break;
 				case NEXT:
 					step = preset.nextStep();
@@ -140,10 +143,10 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-//		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		
+		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
 		setContentView(R.layout.main);
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);
 		mainView.setOnClickListener(this);
@@ -165,10 +168,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		switch (item.getItemId()) {
 			case R.id.stop_timer:
 				stopThread();
-//				if (this.mWakeLock != null) {
-//					this.mWakeLock.release();
-//					this.mWakeLock = null;
-//				}
 				return true;
 			case R.id.select_preset:
 				Intent intent = new Intent(this, TimerPicker.class);
@@ -342,10 +341,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	public void onResume() {
 		super.onResume();
 		if (preset != null) {
-			// TODO: make this only happen while timer is running, perhaps?
-//			final PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-//			this.mWakeLock = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
-//			this.mWakeLock.acquire();
 			Log.v(TAG, "in onResume()");
 			if (stepTimeRemaining() > 0) {
 				startThread();
@@ -362,13 +357,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		super.onPause();
 		Log.v(TAG, "in onPause()");
 		stopThread();
-		// TODO We don't actually run in the background at this point, so if
-		// someone starts another Activity we won't alert them when the timer
-		// expires.
-//		if (this.mWakeLock != null) {
-//			this.mWakeLock.release();
-//			this.mWakeLock = null;
-//		}
 	}
 
 	@Override
@@ -395,9 +383,9 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		if (step == null) {
 			return 0;
 		} else if (startTime == 0) {
-			return step.duration * 1000;
+			return (step.pourFor + step.duration) * 1000;
 		} else {
-			return startTime + step.duration * 1000 - System.currentTimeMillis();
+			return startTime + (step.pourFor + step.duration) * 1000 - System.currentTimeMillis();
 		}
 	}
 

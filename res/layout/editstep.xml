@@ -1,34 +1,47 @@
 <LinearLayout android:layout_width="fill_parent"
 	android:layout_height="fill_parent" android:orientation="vertical"
-	xmlns:android="http://schemas.android.com/apk/res/android">
+	android:gravity="center" xmlns:android="http://schemas.android.com/apk/res/android">
 
-	<EditText android:id="@+id/name" android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
-		android:gravity="center_vertical" android:inputType="textPersonName|textCapWords"
-		android:hint="@string/ghostData_name" />
+	<EditText android:id="@+id/nameEdit" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_marginRight="5dip"
+		android:layout_marginLeft="5dip" android:gravity="center_vertical"
+		android:inputType="textPersonName|textCapWords" android:hint="Step Name" />
 
-	<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:stretchColumns="1">
-
-		<TableRow>
-			<TextView android:layout_column="1" android:text="Every Every (seconds):" />
-			<EditText android:id="@+id/agitateEdit" android:hint="60"
-				android:gravity="left" android:layout_weight="1" />
-		</TableRow>
-	</TableLayout>
+	<View android:layout_width="fill_parent" android:layout_height="1dip"
+		android:background="@drawable/gradientdivider" />
 
 	<LinearLayout android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:orientation="horizontal">
-
-		<Button android:id="@+id/okButton" android:layout_width="0dip"
-			android:layout_height="wrap_content" android:layout_weight="1"
-			android:text="@string/time_picker_ok" />
-
-		<Button android:id="@+id/discardButton" android:layout_width="0dip"
-			android:layout_height="wrap_content" android:layout_weight="1"
-			android:text="@string/time_picker_cancel" />
-
+		android:layout_height="wrap_content" android:layout_marginRight="5dip"
+		android:layout_marginLeft="5dip" android:orientation="horizontal">
+		<TextView android:id="@+id/duration" android:text="Step duration (MM:SS):"
+			android:layout_width="wrap_content" android:layout_weight="1"
+			android:gravity="left" android:layout_height="wrap_content" />
+		<EditText android:id="@+id/durationEdit" android:maxLength="5"
+			android:layout_width="wrap_content" android:layout_weight="1"
+			android:layout_height="wrap_content" android:gravity="center_vertical"
+			android:inputType="time" android:hint="MM:SS" />
 	</LinearLayout>
+
+	<View android:layout_width="fill_parent" android:layout_height="1dip"
+		android:background="@drawable/gradientdivider" />
+
+	<LinearLayout android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_marginRight="5dip"
+		android:layout_marginLeft="5dip" android:orientation="horizontal">
+		<TextView android:id="@+id/agitate" android:text="Agitate every (seconds):"
+			android:layout_width="wrap_content" android:layout_weight="1"
+			android:gravity="left" android:layout_height="wrap_content" />
+		<EditText android:id="@+id/agitateEdit" android:maxLength="3"
+			android:layout_width="wrap_content" android:layout_weight="1"
+			android:layout_height="wrap_content" android:gravity="center_vertical"
+			android:inputType="time" android:hint="seconds" />
+	</LinearLayout>
+
+	<View android:layout_width="fill_parent" android:layout_height="1dip"
+		android:background="@drawable/gradientdivider" />
+
+	<CheckBox android:id="@+id/pourCheck" android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:text="add 10 sec pour?" />
+
 
 </LinearLayout>

@@ -61,10 +61,10 @@ public class TimerPicker extends ListActivity {
 	Handler threadMessageHandler = new Handler() {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case XML_IMPORT_DONE:
-				Log.v(TAG, "XML Import Finished...");
-				listViewCursor.requery();
-				break;
+				case XML_IMPORT_DONE:
+					Log.v(TAG, "XML Import Finished...");
+					listViewCursor.requery();
+					break;
 			}
 		}
 	};
@@ -99,15 +99,15 @@ public class TimerPicker extends ListActivity {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, info.id);
 		Log.v(TAG, "Context menu selection for: " + uri);
 		switch (item.getItemId()) {
-		case EDIT_ID:
-			editPreset(uri);
-			return true;
-		case DELETE_ID:
-			longClickPreset = new DarkroomPreset(this, uri);
-			showDialog(DIALOG_DELETE_CONFIRM);
-			return true;
-		default:
-			return super.onContextItemSelected(item);
+			case EDIT_ID:
+				editPreset(uri);
+				return true;
+			case DELETE_ID:
+				longClickPreset = new DarkroomPreset(this, uri);
+				showDialog(DIALOG_DELETE_CONFIRM);
+				return true;
+			default:
+				return super.onContextItemSelected(item);
 		}
 	}
 
@@ -157,7 +157,7 @@ public class TimerPicker extends ListActivity {
 	public void editPreset(Uri uri) {
 		Intent intent = new Intent(this, PresetEditor.class);
 		intent.setData(uri);
-//		intent.setAction(Intent.ACTION_EDIT);
+		// intent.setAction(Intent.ACTION_EDIT);
 		startActivityForResult(intent, EDIT_PRESET);
 	}
 
@@ -171,12 +171,12 @@ public class TimerPicker extends ListActivity {
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.add_preset:
-			Log.v(TAG, "Add preset.");
-			Intent intent = new Intent(this, PresetEditor.class);
-			intent.setData(null);
-			startActivityForResult(intent, EDIT_PRESET);
-			return true;
+			case R.id.add_preset:
+				Log.v(TAG, "Add preset.");
+				Intent intent = new Intent(this, PresetEditor.class);
+				intent.setData(null);
+				startActivityForResult(intent, EDIT_PRESET);
+				return true;
 		}
 		return false;
 	}
@@ -211,7 +211,8 @@ public class TimerPicker extends ListActivity {
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
 							step = p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
-									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0));
+									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
+									.getAttributeIntValue(null, "pour", 0));
 						}
 					}
 					xrp.next();

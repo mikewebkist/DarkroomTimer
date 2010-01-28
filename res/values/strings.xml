@@ -23,18 +23,6 @@
 	<string name="nameEdit">Step name: %s</string>
 	<string name="durationEdit">Duration: %d:%02d</string>
 	<string name="agitateEdit">Agitate every %d seconds</string>
-
-	<string-array name="step_actions">
-		<item>Agitate</item>
-		<item>Soak</item>
-		<item>Empty</item>
-		<item>Fill</item>
-	</string-array>
-
-	<string-array name="presets">
-		<item>Diafine</item>
-		<item>C-41</item>
-	</string-array>	
 	
 	<string name="sql_presets">
 	CREATE TABLE presets (
@@ -49,7 +37,8 @@
 		step INTEGER,
 		name TEXT,
 		duration INTEGER,
-		agitation INTEGER
+		agitation INTEGER,
+		pour INTEGER
 	);
 	</string>
 	
