@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -59,6 +61,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	private DarkroomPreset preset = null;
 	private DarkroomPreset.DarkroomStep step;
+	private Ringtone ping;
 
 	private Thread timer = null;
 	// protected PowerManager.WakeLock mWakeLock = null;
@@ -77,6 +80,10 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				timerText.setText(String.format("%02d:%02d", minutes, seconds));
 				double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
 
+				if(remaining < 5000 && !ping.isPlaying()) {
+					ping.play();
+				}
+				
 				if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
 					clickText.setText("Pour...");
 					stepActionText.setText("");
@@ -147,6 +154,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);
 		mainView.setOnClickListener(this);
 
+		ping = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		
 		if (preset == null) {
 			Intent intent = new Intent(this, TimerPicker.class);
 			startActivityForResult(intent, GET_PRESET);
