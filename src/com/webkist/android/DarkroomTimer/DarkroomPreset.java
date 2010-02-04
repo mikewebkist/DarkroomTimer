@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -25,7 +26,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-public class DarkroomPreset implements BaseColumns {
+public class DarkroomPreset implements BaseColumns, Serializable {
 	public static final String AUTHORITY = "com.webkist.android.DarkroomTimer";
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 	public static final Uri CONTENT_URI_PRESET = Uri.parse("content://" + AUTHORITY + "/preset");

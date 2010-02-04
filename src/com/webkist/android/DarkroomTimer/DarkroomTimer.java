@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import java.io.Serializable;
+
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -51,6 +53,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private static final int FAILED_PRESET_PICK = 5;
 	private static final int ADJUST_RUNNING_CLOCK = 6;
 	private static final int NEXT = 7;
+
+	private static final String SELECTED_PRESET = "selectedPreset";
 
 	private TextView timerText;
 	private TextView stepActionText;
@@ -147,22 +151,54 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		Log.v(TAG, "in onCreate");
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.main);
 		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);
 		mainView.setOnClickListener(this);
 
-		ping = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+		timerText = (TextView) findViewById(R.id.stepClock);
+		timerText.setOnClickListener(this);
+		stepActionText = (TextView) findViewById(R.id.stepActionText);
+		clickText = (TextView) findViewById(R.id.clickText);
+		stepHead = (TextView) findViewById(R.id.stepLabel);
 		
-		if (preset == null) {
+		ping = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+
+		if(savedInstanceState != null) {
+			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
+		} else {
 			Intent intent = new Intent(this, TimerPicker.class);
 			startActivityForResult(intent, GET_PRESET);
 		}
 
 	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if (preset != null) {
+			TextView header = (TextView) findViewById(R.id.presetName);
+			header.setText(preset.name);
 
+			Log.v(TAG, "in onResume()");
+			if (stepTimeRemaining() > 0) {
+				startThread();
+			} else {
+				Message m = new Message();
+				m.what = DarkroomTimer.DONE;
+				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+			}
+		}
+	}
+
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable(SELECTED_PRESET, preset);
+	}
+	
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			Intent intent = new Intent(this, TimerPicker.class);
@@ -202,17 +238,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				Uri uri = data.getData();
 				Log.v(TAG, "URI: " + uri);
 				preset = new DarkroomPreset(this, uri);
-
 				preset.reset();
 
-				TextView header = (TextView) findViewById(R.id.presetName);
-				header.setText(preset.name);
-
-				timerText = (TextView) findViewById(R.id.stepClock);
-				timerText.setOnClickListener(this);
-				stepActionText = (TextView) findViewById(R.id.stepActionText);
-				clickText = (TextView) findViewById(R.id.clickText);
-				stepHead = (TextView) findViewById(R.id.stepLabel);
 			}
 		}
 	}
@@ -348,21 +375,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		} else {
 			startTime = System.currentTimeMillis();
 			startThread();
-		}
-	}
-
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (preset != null) {
-			Log.v(TAG, "in onResume()");
-			if (stepTimeRemaining() > 0) {
-				startThread();
-			} else {
-				Message m = new Message();
-				m.what = DarkroomTimer.DONE;
-				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
-			}
 		}
 	}
 
