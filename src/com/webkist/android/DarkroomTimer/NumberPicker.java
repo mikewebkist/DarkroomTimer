@@ -131,7 +131,6 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         super.setEnabled(enabled);
         mIncrementButton.setEnabled(enabled);
         mDecrementButton.setEnabled(enabled);
-//        mText.setEnabled(enabled);
     }
 
     public void setOnChangeListener(OnChangedListener listener) {
@@ -208,6 +207,11 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
     protected void changeCurrent(int current) {
 
         // Wrap around the values if we go past the start or end
+    	if (current > mEnd) {
+    		current = mStart;
+    	} else if (current < mStart) {
+    		current = mEnd;
+    	}
         mPrevious = mCurrent;
         mCurrent = current;
         notifyChange();
@@ -231,7 +235,6 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         } else {
             mText.setText(mDisplayedValues[mCurrent - mStart]);
         }
-//        mText.setSelection(mText.getText().length());
     }
 
     private void validateCurrentView(CharSequence str) {
@@ -278,7 +281,6 @@ public class NumberPicker extends LinearLayout implements OnClickListener,
         /* The text view may still have focus so clear it's focus which will
          * trigger the on focus changed and any typed values to be pulled.
          */
-//        mText.clearFocus();
 
         if (R.id.increment == v.getId()) {
             mIncrement = true;
