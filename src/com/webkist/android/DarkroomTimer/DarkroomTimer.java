@@ -80,7 +80,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				timerText.setText(String.format("%02d:%02d", minutes, seconds));
 				double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
 
-				if(remaining < 5000 && !ping.isPlaying()) {
+				if(remaining <= 5000 && !ping.isPlaying()) {
 					ping.play();
 				}
 				
