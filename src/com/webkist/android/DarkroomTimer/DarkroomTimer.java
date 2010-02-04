@@ -18,6 +18,8 @@ package com.webkist.android.DarkroomTimer;
 
 import java.io.Serializable;
 
+import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
+
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -55,6 +57,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private static final int NEXT = 7;
 
 	private static final String SELECTED_PRESET = "selectedPreset";
+	private static final String RUNNING_START_TIME = "runningStartTime";
 
 	private TextView timerText;
 	private TextView stepActionText;
@@ -64,7 +67,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private long startTime = 0;
 
 	private DarkroomPreset preset = null;
-	private DarkroomPreset.DarkroomStep step;
+//	private DarkroomPreset.DarkroomStep step;
 	private Ringtone ping;
 
 	private Thread timer = null;
@@ -87,7 +90,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				if(remaining <= 5000 && !ping.isPlaying()) {
 					ping.play();
 				}
-				
+				DarkroomStep step = preset.currentStep();
 				if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
 					clickText.setText("Pour...");
 					stepActionText.setText("");
@@ -118,17 +121,16 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				}
 				break;
 			case NEXT:
-				step = preset.nextStep();
-				if (step == null) {
-					stepHead.setText(R.string.prompt_done);
-					timerText.setText("DONE");
-				} else {
+				if(preset.nextStep()) {
 					long dur = stepTimeRemaining() / 1000;
-					stepHead.setText(step.name);
+					stepHead.setText(preset.currentStep().name);
 					timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 
 					clickText.setText("Click to start...");
-				}
+				} else {
+					stepHead.setText(R.string.prompt_done);
+					timerText.setText("DONE");
+				} 
 
 				break;
 
@@ -168,6 +170,10 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 		if(savedInstanceState != null) {
 			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
+			startTime = savedInstanceState.getLong(RUNNING_START_TIME);
+			long dur = stepTimeRemaining() / 1000;
+			stepHead.setText(preset.currentStep().name);
+			timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 		} else {
 			Intent intent = new Intent(this, TimerPicker.class);
 			startActivityForResult(intent, GET_PRESET);
@@ -182,7 +188,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			TextView header = (TextView) findViewById(R.id.presetName);
 			header.setText(preset.name);
 
-			Log.v(TAG, "in onResume()");
+			Log.v(TAG, "in onResume(): " + stepTimeRemaining());
 			if (stepTimeRemaining() > 0) {
 				startThread();
 			} else {
@@ -197,8 +203,9 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		outState.putSerializable(SELECTED_PRESET, preset);
+		outState.putLong(RUNNING_START_TIME, startTime);
 	}
-	
+
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
 			Intent intent = new Intent(this, TimerPicker.class);
@@ -233,7 +240,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				timerRunning = false;
 				startTime = 0;
 				stopThread();
-				step = null;
 
 				Uri uri = data.getData();
 				Log.v(TAG, "URI: " + uri);
@@ -287,7 +293,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 							int addseconds = addClock.getCurrent();
 
-							step.duration += addseconds;
+							preset.currentStep().duration += addseconds;
 							Message m = new Message();
 							m.what = DarkroomTimer.TICK;
 							DarkroomTimer.this.threadMessageHandler.sendMessage(m);
@@ -323,7 +329,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 							int minutes = minClock.getCurrent();
 							int seconds = secClock.getCurrent();
 
-							step.duration = minutes * 60 + seconds;
+							preset.currentStep().duration = minutes * 60 + seconds;
 							Message m = new Message();
 							m.what = DarkroomTimer.TICK;
 							DarkroomTimer.this.threadMessageHandler.sendMessage(m);
@@ -343,8 +349,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			NumberPicker addClock = (NumberPicker) dialog.findViewById(R.id.addSeconds);
 			addClock.changeCurrent(0);
 		} else if (id == ADJUST_STOPPED_CLOCK) {
-			int minutes = (int) step.duration / 60;
-			int seconds = (int) step.duration % 60;
+			int minutes = (int) preset.currentStep().duration / 60;
+			int seconds = (int) preset.currentStep().duration % 60;
 
 			NumberPicker minClock = (NumberPicker) dialog.findViewById(R.id.minuteClock);
 			minClock.changeCurrent(minutes);
@@ -406,12 +412,12 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	}
 
 	private long stepTimeRemaining() {
-		if (step == null) {
+		if (preset.currentStep() == null) {
 			return 0;
 		} else if (startTime == 0) {
-			return (step.pourFor + step.duration) * 1000;
+			return (preset.currentStep().pourFor + preset.currentStep().duration) * 1000;
 		} else {
-			return startTime + (step.pourFor + step.duration) * 1000 - System.currentTimeMillis();
+			return startTime + (preset.currentStep().pourFor + preset.currentStep().duration) * 1000 - System.currentTimeMillis();
 		}
 	}
 

@@ -56,17 +56,8 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		this.temp = temp;
 	}
 	
-//	DarkroomPreset(String id, String name) {
-//		this.name = name;
-//		this.id = id;
-//	}
-	
 	DarkroomPreset() {
 	}
-
-//	DarkroomPreset(String name) {
-////		this.name = name;
-//	}
 
 	public DarkroomPreset(Activity ctx, Uri uri) {
 		this.uri = uri;
@@ -130,11 +121,16 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		currentStep = 0;
 	}
 
-	public DarkroomStep nextStep() {
+	public DarkroomStep currentStep() {
+		return steps.get(currentStep);
+	}
+	
+	public boolean nextStep() {
 		if (currentStep < steps.size()) {
-			return steps.get(currentStep++);
+			currentStep++;
+			return true;
 		} else {
-			return null;
+			return false;
 		}
 	}
 
