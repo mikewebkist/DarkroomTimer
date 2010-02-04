@@ -5,20 +5,17 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<application android:label="@string/app_name"
 		android:theme="@style/DarkroomTheme" android:icon="@drawable/darkroomtimer">
-		<activity android:name=".TimerPicker" android:label="@string/app_name"
-			android:screenOrientation="portrait">
+		<activity android:name=".TimerPicker" android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.VIEW"></action>
 			</intent-filter>
 		</activity>
-		<activity android:name=".PresetEditor" android:label="@string/app_name"
-			android:screenOrientation="portrait">
+		<activity android:name=".PresetEditor" android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.EDIT"></action>
 			</intent-filter>
 		</activity>
-		<activity android:name=".DarkroomTimer" android:label="@string/app_name"
-			android:screenOrientation="portrait">
+		<activity android:name=".DarkroomTimer" android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
