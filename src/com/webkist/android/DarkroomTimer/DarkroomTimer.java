@@ -244,8 +244,9 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				Uri uri = data.getData();
 				Log.v(TAG, "URI: " + uri);
 				preset = new DarkroomPreset(this, uri);
-				preset.reset();
-
+				long dur = stepTimeRemaining() / 1000;
+				stepHead.setText(preset.currentStep().name);
+				timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 			}
 		}
 	}

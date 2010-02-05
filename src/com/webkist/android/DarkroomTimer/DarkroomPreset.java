@@ -44,7 +44,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	public float temp;
 	public String id;
 	public Uri uri;
-	private int currentStep = 0;
+	private int currentStep = -1;
 	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
 	public static final String TAG = "DarkroomPreset";
@@ -122,7 +122,11 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	}
 
 	public DarkroomStep currentStep() {
-		return steps.get(currentStep);
+		if(currentStep == -1) {
+			return null;
+		} else {
+			return steps.get(currentStep);
+		}
 	}
 	
 	public boolean nextStep() {
