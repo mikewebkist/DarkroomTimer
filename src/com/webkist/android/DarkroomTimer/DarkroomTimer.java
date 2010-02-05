@@ -187,14 +187,16 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		if (preset != null) {
 			TextView header = (TextView) findViewById(R.id.presetName);
 			header.setText(preset.name);
+			
+			long dur = stepTimeRemaining() / 1000;
+			stepHead.setText(preset.currentStep().name);
+			timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 
-			Log.v(TAG, "in onResume(): " + stepTimeRemaining());
+			Log.v(TAG, "in onResume(): " + String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 			if (preset.running()) {
 				startThread();
-//			} else {
-//				Message m = new Message();
-//				m.what = DarkroomTimer.DONE;
-//				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+			} else {
+				// Wait for a click.
 			}
 		}
 	}
@@ -244,9 +246,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				Uri uri = data.getData();
 				Log.v(TAG, "onActivityResult - URI: " + uri);
 				preset = new DarkroomPreset(this, uri);
-				long dur = stepTimeRemaining() / 1000;
-				stepHead.setText(preset.currentStep().name);
-				timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 			}
 		}
 	}
@@ -436,7 +435,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
 
 					try {
-						Thread.sleep(500);
+						Thread.sleep(500); // Tick every half-second.
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}

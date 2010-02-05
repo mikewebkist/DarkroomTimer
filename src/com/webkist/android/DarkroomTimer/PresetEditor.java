@@ -99,7 +99,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			public void onClick(View v) {
 				ContentValues vals = new ContentValues();
 				ContentResolver cr = getContentResolver();
-				Log.v(TAG, "Deleting: " + preset.uri);
+				Log.v(TAG, "Deleting: " + uri);
 				if (uri != null) {
 					cr.delete(uri, null, null);
 				}
