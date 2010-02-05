@@ -189,12 +189,12 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			header.setText(preset.name);
 
 			Log.v(TAG, "in onResume(): " + stepTimeRemaining());
-			if (stepTimeRemaining() > 0) {
+			if (preset.running()) {
 				startThread();
-			} else {
-				Message m = new Message();
-				m.what = DarkroomTimer.DONE;
-				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+//			} else {
+//				Message m = new Message();
+//				m.what = DarkroomTimer.DONE;
+//				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
 			}
 		}
 	}
@@ -242,7 +242,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				stopThread();
 
 				Uri uri = data.getData();
-				Log.v(TAG, "URI: " + uri);
+				Log.v(TAG, "onActivityResult - URI: " + uri);
 				preset = new DarkroomPreset(this, uri);
 				long dur = stepTimeRemaining() / 1000;
 				stepHead.setText(preset.currentStep().name);
@@ -381,6 +381,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			Log.v(TAG, "Timer already running!");
 		} else {
 			startTime = System.currentTimeMillis();
+			preset.start();
 			startThread();
 		}
 	}
@@ -413,9 +414,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	}
 
 	private long stepTimeRemaining() {
-		if (preset.currentStep() == null) {
-			return 0;
-		} else if (startTime == 0) {
+		if (startTime == 0) {
 			return (preset.currentStep().pourFor + preset.currentStep().duration) * 1000;
 		} else {
 			return startTime + (preset.currentStep().pourFor + preset.currentStep().duration) * 1000 - System.currentTimeMillis();
