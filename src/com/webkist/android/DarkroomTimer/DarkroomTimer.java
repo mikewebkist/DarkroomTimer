@@ -82,39 +82,51 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 				timerText.setText(String.format("%02d:%02d", minutes, seconds));
 				double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
-
+				DarkroomStep step = preset.currentStep();
+				
+				// If we're close to the end, play the notification sound as often as possible.
 				if(remaining <= 5000 && !ping.isPlaying()) {
 					ping.play();
 				}
-				DarkroomStep step = preset.currentStep();
+				
+				// Figure out what the user should be doing now.
 				if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
+					// Pour.
 					userActionText.setText("Pour...");
-					upcomingText.setText("");
 				} else if (step.agitateEvery > 0) {
 					if (elapsedSecs < (step.pourFor + step.agitateFor)) {
+						// Agitate after pour.
 						userActionText.setText(R.string.prompt_agitate);
-						upcomingText.setText("");
+					} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
+						// Agitate. 
+						userActionText.setText(R.string.prompt_agitate);
 					} else {
-						double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
-
-						if (elapsedRemainder < step.agitateFor) {
-							upcomingText.setText("");
-							userActionText.setText(R.string.prompt_agitate);
-						} else if (elapsedRemainder > step.agitateEvery - 10) {
-							// Coming up on agitation
-							double agitateIn = step.agitateEvery - elapsedRemainder;
-							Resources res = getResources();
-							upcomingText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
-									(int) agitateIn / 60, (int) agitateIn % 60));
-						} else {
-							upcomingText.setText("");
-							userActionText.setText("");
-						}
+						// Nothing.
+						userActionText.setText("");
 					}
-				} else {
+				} else { // This clears the "Click to start..." prompt.
 					userActionText.setText("");
+				}
+				
+				// What's coming up.
+				if(step.agitateEvery > 0) {
+					double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
+					Log.v(TAG, String.format("%.0f > (%d - 10) && %.1f >= (%d + 10)", elapsedRemainder, step.agitateEvery, ((double) remaining) / 1000, step.agitateEvery));
+					
+					if (elapsedRemainder > (step.agitateEvery - 10) // Not the first iteration.
+							&& (remaining / 1000) >= (step.agitateFor + 10)) { // And we have enough time left.
+						// Coming up on agitation Ð but not after we're done.
+						double agitateIn = step.agitateEvery - elapsedRemainder;
+						Resources res = getResources();
+						upcomingText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
+								(int) agitateIn / 60, (int) agitateIn % 60));
+					} else {
+						upcomingText.setText("");
+					}
+				} else { // This clears probably nothing.
 					upcomingText.setText("");
 				}
+
 				break;
 			case NEXT:
 				if(preset.nextStep()) {
@@ -395,7 +407,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	}
 
 	private void startThread() {
-		userActionText.setText("");
 		timerRunning = true;
 		timer = new Thread(new TimerThread());
 		timer.start();
