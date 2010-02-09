@@ -141,8 +141,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	}
 	
 	public boolean nextStep() {
-		if (currentStep < steps.size()) {
-			currentStep++;
+		if (++currentStep < steps.size()) {
 			return true;
 		} else {
 			return false;
