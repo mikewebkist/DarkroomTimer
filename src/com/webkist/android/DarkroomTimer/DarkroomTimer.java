@@ -187,14 +187,16 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		if (preset != null) {
 			TextView header = (TextView) findViewById(R.id.presetName);
 			header.setText(preset.name);
+			
+			long dur = stepTimeRemaining() / 1000;
+			stepHead.setText(preset.currentStep().name);
+			timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 
-			Log.v(TAG, "in onResume(): " + stepTimeRemaining());
-			if (stepTimeRemaining() > 0) {
+			Log.v(TAG, "in onResume(): " + String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
+			if (preset.running()) {
 				startThread();
 			} else {
-				Message m = new Message();
-				m.what = DarkroomTimer.DONE;
-				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+				// Wait for a click.
 			}
 		}
 	}
@@ -242,11 +244,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				stopThread();
 
 				Uri uri = data.getData();
-				Log.v(TAG, "URI: " + uri);
+				Log.v(TAG, "onActivityResult - URI: " + uri);
 				preset = new DarkroomPreset(this, uri);
-				long dur = stepTimeRemaining() / 1000;
-				stepHead.setText(preset.currentStep().name);
-				timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 			}
 		}
 	}
@@ -381,6 +380,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			Log.v(TAG, "Timer already running!");
 		} else {
 			startTime = System.currentTimeMillis();
+			preset.start();
 			startThread();
 		}
 	}
@@ -413,9 +413,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	}
 
 	private long stepTimeRemaining() {
-		if (preset.currentStep() == null) {
-			return 0;
-		} else if (startTime == 0) {
+		if (startTime == 0) {
 			return (preset.currentStep().pourFor + preset.currentStep().duration) * 1000;
 		} else {
 			return startTime + (preset.currentStep().pourFor + preset.currentStep().duration) * 1000 - System.currentTimeMillis();
@@ -437,7 +435,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
 
 					try {
-						Thread.sleep(500);
+						Thread.sleep(500); // Tick every half-second.
 					} catch (InterruptedException e) {
 						Thread.currentThread().interrupt();
 					}

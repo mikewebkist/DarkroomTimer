@@ -27,6 +27,11 @@ import android.provider.BaseColumns;
 import android.util.Log;
 
 public class DarkroomPreset implements BaseColumns, Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "DarkroomPreset";
+
 	public static final String AUTHORITY = "com.webkist.android.DarkroomTimer";
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 	public static final Uri CONTENT_URI_PRESET = Uri.parse("content://" + AUTHORITY + "/preset");
@@ -43,11 +48,12 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	public int iso;
 	public float temp;
 	public String id;
-	public Uri uri;
-	private int currentStep = -1;
+	public String uri;
+	
+	private int currentStep = 0;
+	private boolean running = false;
+	
 	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
-
-	public static final String TAG = "DarkroomPreset";
 
 	DarkroomPreset(String id, String name, int iso, float temp) {
 		this.name = name;
@@ -60,7 +66,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	}
 
 	public DarkroomPreset(Activity ctx, Uri uri) {
-		this.uri = uri;
+		this.uri = uri.toString();
 		Cursor cur = ctx.managedQuery(uri, null, null, null, DarkroomPreset.PRESET_NAME);
 
 		int idCol = cur.getColumnIndex(DarkroomPreset._ID);
@@ -119,25 +125,30 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 
 	public void reset() {
 		currentStep = 0;
+		running = false;
+	}
+
+	public boolean running() {
+		return running;
+	}
+
+	public void start() {
+		running = true;
 	}
 
 	public DarkroomStep currentStep() {
-		if(currentStep == -1) {
-			return null;
-		} else {
-			return steps.get(currentStep);
-		}
+		return steps.get(currentStep);
 	}
 	
 	public boolean nextStep() {
-		if (currentStep < steps.size()) {
-			currentStep++;
+		if (++currentStep < steps.size()) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
+	// Doesn't include pour times!
 	public int totalDuration() {
 		int total = 0;
 		for (int i = 0; i < steps.size(); i++) {
@@ -154,7 +165,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		return vals;
 	}
 
-	public class DarkroomStep implements BaseColumns {
+	public class DarkroomStep implements BaseColumns, Serializable {
 		public String name;
 		public int stepNum;
 		public int duration;

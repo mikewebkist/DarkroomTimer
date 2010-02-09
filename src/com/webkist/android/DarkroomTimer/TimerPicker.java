@@ -162,7 +162,7 @@ public class TimerPicker extends ListActivity {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								if (longClickPreset != null) {
-									getContentResolver().delete(longClickPreset.uri, null, null);
+									getContentResolver().delete(Uri.parse(longClickPreset.uri), null, null);
 									Toast.makeText(TimerPicker.this, "Deleted.", Toast.LENGTH_SHORT).show();
 									longClickPreset = null;
 								}
