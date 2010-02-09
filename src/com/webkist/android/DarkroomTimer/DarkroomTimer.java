@@ -58,8 +58,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private static final String RUNNING_START_TIME = "runningStartTime";
 
 	private TextView timerText;
-	private TextView stepActionText;
-	private TextView clickText;
+	private TextView upcomingText;
+	private TextView userActionText;
 	private TextView stepHead;
 
 	private long startTime = 0;
@@ -88,32 +88,32 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				}
 				DarkroomStep step = preset.currentStep();
 				if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
-					clickText.setText("Pour...");
-					stepActionText.setText("");
+					userActionText.setText("Pour...");
+					upcomingText.setText("");
 				} else if (step.agitateEvery > 0) {
 					if (elapsedSecs < (step.pourFor + step.agitateFor)) {
-						clickText.setText(R.string.prompt_agitate);
-						stepActionText.setText("");
+						userActionText.setText(R.string.prompt_agitate);
+						upcomingText.setText("");
 					} else {
 						double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
 
 						if (elapsedRemainder < step.agitateFor) {
-							stepActionText.setText("");
-							clickText.setText(R.string.prompt_agitate);
+							upcomingText.setText("");
+							userActionText.setText(R.string.prompt_agitate);
 						} else if (elapsedRemainder > step.agitateEvery - 10) {
 							// Coming up on agitation
 							double agitateIn = step.agitateEvery - elapsedRemainder;
 							Resources res = getResources();
-							stepActionText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
+							upcomingText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
 									(int) agitateIn / 60, (int) agitateIn % 60));
 						} else {
-							stepActionText.setText("");
-							clickText.setText("");
+							upcomingText.setText("");
+							userActionText.setText("");
 						}
 					}
 				} else {
-					clickText.setText("");
-					stepActionText.setText("");
+					userActionText.setText("");
+					upcomingText.setText("");
 				}
 				break;
 			case NEXT:
@@ -122,7 +122,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					stepHead.setText(preset.currentStep().name);
 					timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 
-					clickText.setText("Click to start...");
+					userActionText.setText("Click to start...");
 				} else {
 					stepHead.setText(R.string.prompt_done);
 					timerText.setText("DONE");
@@ -133,8 +133,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			case DONE:
 				timerRunning = false;
 				startTime = 0;
-				clickText.setText("");
-				stepActionText.setText("");
+				userActionText.setText("");
+				upcomingText.setText("");
 
 				Message m = new Message();
 				m.what = DarkroomTimer.NEXT;
@@ -158,8 +158,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 		timerText = (TextView) findViewById(R.id.stepClock);
 		timerText.setOnClickListener(this);
-		stepActionText = (TextView) findViewById(R.id.stepActionText);
-		clickText = (TextView) findViewById(R.id.clickText);
+		upcomingText = (TextView) findViewById(R.id.upcoming);
+		userActionText = (TextView) findViewById(R.id.userAction);
 		stepHead = (TextView) findViewById(R.id.stepLabel);
 		
 		ping = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
@@ -395,7 +395,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	}
 
 	private void startThread() {
-		clickText.setText("");
+		userActionText.setText("");
 		timerRunning = true;
 		timer = new Thread(new TimerThread());
 		timer.start();
