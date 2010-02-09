@@ -16,8 +16,6 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
-import java.io.Serializable;
-
 import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
 
 import android.media.Ringtone;
@@ -67,11 +65,9 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private long startTime = 0;
 
 	private DarkroomPreset preset = null;
-//	private DarkroomPreset.DarkroomStep step;
 	private Ringtone ping;
 
 	private Thread timer = null;
-	// protected PowerManager.WakeLock mWakeLock = null;
 	private boolean timerRunning = false;
 
 	Handler threadMessageHandler = new Handler() {
