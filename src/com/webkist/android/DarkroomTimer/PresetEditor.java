@@ -52,6 +52,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 import android.widget.AdapterView.OnItemClickListener;
 
@@ -97,19 +98,24 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		Button saveBtn = (Button) findViewById(R.id.saveButton);
 		saveBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				ContentValues vals = new ContentValues();
-				ContentResolver cr = getContentResolver();
-				Log.v(TAG, "Deleting: " + uri);
-				if (uri != null) {
-					cr.delete(uri, null, null);
+				if(preset.steps.size() == 0) {
+					Toast.makeText(getBaseContext(), "You can't create an empty preset!", Toast.LENGTH_LONG).show();
+				} else {
+					ContentValues vals = new ContentValues();
+					ContentResolver cr = getContentResolver();
+					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
+					Log.v(TAG, "Deleting " + preset.name + ": " + uri);
+					if (uri != null) {
+						cr.delete(uri, null, null);
+					}
+					Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
+					String presetId = newUri.getPathSegments().get(1);
+					for (int j = 0; j < preset.steps.size(); j++) {
+						cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
+					}
+					Log.v(TAG, "Inserted " + newUri);
+					finish();
 				}
-				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
-				String presetId = newUri.getPathSegments().get(1);
-				for (int j = 0; j < preset.steps.size(); j++) {
-					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
-				}
-				Log.v(TAG, "Inserted " + newUri);
-				finish();
 			}
 		});
 
