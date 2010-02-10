@@ -66,6 +66,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	private DarkroomPreset preset = null;
 	private Ringtone ping;
+	private boolean done = false;
 
 	private Thread timer = null;
 	private boolean timerRunning = false;
@@ -77,81 +78,78 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			case TICK:
 				long remaining = stepTimeRemaining();
 
-				int minutes = (int) remaining / 60000;
-				int seconds = (int) ((remaining % 60000) / 1000);
+				if(remaining <= 0) {
+					// DONE
+					stopThread();
+					startTime = 0;
 
-				timerText.setText(String.format("%02d:%02d", minutes, seconds));
-				double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
-				DarkroomStep step = preset.currentStep();
-				
-				// If we're close to the end, play the notification sound as often as possible.
-				if(remaining <= 5000 && !ping.isPlaying()) {
-					ping.play();
-				}
-				
-				// Figure out what the user should be doing now.
-				if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
-					// Pour.
-					userActionText.setText("Pour...");
-				} else if (step.agitateEvery > 0) {
-					if (elapsedSecs < (step.pourFor + step.agitateFor)) {
-						// Agitate after pour.
-						userActionText.setText(R.string.prompt_agitate);
-					} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
-						// Agitate. 
-						userActionText.setText(R.string.prompt_agitate);
+					upcomingText.setText("");
+					
+					if(preset.nextStep()) {
+						long dur = stepTimeRemaining() / 1000;
+						stepHead.setText(preset.currentStep().name);
+						timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
+						userActionText.setText("Click to start...");
 					} else {
-						// Nothing.
+						stepHead.setText(R.string.prompt_done);
+						timerText.setText("DONE");
+						timerRunning=false;
+						userActionText.setText("");
+						done=true;
+					} 
+
+				} else {
+					int minutes = (int) remaining / 60000;
+					int seconds = (int) ((remaining % 60000) / 1000);
+
+					timerText.setText(String.format("%02d:%02d", minutes, seconds));
+					double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
+					DarkroomStep step = preset.currentStep();
+
+					// If we're close to the end, play the notification sound as often as possible.
+					if(remaining <= 5000 && !ping.isPlaying()) {
+						ping.play();
+					}
+
+					// Figure out what the user should be doing now.
+					if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
+						// Pour.
+						userActionText.setText("Pour...");
+					} else if (step.agitateEvery > 0) {
+						if (elapsedSecs < (step.pourFor + step.agitateFor)) {
+							// Agitate after pour.
+							userActionText.setText(R.string.prompt_agitate);
+						} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
+							// Agitate. 
+							userActionText.setText(R.string.prompt_agitate);
+						} else {
+							// Nothing.
+							userActionText.setText("");
+						}
+					} else { // This clears the "Click to start..." prompt.
 						userActionText.setText("");
 					}
-				} else { // This clears the "Click to start..." prompt.
-					userActionText.setText("");
-				}
-				
-				// What's coming up.
-				if(step.agitateEvery > 0) {
-					double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
-					Log.v(TAG, String.format("%.0f > (%d - 10) && %.1f >= (%d + 10)", elapsedRemainder, step.agitateEvery, ((double) remaining) / 1000, step.agitateEvery));
-					
-					if (elapsedRemainder > (step.agitateEvery - 10) // Not the first iteration.
-							&& (remaining / 1000) >= (step.agitateFor + 10)) { // And we have enough time left.
-						// Coming up on agitation Ð but not after we're done.
-						double agitateIn = step.agitateEvery - elapsedRemainder;
-						Resources res = getResources();
-						upcomingText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
-								(int) agitateIn / 60, (int) agitateIn % 60));
-					} else {
+
+					// What's coming up.
+					if(step.agitateEvery > 0) {
+						double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
+						Log.v(TAG, String.format("%.0f > (%d - 10) && %.1f >= (%d + 10)", elapsedRemainder, step.agitateEvery, ((double) remaining) / 1000, step.agitateEvery));
+
+						if (elapsedRemainder > (step.agitateEvery - 10) // Not the first iteration.
+								&& (remaining / 1000) >= (step.agitateFor + 10)) { // And we have enough time left.
+							// Coming up on agitation Ð but not after we're done.
+							double agitateIn = step.agitateEvery - elapsedRemainder;
+							Resources res = getResources();
+							upcomingText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
+									(int) agitateIn / 60, (int) agitateIn % 60));
+						} else {
+							upcomingText.setText("");
+						}
+					} else { // This clears probably nothing.
 						upcomingText.setText("");
 					}
-				} else { // This clears probably nothing.
-					upcomingText.setText("");
 				}
-
-				break;
-			case NEXT:
-				if(preset.nextStep()) {
-					long dur = stepTimeRemaining() / 1000;
-					stepHead.setText(preset.currentStep().name);
-					timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
-
-					userActionText.setText("Click to start...");
-				} else {
-					stepHead.setText(R.string.prompt_done);
-					timerText.setText("DONE");
-				} 
-
-				break;
-
-			case DONE:
-				timerRunning = false;
-				startTime = 0;
-				userActionText.setText("");
-				upcomingText.setText("");
-
-				Message m = new Message();
-				m.what = DarkroomTimer.NEXT;
-				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
-
+				
 				break;
 			}
 		}
@@ -370,16 +368,18 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if (v.getId() == R.id.stepClock) {
-			Log.v(TAG, "We have a clock click.");
-			if (timerRunning) {
-				showDialog(ADJUST_RUNNING_CLOCK);
+		if(!done) {
+			if (v.getId() == R.id.stepClock) {
+				Log.v(TAG, "We have a clock click.");
+				if (timerRunning) {
+					showDialog(ADJUST_RUNNING_CLOCK);
+				} else {
+					showDialog(ADJUST_STOPPED_CLOCK);
+				}
 			} else {
-				showDialog(ADJUST_STOPPED_CLOCK);
+				Log.v(TAG, "In onClick: " + v.getId());
+				handleClick();
 			}
-		} else {
-			Log.v(TAG, "In onClick: " + v.getId());
-			handleClick();
 		}
 	}
 
@@ -430,23 +430,16 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	class TimerThread implements Runnable {
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
-				if (DarkroomTimer.this.stepTimeRemaining() <= 0) {
-					Message m = new Message();
-					m.what = DarkroomTimer.DONE;
-					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+				Message m = new Message();
+				m.what = DarkroomTimer.TICK;
+				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
 
-					break;
-				} else {
-					Message m = new Message();
-					m.what = DarkroomTimer.TICK;
-					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
-
-					try {
-						Thread.sleep(500); // Tick every half-second.
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
+				try {
+					Thread.sleep(500); // Tick every half-second.
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
+
 			}
 		}
 	}
