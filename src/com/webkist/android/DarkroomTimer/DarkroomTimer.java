@@ -47,12 +47,10 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	// TODO Organize these.
 	private static final int TICK = 1;
-	private static final int DONE = 2;
 	private static final int ADJUST_STOPPED_CLOCK = 3;
 	private static final int GET_PRESET = 4;
 	private static final int FAILED_PRESET_PICK = 5;
 	private static final int ADJUST_RUNNING_CLOCK = 6;
-	private static final int NEXT = 7;
 
 	private static final String SELECTED_PRESET = "selectedPreset";
 	private static final String RUNNING_START_TIME = "runningStartTime";
@@ -66,7 +64,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	private DarkroomPreset preset = null;
 	private Ringtone ping;
-	private boolean done = false;
 
 	private Thread timer = null;
 	private boolean timerRunning = false;
@@ -93,9 +90,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					} else {
 						stepHead.setText(R.string.prompt_done);
 						timerText.setText("DONE");
-						timerRunning=false;
 						userActionText.setText("");
-						done=true;
 					} 
 
 				} else {
@@ -133,8 +128,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					// What's coming up.
 					if(step.agitateEvery > 0) {
 						double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
-						Log.v(TAG, String.format("%.0f > (%d - 10) && %.1f >= (%d + 10)", elapsedRemainder, step.agitateEvery, ((double) remaining) / 1000, step.agitateEvery));
-
+						
 						if (elapsedRemainder > (step.agitateEvery - 10) // Not the first iteration.
 								&& (remaining / 1000) >= (step.agitateFor + 10)) { // And we have enough time left.
 							// Coming up on agitation Ð but not after we're done.
@@ -177,9 +171,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		if(savedInstanceState != null) {
 			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
 			startTime = savedInstanceState.getLong(RUNNING_START_TIME);
-			long dur = stepTimeRemaining() / 1000;
-			stepHead.setText(preset.currentStep().name);
-			timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 		} else {
 			Intent intent = new Intent(this, TimerPicker.class);
 			startActivityForResult(intent, GET_PRESET);
@@ -190,20 +181,27 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	@Override
 	public void onResume() {
 		super.onResume();
+		
 		if (preset != null) {
 			TextView header = (TextView) findViewById(R.id.presetName);
 			header.setText(preset.name);
 			
-			long dur = stepTimeRemaining() / 1000;
-			stepHead.setText(preset.currentStep().name);
-			timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
-
-			Log.v(TAG, "in onResume(): " + String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
-			if (preset.running()) {
-				startThread();
+			if(preset.done()) {
+				stepHead.setText(R.string.prompt_done);
+				timerText.setText("DONE");
+				userActionText.setText("");
 			} else {
-				// Wait for a click.
+				long dur = stepTimeRemaining() / 1000;
+				stepHead.setText(preset.currentStep().name);
+				timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 			}
+
+			if(preset.running() && startTime > 0) {
+				startThread();
+			} else if(preset.running() || (!preset.running() && !preset.done())) {
+				userActionText.setText("Click to start...");
+			}
+
 		}
 	}
 
@@ -368,7 +366,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if(!done) {
+		if(!preset.done()) {
 			if (v.getId() == R.id.stepClock) {
 				Log.v(TAG, "We have a clock click.");
 				if (timerRunning) {
