@@ -182,8 +182,14 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		switch (id) {
 			case EDIT_STEP:
 				((EditText) dialog.findViewById(R.id.nameEdit)).setText(modifiedStep.name);
+				((EditText) dialog.findViewById(R.id.nameEdit)).clearFocus();
+				
 				((EditText) dialog.findViewById(R.id.durationEdit)).setText(String.format("%d:%02d", modifiedStep.duration / 60, modifiedStep.duration % 60));
+				((EditText) dialog.findViewById(R.id.durationEdit)).clearFocus();
+				
 				((EditText) dialog.findViewById(R.id.agitateEdit)).setText(String.format("%d", modifiedStep.agitateEvery));
+				((EditText) dialog.findViewById(R.id.agitateEdit)).clearFocus();
+				
 				CheckBox cb = (CheckBox) dialog.findViewById(R.id.pourCheck);
 				if(modifiedStep.pourFor > 0) {
 					cb.setChecked(true);
