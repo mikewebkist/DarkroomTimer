@@ -55,6 +55,8 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	
 	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
+	private boolean done = false;
+
 	DarkroomPreset(String id, String name, int iso, float temp) {
 		this.name = name;
 		this.id = id;
@@ -136,6 +138,9 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		running = true;
 	}
 
+	public boolean done() {
+		return done;
+	}
 	public DarkroomStep currentStep() {
 		return steps.get(currentStep);
 	}
@@ -144,6 +149,8 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		if (++currentStep < steps.size()) {
 			return true;
 		} else {
+			done=true;
+			running=false;
 			return false;
 		}
 	}
