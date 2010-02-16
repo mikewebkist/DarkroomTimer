@@ -183,6 +183,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
 		if (id == -1) {
 			selectedStep = preset.blankStep();
+			preset.addStep(selectedStep);
 		} else {
 			selectedStep = (DarkroomPreset.DarkroomStep) parent.getItemAtPosition(position);
 		}
