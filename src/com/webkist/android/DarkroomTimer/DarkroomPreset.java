@@ -91,7 +91,6 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 			int step_agitageEveryCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_AGITATION);
 			int step_pourForCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_POUR);
 
-			Log.v(TAG, "Steps found: " + step_cur.getCount());
 			if (step_cur.moveToFirst()) {
 				do {
 					int stepNum = step_cur.getInt(step_stepNumCol);
@@ -173,6 +172,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	}
 
 	public class DarkroomStep implements BaseColumns, Serializable {
+		private static final long serialVersionUID = 1L;
 		public String name;
 		public int stepNum;
 		public int duration;

@@ -45,7 +45,6 @@ import android.view.View.OnClickListener;
 public class DarkroomTimer extends Activity implements OnClickListener {
 	private static final String TAG = "DarkroomTimer";
 
-	// TODO Organize these.
 	private static final int TICK = 1;
 	private static final int ADJUST_STOPPED_CLOCK = 3;
 	private static final int GET_PRESET = 4;
@@ -153,7 +152,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Log.v(TAG, "in onCreate");
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		setContentView(R.layout.main);
@@ -248,7 +246,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				stopThread();
 
 				Uri uri = data.getData();
-				Log.v(TAG, "onActivityResult - URI: " + uri);
 				preset = new DarkroomPreset(this, uri);
 			}
 		}
@@ -259,7 +256,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		switch (keyCode) {
 
 		case KeyEvent.KEYCODE_DPAD_CENTER:
-			Log.v(TAG, "Key: " + event);
 			handleClick();
 			break;
 
@@ -340,7 +336,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 						}
 					}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
-							Log.v(TAG, "in onCreateDialog, clicked Cancel");
+							// Just close. Don't need to do anything.
 						}
 					}).create();
 		}
@@ -368,14 +364,12 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		if(!preset.done()) {
 			if (v.getId() == R.id.stepClock) {
-				Log.v(TAG, "We have a clock click.");
 				if (timerRunning) {
 					showDialog(ADJUST_RUNNING_CLOCK);
 				} else {
 					showDialog(ADJUST_STOPPED_CLOCK);
 				}
 			} else {
-				Log.v(TAG, "In onClick: " + v.getId());
 				handleClick();
 			}
 		}
@@ -383,7 +377,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	private void handleClick() {
 		if (timerRunning) {
-			Log.v(TAG, "Timer already running!");
+			// Nothing happens if the timer is already running.
 		} else {
 			startTime = System.currentTimeMillis();
 			preset.start();
@@ -394,14 +388,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	@Override
 	public void onPause() {
 		super.onPause();
-		Log.v(TAG, "in onPause()");
 		stopThread();
-	}
-
-	@Override
-	public void onStop() {
-		super.onStop();
-		Log.v(TAG, "in onStop()");
 	}
 
 	private void startThread() {

@@ -17,10 +17,6 @@ limitations under the License.
 package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
 
@@ -32,18 +28,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -53,7 +45,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class PresetEditor extends Activity implements OnItemClickListener {
@@ -79,7 +70,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		if (uri == null) {
 			preset = new DarkroomPreset();
 		} else {
-			Log.v(TAG, "We have a uri: " + uri);
 			preset = new DarkroomPreset(this, uri);
 		}
 
@@ -104,7 +94,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 					ContentValues vals = new ContentValues();
 					ContentResolver cr = getContentResolver();
 					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
-					Log.v(TAG, "Deleting " + preset.name + ": " + uri);
 					if (uri != null) {
 						cr.delete(uri, null, null);
 					}
@@ -113,7 +102,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 					for (int j = 0; j < preset.steps.size(); j++) {
 						cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
 					}
-					Log.v(TAG, "Inserted " + newUri);
 					finish();
 				}
 			}
@@ -130,7 +118,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	}
 
 	protected Dialog onCreateDialog(int id) {
-		Dialog dialog;
+		Dialog dialog = null;
 		LayoutInflater factory = LayoutInflater.from(this);
 		switch (id) {
 			case EDIT_STEP:
@@ -154,12 +142,10 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 					}
 				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						Log.v(TAG, "in onCreateDialog, clicked Cancel");
+						// Do nothing on cancel.
 					}
 				}).setNeutralButton("Delete", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						Log.v(TAG, "in onCreateDialog, clicked Delete");
-						// TODO						
 						preset.steps.remove(selectedStep);
 						adapter.notifyDataSetChanged();
 					}
@@ -167,13 +153,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				break;
 				
 			default:
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle(R.string.app_name).setMessage(
-						"UNDEFINED DIALOG").setCancelable(false).setPositiveButton(R.string.time_picker_ok,
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								// finish();
-							}
-						}).create();
+				Log.e(TAG, "Asked to create an unexpected dialog: " + id);
 		}
 		return dialog;
 	}
@@ -200,13 +180,12 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public void onItemClick(AdapterView parent, View v, int position, long id) {
 		if (id == -1) {
 			selectedStep = preset.blankStep();
-			Log.v(TAG, "Add step clicked: id=" + id + ", position=" + position);
 		} else {
 			selectedStep = (DarkroomPreset.DarkroomStep) parent.getItemAtPosition(position);
-			Log.v(TAG, "List Item Clicked: preset=" + preset.name + ", step=" + selectedStep);
 		}
 		modifiedStep = selectedStep.clone();
 		showDialog(EDIT_STEP);

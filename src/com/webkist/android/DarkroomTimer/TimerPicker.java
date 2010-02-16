@@ -41,7 +41,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,10 +48,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -73,7 +70,6 @@ public class TimerPicker extends ListActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case XML_IMPORT_DONE:
-					Log.v(TAG, "XML Import Finished...");
 					listViewCursor.requery();
 					break;
 			}
@@ -99,9 +95,6 @@ public class TimerPicker extends ListActivity {
 		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
 		showTempsInF = settings.getBoolean("showTempsInF", true);
 		if (!alreadyRan) {
-			// SharedPreferences.Editor editor = settings.edit();
-			// editor.putBoolean("AlreadyRanFlag", true);
-			// editor.commit();
 			showDialog(DIALOG_FIRST_RUN);
 		}
 		registerForContextMenu(getListView());
@@ -128,7 +121,6 @@ public class TimerPicker extends ListActivity {
 				showDialog(DIALOG_DELETE_CONFIRM);
 				return true;
 			case DUPLICATE_ID:
-				// TODO
 				DarkroomPreset preset = new DarkroomPreset(this, uri);
 				ContentValues vals = new ContentValues();
 				ContentResolver cr = getContentResolver();
@@ -138,7 +130,6 @@ public class TimerPicker extends ListActivity {
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
 				}
-				Log.v(TAG, "Inserted " + newUri);
 				editPreset(newUri);
 				return true;
 			default:
@@ -208,7 +199,6 @@ public class TimerPicker extends ListActivity {
 	public void editPreset(Uri uri) {
 		Intent intent = new Intent(this, PresetEditor.class);
 		intent.setData(uri);
-		// intent.setAction(Intent.ACTION_EDIT);
 		startActivityForResult(intent, EDIT_PRESET);
 	}
 
@@ -223,7 +213,6 @@ public class TimerPicker extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.add_preset:
-				Log.v(TAG, "Add preset.");
 				Intent intent = new Intent(this, PresetEditor.class);
 				intent.setData(null);
 				startActivityForResult(intent, EDIT_PRESET);
@@ -237,7 +226,6 @@ public class TimerPicker extends ListActivity {
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
-		Log.v(TAG, "List Item Clicked: preset=" + uri);
 		setResult(RESULT_OK, new Intent().setData(uri));
 		finish();
 	}
@@ -246,7 +234,6 @@ public class TimerPicker extends ListActivity {
 
 		public MyOtherAdapter(Context context, Cursor c) {
 			super(context, c);
-			// TODO Auto-generated constructor stub
 		}
 
 		@Override
@@ -281,11 +268,10 @@ public class TimerPicker extends ListActivity {
 		public void run() {
 			ContentResolver cr = getContentResolver();
 
+			Log.w(TAG, "Initializing DB from XML resources.");
 			ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
 			try {
 				DarkroomPreset p = null;
-				@SuppressWarnings("unused")
-				DarkroomPreset.DarkroomStep step = null;
 				while (xrp.getEventType() != XmlResourceParser.END_DOCUMENT) {
 					if (xrp.getEventType() == XmlResourceParser.START_TAG) {
 						String s = xrp.getName();
@@ -294,7 +280,7 @@ public class TimerPicker extends ListActivity {
 									xrp.getAttributeIntValue(null, "iso", 0), xrp.getAttributeFloatValue(null, "temp", 0));
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
-							step = p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
+							p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
 									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
 									.getAttributeIntValue(null, "pour", 0));
 						}
@@ -314,7 +300,6 @@ public class TimerPicker extends ListActivity {
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues(presetId));
 				}
-				Log.v(TAG, "Inserted " + uri);
 			}
 
 			Message m = new Message();
