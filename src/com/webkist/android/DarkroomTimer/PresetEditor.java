@@ -91,7 +91,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				if(preset.steps.size() == 0) {
 					Toast.makeText(getBaseContext(), "You can't create an empty preset!", Toast.LENGTH_LONG).show();
 				} else {
-					ContentValues vals = new ContentValues();
 					ContentResolver cr = getContentResolver();
 					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
 					if (uri != null) {
@@ -126,32 +125,32 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("EditStep").setView(
 						v).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {							
-					public void onClick(DialogInterface dialog, int whichButton) {
-						modifiedStep.name = ((EditText) v.findViewById(R.id.nameEdit)).getText().toString();
-						String  newDuration = ((EditText) v.findViewById(R.id.durationEdit)).getText().toString();
-						int minutes = Integer.parseInt(newDuration.substring(0, newDuration.indexOf(":")));
-						int seconds = Integer.parseInt(newDuration.substring(newDuration.indexOf(":") + 1));
-						modifiedStep.duration = minutes * 60 + seconds;
-						modifiedStep.agitateEvery = Integer.parseInt(((EditText) v.findViewById(R.id.agitateEdit)).getText().toString());
-						CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
-						if(cb.isChecked()) {
-							modifiedStep.pourFor = 10;
-						}
-						selectedStep.overwrite(modifiedStep);
-						adapter.notifyDataSetChanged();
-					}
-				}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Do nothing on cancel.
-					}
-				}).setNeutralButton("Delete", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						preset.steps.remove(selectedStep);
-						adapter.notifyDataSetChanged();
-					}
-				}).create();
+							public void onClick(DialogInterface dialog, int whichButton) {
+								modifiedStep.name = ((EditText) v.findViewById(R.id.nameEdit)).getText().toString();
+								String  newDuration = ((EditText) v.findViewById(R.id.durationEdit)).getText().toString();
+								int minutes = Integer.parseInt(newDuration.substring(0, newDuration.indexOf(":")));
+								int seconds = Integer.parseInt(newDuration.substring(newDuration.indexOf(":") + 1));
+								modifiedStep.duration = minutes * 60 + seconds;
+								modifiedStep.agitateEvery = Integer.parseInt(((EditText) v.findViewById(R.id.agitateEdit)).getText().toString());
+								CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
+								if(cb.isChecked()) {
+									modifiedStep.pourFor = 10;
+								}
+								selectedStep.overwrite(modifiedStep);
+								adapter.notifyDataSetChanged();
+							}
+						}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								// Do nothing on cancel.
+							}
+						}).setNeutralButton("Delete", new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								preset.steps.remove(selectedStep);
+								adapter.notifyDataSetChanged();
+							}
+						}).create();
 				break;
-				
+
 			default:
 				Log.e(TAG, "Asked to create an unexpected dialog: " + id);
 		}
