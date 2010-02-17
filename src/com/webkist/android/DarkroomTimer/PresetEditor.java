@@ -76,11 +76,11 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 		((TextView) findViewById(R.id.name)).setText(preset.name);
 		
-//		Spinner spinner = (Spinner) findViewById(R.id.spinner);
-//	    ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
-//	            this, R.array.iso_values, android.R.layout.simple_spinner_item);
-//	    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//	    spinner.setAdapter(spinnerAdapter);
+		Spinner spinner = (Spinner) findViewById(R.id.isoSpinner);
+	    ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
+	            this, R.array.iso_values, android.R.layout.simple_spinner_item);
+	    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	    spinner.setAdapter(spinnerAdapter);
 	    
 		adapter = new MyAdapter(this, preset.steps);
 		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.two_line_list_item, lv, false);
