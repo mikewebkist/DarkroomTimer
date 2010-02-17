@@ -44,5 +44,39 @@
 		pour INTEGER
 	);
 	</string>
+
+<string name="iso_prompt">Film Speed</string>
+
+	<string-array name="iso_values">
+		<item>Any Film</item>
+		<item>6</item>
+		<item>8</item>
+		<item>10</item>
+		<item>12</item>
+		<item>16</item>
+		<item>20</item>
+		<item>25</item>
+		<item>32</item>
+		<item>40</item>
+		<item>50</item>
+		<item>64</item>
+		<item>80</item>
+		<item>100</item>
+		<item>125</item>
+		<item>160</item>
+		<item>200</item>
+		<item>250</item>
+		<item>320</item>
+		<item>400</item>
+		<item>500</item>
+		<item>640</item>
+		<item>800</item>
+		<item>1000</item>
+		<item>1250</item>
+		<item>1600</item>
+		<item>2000</item>
+		<item>2500</item>
+		<item>3200</item>
+	</string-array>
 	
 </resources>

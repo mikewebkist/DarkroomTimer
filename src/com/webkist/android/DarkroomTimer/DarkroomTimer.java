@@ -29,6 +29,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
@@ -159,6 +160,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		mainView.setOnClickListener(this);
 
 		timerText = (TextView) findViewById(R.id.stepClock);
+//		Typeface face = Typeface.createFromAsset(getAssets(), "VeraBd.ttf");
+//		timerText.setTypeface(face);
 		timerText.setOnClickListener(this);
 		upcomingText = (TextView) findViewById(R.id.upcoming);
 		userActionText = (TextView) findViewById(R.id.userAction);
