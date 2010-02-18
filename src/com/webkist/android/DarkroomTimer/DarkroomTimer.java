@@ -32,8 +32,11 @@ import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.LinearLayout;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+import android.widget.ViewAnimator;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,7 +46,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 
-public class DarkroomTimer extends Activity implements OnClickListener {
+public class DarkroomTimer extends Activity implements OnClickListener, OnCheckedChangeListener {
 	private static final String TAG = "DarkroomTimer";
 
 	private static final int TICK = 1;
@@ -51,16 +54,20 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private static final int GET_PRESET = 4;
 	private static final int FAILED_PRESET_PICK = 5;
 	private static final int ADJUST_RUNNING_CLOCK = 6;
+	
+	private static final int PROMPT_NONE = 0;
+	private static final int PROMPT_POUR = 1;
+	private static final int PROMPT_AGITATE = 2;
 
 	private static final String SELECTED_PRESET = "selectedPreset";
 	private static final String RUNNING_START_TIME = "runningStartTime";
 
 	private TextView timerText;
 	private TextView upcomingText;
-	private TextView userActionText;
-	private TextView stepHead;
+	private TextView stepLabel;
 
 	private long startTime = 0;
+	private long pauseTime = 0;
 
 	private DarkroomPreset preset = null;
 	private Ringtone ping;
@@ -68,6 +75,27 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	private Thread timer = null;
 	private boolean timerRunning = false;
 
+	private static boolean showTempsInF = true;
+
+	private ViewAnimator actionFlipper;
+
+	// The format should be in the form "%.1f¼%s"
+	public static String tempString(double temp, String format) {
+		return String.format(format, temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
+	}
+	
+	public static String tempString(double temp) {
+		return String.format("%.1f¼%s", temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
+	}
+	
+	public static double tempDouble(double temp) {
+		if(showTempsInF) {
+			return temp * 9 / 5 + 32;
+		} else {
+			return temp;
+		}
+	}
+	
 	Handler threadMessageHandler = new Handler() {
 
 		public void handleMessage(Message msg) {
@@ -84,13 +112,14 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					
 					if(preset.nextStep()) {
 						long dur = stepTimeRemaining() / 1000;
-						stepHead.setText(preset.currentStep().name);
+						stepLabel.setText(preset.currentStep().name);
 						timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
-						userActionText.setText("Click to start...");
+						actionFlipper.setDisplayedChild(PROMPT_NONE); // SHOW CLICK
+						((ToggleButton) findViewById(R.id.toggleButton)).setChecked(false);
 					} else {
-						stepHead.setText(R.string.prompt_done);
-						timerText.setText("DONE");
-						userActionText.setText("");
+						stepLabel.setText(R.string.prompt_done);
+						timerText.setText(R.string.prompt_done);
+						actionFlipper.setDisplayedChild(PROMPT_NONE);
 					} 
 
 				} else {
@@ -109,20 +138,20 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 					// Figure out what the user should be doing now.
 					if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
 						// Pour.
-						userActionText.setText("Pour...");
+						actionFlipper.setDisplayedChild(PROMPT_POUR);
 					} else if (step.agitateEvery > 0) {
 						if (elapsedSecs < (step.pourFor + step.agitateFor)) {
 							// Agitate after pour.
-							userActionText.setText(R.string.prompt_agitate);
+							actionFlipper.setDisplayedChild(PROMPT_AGITATE);
 						} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
 							// Agitate. 
-							userActionText.setText(R.string.prompt_agitate);
+							actionFlipper.setDisplayedChild(PROMPT_AGITATE);
 						} else {
 							// Nothing.
-							userActionText.setText("");
+							actionFlipper.setDisplayedChild(PROMPT_NONE);
 						}
 					} else { // This clears the "Click to start..." prompt.
-						userActionText.setText("");
+						actionFlipper.setDisplayedChild(PROMPT_NONE);
 					}
 
 					// What's coming up.
@@ -149,6 +178,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		}
 	};
 
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -156,16 +186,16 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		setContentView(R.layout.main);
-		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);
-		mainView.setOnClickListener(this);
-
+		ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
+		startButton.setOnCheckedChangeListener(this);
+		
 		timerText = (TextView) findViewById(R.id.stepClock);
-//		Typeface face = Typeface.createFromAsset(getAssets(), "VeraBd.ttf");
-//		timerText.setTypeface(face);
+		Typeface face = Typeface.createFromAsset(getAssets(), "digital-7-mono.ttf");
+		timerText.setTypeface(face);
 		timerText.setOnClickListener(this);
 		upcomingText = (TextView) findViewById(R.id.upcoming);
-		userActionText = (TextView) findViewById(R.id.userAction);
-		stepHead = (TextView) findViewById(R.id.stepLabel);
+		actionFlipper = (ViewAnimator) findViewById(R.id.actionFlipper);
+		stepLabel = (TextView) findViewById(R.id.stepLabel);
 		
 		ping = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 
@@ -184,23 +214,22 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		super.onResume();
 		
 		if (preset != null) {
-			TextView header = (TextView) findViewById(R.id.presetName);
-			header.setText(preset.name);
+			this.setTitle(preset.toString());
 			
 			if(preset.done()) {
-				stepHead.setText(R.string.prompt_done);
-				timerText.setText("DONE");
-				userActionText.setText("");
+				stepLabel.setText(R.string.prompt_done);
+				timerText.setText(R.string.prompt_done);
+				actionFlipper.setDisplayedChild(PROMPT_NONE);
 			} else {
 				long dur = stepTimeRemaining() / 1000;
-				stepHead.setText(preset.currentStep().name);
+				stepLabel.setText(preset.currentStep().name);
 				timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 			}
 
 			if(preset.running() && startTime > 0) {
 				startThread();
 			} else if(preset.running() || (!preset.running() && !preset.done())) {
-				userActionText.setText("Click to start...");
+				actionFlipper.setDisplayedChild(PROMPT_NONE); // SHOW CLICK
 			}
 
 		}
@@ -230,9 +259,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.stop_timer:
-			stopThread();
-			return true;
 		case R.id.select_preset:
 			Intent intent = new Intent(this, TimerPicker.class);
 			startActivityForResult(intent, GET_PRESET);
@@ -252,21 +278,6 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				preset = new DarkroomPreset(this, uri);
 			}
 		}
-	}
-
-	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		switch (keyCode) {
-
-		case KeyEvent.KEYCODE_DPAD_CENTER:
-			handleClick();
-			break;
-
-		default:
-			return false;
-
-		}
-		return true;
 	}
 
 	protected Dialog onCreateDialog(int id) {
@@ -372,22 +383,32 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				} else {
 					showDialog(ADJUST_STOPPED_CLOCK);
 				}
-			} else {
-				handleClick();
 			}
 		}
 	}
 
-	private void handleClick() {
+	private void startTimer() {
 		if (timerRunning) {
 			// Nothing happens if the timer is already running.
 		} else {
-			startTime = System.currentTimeMillis();
+			if(pauseTime > 0 && startTime > 0) {
+				startTime += System.currentTimeMillis() - pauseTime;
+			} else {
+				startTime = System.currentTimeMillis();
+			}
+			pauseTime = 0;
 			preset.start();
 			startThread();
 		}
 	}
 
+	private void pauseTimer() {
+		if(timerRunning) {
+			pauseTime = System.currentTimeMillis();
+			stopThread();
+		}
+	}
+	
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -429,6 +450,15 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				}
 
 			}
+		}
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		if(isChecked) {
+			startTimer();
+		} else {
+			pauseTimer();
 		}
 	}
 

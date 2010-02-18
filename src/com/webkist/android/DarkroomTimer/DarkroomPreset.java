@@ -25,6 +25,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
+import android.widget.TextView;
 
 public class DarkroomPreset implements BaseColumns, Serializable {
 
@@ -121,7 +122,18 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	}
 
 	public String toString() {
-		return name;
+		if(iso > 0 || temp > 0) {
+			String title = String.format("%s (", name);
+			if(iso > 0) {
+				title = String.format("%sISO %d%s", title, iso, temp > 0 ? ", " : "");
+			}
+			if(temp > 0) {
+				title = String.format("%s @ %s)", title, DarkroomTimer.tempString(temp));
+			}
+			return title;
+		} else {
+			return name;
+		}
 	}
 
 	public void reset() {

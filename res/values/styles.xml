@@ -8,30 +8,43 @@
 		<item name="android:textColor">#F00</item>
 	</style>
 
-	<style name="presetText">
-		<item name="android:textSize">24sp</item>
-		<item name="android:textColor">#ff0000</item>
-	</style>
 	<style name="timer">
-		<item name="android:textSize">72sp</item>
-		<item name="android:textStyle">bold</item>
-		<item name="android:textColor">#eeeeee</item>
+		<item name="android:textSize">125dip</item>
+		<item name="android:textColor">#ff0000</item>
+		<item name="android:background">#300</item>
 	</style>
 
-	<style name="timer.total" parent="timer">
+	<style name="timePicker" parent="timer">
 		<item name="android:textSize">48sp</item>
 		<item name="android:textColor">#666666</item>
 	</style>
-
-	<style name="stepText">
-		<item name="android:textSize">36sp</item>
+	
+	<style name="upcomingText">
+		<item name="android:textSize">25dip</item>
 		<item name="android:textColor">#aaaaaa</item>
+		<item name="android:typeface">serif</item>
+	</style>
+	
+	<style name="stepText">
+		<item name="android:textSize">36dip</item>
+		<item name="android:textColor">#fff</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:typeface">sans</item>
 	</style>
 
 	<style name="actionText">
-		<item name="android:textSize">24sp</item>
+		<item name="android:textSize">30dip</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:typeface">monospace</item>
 	</style>
 
+	<style name="startButton">
+		<item name="android:textSize">30dip</item>
+		<item name="android:textColor">#000</item>
+		<item name="android:textStyle">bold</item>
+		<item name="android:background">@android:drawable/btn_default</item>
+	</style>
+	
 	<style name="DarkroomTheme.StepEditor" parent="@android:style/TextAppearance.Medium">
 		<item name="android:textSize">16sp</item>
 		<item name="android:paddingBottom">16sp</item>

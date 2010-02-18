@@ -82,6 +82,12 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	    spinner.setAdapter(spinnerAdapter);
 	    
+	    if(preset.iso > 0) {
+	    	spinner.setSelection(spinnerAdapter.getPosition(String.format("%d", preset.iso)));
+	    }
+	    if(preset.temp > 0) {
+	    	((TextView) findViewById(R.id.tempEdit)).setText(String.format("%.1f", DarkroomTimer.tempDouble(preset.temp)));
+	    }
 		adapter = new MyAdapter(this, preset.steps);
 		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.two_line_list_item, lv, false);
 		TextView t = (TextView) v.findViewById(android.R.id.text1);

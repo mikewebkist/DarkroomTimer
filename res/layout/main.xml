@@ -1,41 +1,82 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/mainLayout"
-	android:orientation="vertical" 
+	android:orientation="vertical"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent" 
-	android:gravity="center_horizontal"
-	android:theme="@style/DarkroomTheme.RedLight">
+	android:layout_height="fill_parent">
 
-	<TextView android:id="@+id/presetName" 
+	<LinearLayout
+		android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/gradient_step_bg">
+		<TextView
+			android:id="@+id/stepLabel"
+			android:text="Dummy Step"
 			android:layout_width="fill_parent"
-			android:layout_height="wrap_content" 
-			style="@style/presetText"
-			android:text="Dummy Preset" />
+			android:layout_height="wrap_content"
+			android:gravity="center_horizontal"
+			style="@style/stepText" />
+	</LinearLayout>
 
-	<TextView android:id="@+id/upcoming"
-			android:layout_width="wrap_content" 
-			android:layout_height="wrap_content" 
-			style="@style/actionText" />
-	
-	<TextView android:id="@+id/stepLabel" 
-		android:text="Dummy Step"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
+	<ViewAnimator
+		android:id="@+id/actionFlipper"
 		android:layout_weight="1"
-		style="@style/stepText" />
+		android:layout_width="fill_parent"
+		android:layout_height="0dip">
 
-	<TextView android:id="@+id/userAction"
-		android:layout_width="wrap_content"
+		<TextView
+			android:layout_width="fill_parent"
+			style="@style/actionText"
+			android:layout_height="fill_parent"
+			android:gravity="center"
+			android:text="" />
+		<TextView
+			android:layout_width="fill_parent"
+			style="@style/actionText"
+			android:layout_height="fill_parent"
+			android:gravity="center"
+			android:text="@string/prompt_pour" />
+		<TextView
+			android:layout_width="fill_parent"
+			style="@style/actionText"
+			android:layout_height="fill_parent"
+			android:gravity="center"
+			android:text="@string/prompt_agitate" />
+
+	</ViewAnimator>
+
+	<TextView
+		android:id="@+id/stepClock"
+		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:layout_weight="1"
-		style="@style/stepText" />
-
-	<TextView android:id="@+id/stepClock" 
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" 
+		android:gravity="center_horizontal"
 		style="@style/timer"
-		android:text="00:00" 
-		android:layout_weight="1" />
+		android:text="00:00" />
 
+	<TextView
+		android:id="@+id/upcoming"
+		android:layout_width="fill_parent"
+		android:layout_height="0dip"
+		android:gravity="center"
+		android:layout_weight="1"
+		style="@style/upcomingText" />
+
+
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		style="@android:style/ButtonBar">
+
+		<ToggleButton
+			android:textOff="@string/prompt_start"
+			android:textOn="@string/prompt_pause"
+			android:id="@+id/toggleButton"
+			style="@style/startButton"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+
+	</LinearLayout>
 </LinearLayout>
