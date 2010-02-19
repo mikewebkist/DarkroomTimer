@@ -128,7 +128,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 				title = String.format("%sISO %d%s", title, iso, temp > 0 ? ", " : "");
 			}
 			if(temp > 0) {
-				title = String.format("%s @ %s)", title, DarkroomTimer.tempString(temp));
+				title = String.format("%s @ %.1f¼C)", title, temp);
 			}
 			return title;
 		} else {

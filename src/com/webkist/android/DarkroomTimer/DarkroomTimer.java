@@ -85,16 +85,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		return String.format(format, temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
 	}
 
-	public static String tempString(double temp) {
-		return String.format("%.1f¼%s", temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
-	}
-
-	public static double tempDouble(double temp) {
-		if (showTempsInF) {
-			return temp * 9 / 5 + 32;
-		} else {
-			return temp;
-		}
+	public static boolean showTempsInF() {
+		return showTempsInF;
 	}
 
 	Handler threadMessageHandler = new Handler() {

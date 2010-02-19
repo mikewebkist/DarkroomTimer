@@ -36,19 +36,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
-public class PresetEditor extends Activity implements OnItemClickListener {
+public class PresetEditor extends Activity implements OnItemClickListener, OnCheckedChangeListener {
 	public static final String TAG = "PresetEditor";
 	private static final int EDIT_STEP = 1;
 
@@ -57,6 +61,20 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	private DarkroomStep selectedStep;
 	private MyAdapter adapter;
 	private DarkroomStep modifiedStep;
+	private boolean showTempsInF = DarkroomTimer.showTempsInF();
+
+	
+	public String tempString(double temp) {
+		return String.format("%.1f¼%s", temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
+	}
+
+	public double tempDouble(double temp) {
+		if (showTempsInF) {
+			return temp * 9 / 5 + 32;
+		} else {
+			return temp;
+		}
+	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -85,9 +103,16 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	    if(preset.iso > 0) {
 	    	spinner.setSelection(spinnerAdapter.getPosition(String.format("%d", preset.iso)));
 	    }
+	    
+    	ToggleButton tempToggle = (ToggleButton) findViewById(R.id.tempToggle);
+    	tempToggle.setChecked(showTempsInF);
+    	tempToggle.setOnCheckedChangeListener(this);
+    	
+    	EditText tempEdit = (EditText) findViewById(R.id.tempEdit);
 	    if(preset.temp > 0) {
-	    	((TextView) findViewById(R.id.tempEdit)).setText(String.format("%.1f", DarkroomTimer.tempDouble(preset.temp)));
+	    	tempEdit.setText(String.format("%.1f", tempDouble(preset.temp)));
 	    }
+	    
 		adapter = new MyAdapter(this, preset.steps);
 		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.two_line_list_item, lv, false);
 		TextView t = (TextView) v.findViewById(android.R.id.text1);
@@ -104,6 +129,27 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 				if(preset.steps.size() == 0) {
 					Toast.makeText(getBaseContext(), "You can't create an empty preset!", Toast.LENGTH_LONG).show();
 				} else {
+					EditText tempEdit = (EditText) findViewById(R.id.tempEdit);
+					try {
+						Float temp = Float.parseFloat(tempEdit.getText().toString());
+				    	ToggleButton tempToggle = (ToggleButton) findViewById(R.id.tempToggle);
+
+						if(tempToggle.isChecked()) {
+							preset.temp = (temp - 32) / 9 * 5;
+						} else {
+							preset.temp = temp;
+						}
+					} catch(NumberFormatException e) {
+						Log.v(TAG, "Problem parsing temp value: " + tempEdit.getText().toString());
+					}
+					
+					Spinner spinner = (Spinner) findViewById(R.id.isoSpinner);
+					if(spinner.getSelectedItemPosition() > 0) {
+						preset.iso = Integer.parseInt(spinner.getSelectedItem().toString());
+					} else {
+						preset.iso = 0;
+					}
+					
 					ContentResolver cr = getContentResolver();
 					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
 					if (uri != null) {
@@ -230,6 +276,22 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			tv.setText(details);
 
 			return convertView;
+		}
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		EditText tempEdit = (EditText) findViewById(R.id.tempEdit);
+		
+		try {
+			Float temp = Float.parseFloat(tempEdit.getText().toString());
+			if(isChecked) {
+				tempEdit.setText(String.format("%.1f" ,temp * 9 / 5 + 32));
+			} else {
+				tempEdit.setText(String.format("%.1f" ,(temp - 32) / 9 * 5));
+			}
+		} catch(NumberFormatException e) {
+			Log.v(TAG, "Problem parsing temp value: " + tempEdit.getText().toString());
 		}
 	}
 
