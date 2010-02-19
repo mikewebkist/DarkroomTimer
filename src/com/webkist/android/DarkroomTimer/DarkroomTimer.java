@@ -61,6 +61,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 	private static final String SELECTED_PRESET = "selectedPreset";
 	private static final String RUNNING_START_TIME = "runningStartTime";
+	private static final String RUNNING_PAUSE_TIME = "runningPauseTime";
 
 	private TextView timerText;
 	private TextView upcomingText;
@@ -115,6 +116,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 						stepLabel.setText(preset.currentStep().name);
 						timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 						actionFlipper.setDisplayedChild(PROMPT_NONE); // SHOW CLICK
+						// This trips the event handler, below, but it's ok because the clock is stopped.
 						((ToggleButton) findViewById(R.id.toggleButton)).setChecked(false);
 					} else {
 						stepLabel.setText(R.string.prompt_done);
@@ -204,6 +206,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		if(savedInstanceState != null) {
 			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
 			startTime = savedInstanceState.getLong(RUNNING_START_TIME);
+			pauseTime = savedInstanceState.getLong(RUNNING_PAUSE_TIME);
 		} else {
 			Intent intent = new Intent(this, TimerPicker.class);
 			startActivityForResult(intent, GET_PRESET);
@@ -229,7 +232,13 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			}
 
 			if(preset.running() && startTime > 0) {
-				startThread();
+				if(pauseTime > 0) {
+					// TODO This triggers the event handler down at the bottom, which restarts the timer.
+					((ToggleButton) findViewById(R.id.toggleButton)).setChecked(true);
+					pauseTimer();
+				} else {
+					startThread();
+				}
 			} else if(preset.running() || (!preset.running() && !preset.done())) {
 				actionFlipper.setDisplayedChild(PROMPT_NONE); // SHOW CLICK
 			}
@@ -242,6 +251,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onSaveInstanceState(Bundle outState) {
 		outState.putSerializable(SELECTED_PRESET, preset);
 		outState.putLong(RUNNING_START_TIME, startTime);
+		outState.putLong(RUNNING_PAUSE_TIME, pauseTime);
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -440,6 +450,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 	class TimerThread implements Runnable {
 		public void run() {
+			Log.v(TAG, "This thread is starting...");
 			while (!Thread.currentThread().isInterrupted()) {
 				Message m = new Message();
 				m.what = DarkroomTimer.TICK;
@@ -452,11 +463,13 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 				}
 
 			}
+			Log.v(TAG, "This thread is ending...");
 		}
 	}
 
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		Log.v(TAG, "In onCheckedChanged");
 		if(isChecked) {
 			startTimer();
 		} else {
