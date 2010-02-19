@@ -192,6 +192,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		timerText = (TextView) findViewById(R.id.stepClock);
 		Typeface face = Typeface.createFromAsset(getAssets(), "digital-7-mono.ttf");
 		timerText.setTypeface(face);
+		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
+		timerTextBG.setTypeface(face);
 		timerText.setOnClickListener(this);
 		upcomingText = (TextView) findViewById(R.id.upcoming);
 		actionFlipper = (ViewAnimator) findViewById(R.id.actionFlipper);

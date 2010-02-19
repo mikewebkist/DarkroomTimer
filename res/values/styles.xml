@@ -11,7 +11,12 @@
 	<style name="timer">
 		<item name="android:textSize">125dip</item>
 		<item name="android:textColor">#ff0000</item>
-		<item name="android:background">#300</item>
+	</style>
+
+	<style name="timer.black">
+		<item name="android:textSize">125dip</item>
+		<item name="android:textColor">#000000</item>
+		<item name="android:background">#200</item>
 	</style>
 
 	<style name="timePicker" parent="timer">
@@ -33,9 +38,9 @@
 	</style>
 
 	<style name="actionText">
-		<item name="android:textSize">30dip</item>
-		<item name="android:textStyle">bold</item>
-		<item name="android:typeface">monospace</item>
+		<item name="android:textSize">36dip</item>
+		<item name="android:textColor">#ccc</item>
+		<item name="android:typeface">sans</item>
 	</style>
 
 	<style name="startButton">

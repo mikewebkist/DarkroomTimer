@@ -20,43 +20,44 @@
 			android:layout_weight="1"
 			style="@style/stepText" />
 
+
 		<FrameLayout
 			android:layout_height="fill_parent"
 			android:layout_width="0dip"
-			android:gravity="right|bottom"
-			android:background="#00f"
+			android:paddingRight="5dip"
 			android:layout_weight="1">
 			
 			<ViewAnimator
 				android:id="@+id/actionFlipper"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content">
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent">
 
 				<TextView
 					android:layout_width="fill_parent"
 					style="@style/actionText"
 					android:layout_height="fill_parent"
-					android:gravity="right|bottom"
+					android:gravity="right|center_vertical"
 					android:text="" />
 				<TextView
 					android:layout_width="fill_parent"
 					style="@style/actionText"
 					android:layout_height="fill_parent"
-					android:gravity="right|bottom"
+					android:gravity="right|center_vertical"
 					android:text="@string/prompt_pour" />
 				<TextView
 					android:layout_width="fill_parent"
 					style="@style/actionText"
 					android:layout_height="fill_parent"
-					android:gravity="right|bottom"
+					android:gravity="right|center_vertical"
 					android:text="@string/prompt_agitate" />
 
 			</ViewAnimator>
 
 			<TextView
 				android:id="@+id/upcoming"
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
+			android:gravity="right|center_vertical"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
 				style="@style/upcomingText" />
 				
 		</FrameLayout>
@@ -69,6 +70,20 @@
 		android:layout_height="0dip"
 		android:layout_weight="1" />
 
+<FrameLayout
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent"
+			android:gravity="right|bottom"
+			android:layout_weight="1">
+
+	<TextView
+		android:id="@+id/stepClockBlack"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center_horizontal"
+		style="@style/timer.black"
+		android:text="88:88" />
+			
 	<TextView
 		android:id="@+id/stepClock"
 		android:layout_width="fill_parent"
@@ -77,6 +92,7 @@
 		style="@style/timer"
 		android:text="00:00" />
 
+</FrameLayout>
 	<View
 		android:layout_width="fill_parent"
 		android:layout_height="0dip"
