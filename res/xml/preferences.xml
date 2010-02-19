@@ -1,0 +1,13 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<CheckBoxPreference
+		android:key="showTempsInF"
+		android:title="Temps in ºF"
+		android:summary="Show all temperatures in Farenheit." />
+	<RingtonePreference
+		android:key="alertTone"
+		android:title="Alert Tone"
+		android:ringtoneType="notification"
+		android:showDefault="true"
+		android:showSilent="true"
+		android:summary="Tone to play when step is finishing." />
+</PreferenceScreen>

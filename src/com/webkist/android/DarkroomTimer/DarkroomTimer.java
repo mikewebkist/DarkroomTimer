@@ -28,9 +28,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -71,7 +74,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	private long pauseTime = 0;
 
 	private DarkroomPreset preset = null;
-	private Ringtone ping;
+	private Ringtone ping = null;
 
 	private Thread timer = null;
 	private boolean timerRunning = false;
@@ -125,7 +128,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 						// If we're close to the end, play the notification
 						// sound as often as possible.
-						if (remaining <= 5000 && !ping.isPlaying()) {
+						if (ping != null && remaining <= 5000 && !ping.isPlaying()) {
 							ping.play();
 						}
 
@@ -192,7 +195,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		actionFlipper = (ViewAnimator) findViewById(R.id.actionFlipper);
 		stepLabel = (TextView) findViewById(R.id.stepLabel);
 
-		ping = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 
 		if (savedInstanceState != null) {
 			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
@@ -209,6 +211,20 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onResume() {
 		super.onResume();
 
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		showTempsInF = settings.getBoolean("showTempsInF", false);
+
+		if(ping != null) {
+			
+		}
+		String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
+		if(ring != "") {
+			Log.v(TAG, ring);
+			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));			
+		} else {
+			ping = null;
+		}
+		
 		if (preset != null) {
 			this.setTitle(preset.toString());
 
@@ -264,6 +280,10 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
+			case R.id.preferences:
+				startActivity(new Intent(this, EditPreferences.class));
+				return true;
+				
 			case R.id.select_preset:
 				Intent intent = new Intent(this, TimerPicker.class);
 				startActivityForResult(intent, GET_PRESET);
