@@ -6,8 +6,8 @@
                 <item>Amber</item>
         </string-array>
         <string-array name="ledColors">
-                <item>0x00ff0000</item>
-                <item>0x0000ff00</item>
-                <item>0x00ffff00</item>
+                <item>#ffff0000</item>
+                <item>#ff00ff00</item>
+                <item>#ffff7e00</item>
         </string-array>
 </resources>

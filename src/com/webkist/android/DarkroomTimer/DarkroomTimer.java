@@ -30,6 +30,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -219,14 +220,15 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		}
 		String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
 		if(ring != "") {
-			Log.v(TAG, ring);
 			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));			
 		} else {
 			ping = null;
 		}
 		
-		int ledColor = (int) settings.getLong("ledColor", 0x00ff0000);
-		timerText.setBackgroundColor(ledColor);
+		int ledColor = Color.parseColor(settings.getString("ledColor", "red"));
+		timerText.setTextColor(ledColor);
+		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
+		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
 		
 		if (preset != null) {
 			this.setTitle(preset.toString());
