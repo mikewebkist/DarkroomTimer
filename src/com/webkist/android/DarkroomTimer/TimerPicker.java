@@ -28,7 +28,6 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -120,10 +119,11 @@ public class TimerPicker extends ListActivity {
 				return true;
 			case DUPLICATE_ID:
 				DarkroomPreset preset = new DarkroomPreset(this, uri);
-				ContentValues vals = new ContentValues();
+				preset.name = preset.name + " copy";
+				
 				ContentResolver cr = getContentResolver();
-				vals.put(DarkroomPreset.PRESET_NAME, preset.name + " copy");
-				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				
+				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
 				String presetId = newUri.getPathSegments().get(1);
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
