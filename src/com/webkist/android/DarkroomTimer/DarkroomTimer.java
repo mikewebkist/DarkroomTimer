@@ -225,6 +225,9 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			ping = null;
 		}
 		
+		int ledColor = (int) settings.getLong("ledColor", 0x00ff0000);
+		timerText.setBackgroundColor(ledColor);
+		
 		if (preset != null) {
 			this.setTitle(preset.toString());
 

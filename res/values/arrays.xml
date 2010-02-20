@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+        <string-array name="ledColorNames">
+                <item>Red</item>
+                <item>Green</item>
+                <item>Amber</item>
+        </string-array>
+        <string-array name="ledColors">
+                <item>0x00ff0000</item>
+                <item>0x0000ff00</item>
+                <item>0x00ffff00</item>
+        </string-array>
+</resources>

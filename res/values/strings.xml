@@ -52,7 +52,7 @@
 	</string>
 
 <string name="iso_prompt">Film Speed</string>
-
+		
 	<string-array name="iso_values">
 		<item>Any Film</item>
 		<item>6</item>
