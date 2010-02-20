@@ -25,7 +25,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
-import android.widget.TextView;
 
 public class DarkroomPreset implements BaseColumns, Serializable {
 
