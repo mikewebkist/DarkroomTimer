@@ -16,6 +16,8 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
+
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -26,11 +28,19 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
-import android.widget.LinearLayout;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.ToggleButton;
+import android.widget.ViewAnimator;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,127 +50,222 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 
-public class DarkroomTimer extends Activity implements OnClickListener {
+public class DarkroomTimer extends Activity implements OnClickListener, OnCheckedChangeListener {
 	private static final String TAG = "DarkroomTimer";
 
-	// TODO Organize these.
 	private static final int TICK = 1;
-	private static final int DONE = 2;
 	private static final int ADJUST_STOPPED_CLOCK = 3;
 	private static final int GET_PRESET = 4;
 	private static final int FAILED_PRESET_PICK = 5;
 	private static final int ADJUST_RUNNING_CLOCK = 6;
-	private static final int NEXT = 7;
+
+	private static final int PROMPT_NONE = 0;
+	private static final int PROMPT_POUR = 1;
+	private static final int PROMPT_AGITATE = 2;
+
+	private static final String SELECTED_PRESET = "selectedPreset";
+	private static final String RUNNING_START_TIME = "runningStartTime";
+	private static final String RUNNING_PAUSE_TIME = "runningPauseTime";
 
 	private TextView timerText;
-	private TextView stepActionText;
-	private TextView clickText;
-	private TextView stepHead;
+	private TextView upcomingText;
+	private TextView stepLabel;
 
 	private long startTime = 0;
+	private long pauseTime = 0;
 
 	private DarkroomPreset preset = null;
-	private DarkroomPreset.DarkroomStep step;
-	private Ringtone ping;
+	private Ringtone ping = null;
 
 	private Thread timer = null;
-	// protected PowerManager.WakeLock mWakeLock = null;
 	private boolean timerRunning = false;
+
+	private static boolean showTempsInF = true;
+
+	private ViewAnimator actionFlipper;
+
+	// The format should be in the form "%.1f¼%s"
+	public static String tempString(double temp, String format) {
+		return String.format(format, temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
+	}
+
+	public static boolean showTempsInF() {
+		return showTempsInF;
+	}
 
 	Handler threadMessageHandler = new Handler() {
 
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-			case TICK:
-				long remaining = stepTimeRemaining();
+				case TICK:
+					long remaining = stepTimeRemaining();
 
-				int minutes = (int) remaining / 60000;
-				int seconds = (int) ((remaining % 60000) / 1000);
+					if (remaining <= 0) {
+						// DONE
+						stopThread();
+						startTime = 0;
 
-				timerText.setText(String.format("%02d:%02d", minutes, seconds));
-				double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
+						upcomingText.setText("");
 
-				if(remaining <= 5000 && !ping.isPlaying()) {
-					ping.play();
-				}
-				
-				if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
-					clickText.setText("Pour...");
-					stepActionText.setText("");
-				} else if (step.agitateEvery > 0) {
-					if (elapsedSecs < (step.pourFor + step.agitateFor)) {
-						clickText.setText(R.string.prompt_agitate);
-						stepActionText.setText("");
-					} else {
-						double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
-
-						if (elapsedRemainder < step.agitateFor) {
-							stepActionText.setText("");
-							clickText.setText(R.string.prompt_agitate);
-						} else if (elapsedRemainder > step.agitateEvery - 10) {
-							// Coming up on agitation
-							double agitateIn = step.agitateEvery - elapsedRemainder;
-							Resources res = getResources();
-							stepActionText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
-									(int) agitateIn / 60, (int) agitateIn % 60));
+						if (preset.nextStep()) {
+							long dur = stepTimeRemaining() / 1000;
+							stepLabel.setText(preset.currentStep().name);
+							timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
+							actionFlipper.setDisplayedChild(PROMPT_NONE);
+							((ToggleButton) findViewById(R.id.toggleButton)).setChecked(false);
 						} else {
-							stepActionText.setText("");
-							clickText.setText("");
+							stepLabel.setText(R.string.prompt_done);
+							timerText.setText(R.string.prompt_done);
+							actionFlipper.setDisplayedChild(PROMPT_NONE);
+						}
+
+					} else {
+						int minutes = (int) remaining / 60000;
+						int seconds = (int) ((remaining % 60000) / 1000);
+
+						timerText.setText(String.format("%02d:%02d", minutes, seconds));
+						double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
+						DarkroomStep step = preset.currentStep();
+
+						// If we're close to the end, play the notification
+						// sound as often as possible.
+						if (ping != null && remaining <= 5000 && !ping.isPlaying()) {
+							ping.play();
+						}
+
+						// Figure out what the user should be doing now.
+						if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
+							// Pour.
+							actionFlipper.setDisplayedChild(PROMPT_POUR);
+						} else if (step.agitateEvery > 0) {
+							if (elapsedSecs < (step.pourFor + step.agitateFor)) {
+								// Agitate after pour.
+								actionFlipper.setDisplayedChild(PROMPT_AGITATE);
+							} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
+								// Agitate.
+								actionFlipper.setDisplayedChild(PROMPT_AGITATE);
+							} else {
+								// Nothing.
+								actionFlipper.setDisplayedChild(PROMPT_NONE);
+							}
+						} else { // This clears the "Click to start..." prompt.
+							actionFlipper.setDisplayedChild(PROMPT_NONE);
+						}
+
+						// What's coming up.
+						if (step.agitateEvery > 0) {
+							double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
+
+							if (elapsedRemainder > (step.agitateEvery - 10) && (remaining / 1000) >= (step.agitateFor + 10)) {
+								double agitateIn = step.agitateEvery - elapsedRemainder;
+								Resources res = getResources();
+								upcomingText.setText(String.format("%s in %02d:%02d",
+										res.getString(R.string.prompt_agitate), (int) agitateIn / 60, (int) agitateIn % 60));
+							} else {
+								upcomingText.setText("");
+							}
+						} else {
+							upcomingText.setText("");
 						}
 					}
-				} else {
-					clickText.setText("");
-					stepActionText.setText("");
-				}
-				break;
-			case NEXT:
-				step = preset.nextStep();
-				if (step == null) {
-					stepHead.setText(R.string.prompt_done);
-					timerText.setText("DONE");
-				} else {
-					long dur = stepTimeRemaining() / 1000;
-					stepHead.setText(step.name);
-					timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
 
-					clickText.setText("Click to start...");
-				}
-
-				break;
-
-			case DONE:
-				timerRunning = false;
-				startTime = 0;
-				clickText.setText("");
-				stepActionText.setText("");
-
-				Message m = new Message();
-				m.what = DarkroomTimer.NEXT;
-				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
-
-				break;
+					break;
 			}
 		}
 	};
+
+	private boolean ignoreToggle = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		// getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.main);
-		LinearLayout mainView = (LinearLayout) findViewById(R.id.mainLayout);
-		mainView.setOnClickListener(this);
+		ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
+		startButton.setOnCheckedChangeListener(this);
 
-		ping = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
-		
-		if (preset == null) {
+		timerText = (TextView) findViewById(R.id.stepClock);
+		Typeface face = Typeface.createFromAsset(getAssets(), "digital-7-mono.ttf");
+		timerText.setTypeface(face);
+		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
+		timerTextBG.setTypeface(face);
+		timerText.setOnClickListener(this);
+		upcomingText = (TextView) findViewById(R.id.upcoming);
+		actionFlipper = (ViewAnimator) findViewById(R.id.actionFlipper);
+		stepLabel = (TextView) findViewById(R.id.stepLabel);
+
+
+		if (savedInstanceState != null) {
+			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
+			startTime = savedInstanceState.getLong(RUNNING_START_TIME);
+			pauseTime = savedInstanceState.getLong(RUNNING_PAUSE_TIME);
+		} else {
 			Intent intent = new Intent(this, TimerPicker.class);
 			startActivityForResult(intent, GET_PRESET);
 		}
 
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		showTempsInF = settings.getBoolean("showTempsInF", true);
+
+		if(ping != null) {
+			
+		}
+		String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
+		if(ring != "") {
+			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));			
+		} else {
+			ping = null;
+		}
+		
+		int ledColor = Color.parseColor(settings.getString("ledColor", "red"));
+		timerText.setTextColor(ledColor);
+		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
+		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
+		
+		if (preset != null) {
+			this.setTitle(preset.toString());
+
+			if (preset.done()) {
+				stepLabel.setText(R.string.prompt_done);
+				timerText.setText(R.string.prompt_done);
+				actionFlipper.setDisplayedChild(PROMPT_NONE);
+			} else {
+				long dur = stepTimeRemaining() / 1000;
+				stepLabel.setText(preset.currentStep().name);
+				timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
+			}
+
+			ToggleButton toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
+
+			if (preset.running() && startTime > 0) {
+				if (pauseTime > 0) {
+					toggleButton.setChecked(false);
+					pauseTimer();
+				} else {
+					ignoreToggle = true;
+					toggleButton.setChecked(true);
+					startThread();
+				}
+			} else if (preset.running() || (!preset.running() && !preset.done())) {
+				toggleButton.setChecked(false);
+				actionFlipper.setDisplayedChild(PROMPT_NONE);
+			}
+		}
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable(SELECTED_PRESET, preset);
+		outState.putLong(RUNNING_START_TIME, startTime);
+		outState.putLong(RUNNING_PAUSE_TIME, pauseTime);
 	}
 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -171,7 +276,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
+
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.darkroomtimer, menu);
@@ -180,13 +285,14 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.stop_timer:
-			stopThread();
-			return true;
-		case R.id.select_preset:
-			Intent intent = new Intent(this, TimerPicker.class);
-			startActivityForResult(intent, GET_PRESET);
-			return true;
+			case R.id.preferences:
+				startActivity(new Intent(this, EditPreferences.class));
+				return true;
+				
+			case R.id.select_preset:
+				Intent intent = new Intent(this, TimerPicker.class);
+				startActivityForResult(intent, GET_PRESET);
+				return true;
 		}
 		return false;
 	}
@@ -197,40 +303,11 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 				timerRunning = false;
 				startTime = 0;
 				stopThread();
-				step = null;
 
 				Uri uri = data.getData();
-				Log.v(TAG, "URI: " + uri);
 				preset = new DarkroomPreset(this, uri);
-
-				preset.reset();
-
-				TextView header = (TextView) findViewById(R.id.presetName);
-				header.setText(preset.name);
-
-				timerText = (TextView) findViewById(R.id.stepClock);
-				timerText.setOnClickListener(this);
-				stepActionText = (TextView) findViewById(R.id.stepActionText);
-				clickText = (TextView) findViewById(R.id.clickText);
-				stepHead = (TextView) findViewById(R.id.stepLabel);
 			}
 		}
-	}
-
-	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		switch (keyCode) {
-
-		case KeyEvent.KEYCODE_DPAD_CENTER:
-			Log.v(TAG, "Key: " + event);
-			handleClick();
-			break;
-
-		default:
-			return false;
-
-		}
-		return true;
 	}
 
 	protected Dialog onCreateDialog(int id) {
@@ -260,7 +337,7 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 							int addseconds = addClock.getCurrent();
 
-							step.duration += addseconds;
+							preset.currentStep().duration += addseconds;
 							Message m = new Message();
 							m.what = DarkroomTimer.TICK;
 							DarkroomTimer.this.threadMessageHandler.sendMessage(m);
@@ -296,14 +373,14 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 							int minutes = minClock.getCurrent();
 							int seconds = secClock.getCurrent();
 
-							step.duration = minutes * 60 + seconds;
+							preset.currentStep().duration = minutes * 60 + seconds;
 							Message m = new Message();
 							m.what = DarkroomTimer.TICK;
 							DarkroomTimer.this.threadMessageHandler.sendMessage(m);
 						}
 					}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int whichButton) {
-							Log.v(TAG, "in onCreateDialog, clicked Cancel");
+							// Just close. Don't need to do anything.
 						}
 					}).create();
 		}
@@ -316,8 +393,8 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 			NumberPicker addClock = (NumberPicker) dialog.findViewById(R.id.addSeconds);
 			addClock.changeCurrent(0);
 		} else if (id == ADJUST_STOPPED_CLOCK) {
-			int minutes = (int) step.duration / 60;
-			int seconds = (int) step.duration % 60;
+			int minutes = (int) preset.currentStep().duration / 60;
+			int seconds = (int) preset.currentStep().duration % 60;
 
 			NumberPicker minClock = (NumberPicker) dialog.findViewById(R.id.minuteClock);
 			minClock.changeCurrent(minutes);
@@ -329,61 +406,51 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 
 	@Override
 	public void onClick(View v) {
-		if (v.getId() == R.id.stepClock) {
-			Log.v(TAG, "We have a clock click.");
-			if (timerRunning) {
-				showDialog(ADJUST_RUNNING_CLOCK);
-			} else {
-				showDialog(ADJUST_STOPPED_CLOCK);
+		if (!preset.done()) {
+			if (v.getId() == R.id.stepClock) {
+				if (timerRunning) {
+					showDialog(ADJUST_RUNNING_CLOCK);
+				} else {
+					showDialog(ADJUST_STOPPED_CLOCK);
+				}
 			}
-		} else {
-			Log.v(TAG, "In onClick: " + v.getId());
-			handleClick();
 		}
 	}
 
-	private void handleClick() {
+	private void startTimer() {
 		if (timerRunning) {
-			Log.v(TAG, "Timer already running!");
+			// Nothing happens if the timer is already running.
 		} else {
-			startTime = System.currentTimeMillis();
+			if (pauseTime > 0 && startTime > 0) {
+				startTime += System.currentTimeMillis() - pauseTime;
+			} else {
+				startTime = System.currentTimeMillis();
+			}
+			pauseTime = 0;
+			preset.start();
 			startThread();
 		}
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		if (preset != null) {
-			Log.v(TAG, "in onResume()");
-			if (stepTimeRemaining() > 0) {
-				startThread();
-			} else {
-				Message m = new Message();
-				m.what = DarkroomTimer.DONE;
-				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
-			}
+	private void pauseTimer() {
+		if (timerRunning) {
+			pauseTime = System.currentTimeMillis();
+			stopThread();
 		}
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		Log.v(TAG, "in onPause()");
 		stopThread();
 	}
 
-	@Override
-	public void onStop() {
-		super.onStop();
-		Log.v(TAG, "in onStop()");
-	}
-
 	private void startThread() {
-		clickText.setText("");
-		timerRunning = true;
-		timer = new Thread(new TimerThread());
-		timer.start();
+		if (!timerRunning) {
+			timerRunning = true;
+			timer = new Thread(new TimerThread());
+			timer.start();
+		}
 	}
 
 	private void stopThread() {
@@ -394,35 +461,44 @@ public class DarkroomTimer extends Activity implements OnClickListener {
 	}
 
 	private long stepTimeRemaining() {
-		if (step == null) {
-			return 0;
-		} else if (startTime == 0) {
-			return (step.pourFor + step.duration) * 1000;
+		if (startTime == 0) {
+			return (preset.currentStep().pourFor + preset.currentStep().duration) * 1000;
 		} else {
-			return startTime + (step.pourFor + step.duration) * 1000 - System.currentTimeMillis();
+			if (pauseTime > 0) {
+				return startTime + (preset.currentStep().pourFor + preset.currentStep().duration) * 1000 - pauseTime;
+			} else {
+				return startTime + (preset.currentStep().pourFor + preset.currentStep().duration) * 1000
+						- System.currentTimeMillis();
+			}
 		}
 	}
 
 	class TimerThread implements Runnable {
 		public void run() {
 			while (!Thread.currentThread().isInterrupted()) {
-				if (DarkroomTimer.this.stepTimeRemaining() <= 0) {
-					Message m = new Message();
-					m.what = DarkroomTimer.DONE;
-					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
+				Message m = new Message();
+				m.what = DarkroomTimer.TICK;
+				DarkroomTimer.this.threadMessageHandler.sendMessage(m);
 
-					break;
-				} else {
-					Message m = new Message();
-					m.what = DarkroomTimer.TICK;
-					DarkroomTimer.this.threadMessageHandler.sendMessage(m);
-
-					try {
-						Thread.sleep(500);
-					} catch (InterruptedException e) {
-						Thread.currentThread().interrupt();
-					}
+				try {
+					Thread.sleep(500); // Tick every half-second.
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
+
+			}
+		}
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		if (ignoreToggle) {
+			ignoreToggle = false;
+		} else {
+			if (isChecked) {
+				startTimer();
+			} else {
+				pauseTimer();
 			}
 		}
 	}

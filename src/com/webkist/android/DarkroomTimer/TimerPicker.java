@@ -28,7 +28,6 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,7 +40,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -49,10 +47,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -73,14 +69,13 @@ public class TimerPicker extends ListActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case XML_IMPORT_DONE:
-					Log.v(TAG, "XML Import Finished...");
 					listViewCursor.requery();
 					break;
 			}
 		}
 	};
 	private DarkroomPreset longClickPreset;
-	private boolean showTempsInF;
+	private boolean showTempsInF = true;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -97,11 +92,8 @@ public class TimerPicker extends ListActivity {
 		setListAdapter(adapter);
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
-		showTempsInF = settings.getBoolean("showTempsInF", true);
+		showTempsInF  = settings.getBoolean("showTempsInF", true);
 		if (!alreadyRan) {
-			// SharedPreferences.Editor editor = settings.edit();
-			// editor.putBoolean("AlreadyRanFlag", true);
-			// editor.commit();
 			showDialog(DIALOG_FIRST_RUN);
 		}
 		registerForContextMenu(getListView());
@@ -128,17 +120,16 @@ public class TimerPicker extends ListActivity {
 				showDialog(DIALOG_DELETE_CONFIRM);
 				return true;
 			case DUPLICATE_ID:
-				// TODO
 				DarkroomPreset preset = new DarkroomPreset(this, uri);
-				ContentValues vals = new ContentValues();
+				preset.name = preset.name + " copy";
+				
 				ContentResolver cr = getContentResolver();
-				vals.put(DarkroomPreset.PRESET_NAME, preset.name + " copy");
-				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				
+				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
 				String presetId = newUri.getPathSegments().get(1);
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
 				}
-				Log.v(TAG, "Inserted " + newUri);
 				editPreset(newUri);
 				return true;
 			default:
@@ -162,7 +153,7 @@ public class TimerPicker extends ListActivity {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								if (longClickPreset != null) {
-									getContentResolver().delete(longClickPreset.uri, null, null);
+									getContentResolver().delete(Uri.parse(longClickPreset.uri), null, null);
 									Toast.makeText(TimerPicker.this, "Deleted.", Toast.LENGTH_SHORT).show();
 									longClickPreset = null;
 								}
@@ -208,7 +199,6 @@ public class TimerPicker extends ListActivity {
 	public void editPreset(Uri uri) {
 		Intent intent = new Intent(this, PresetEditor.class);
 		intent.setData(uri);
-		// intent.setAction(Intent.ACTION_EDIT);
 		startActivityForResult(intent, EDIT_PRESET);
 	}
 
@@ -223,7 +213,6 @@ public class TimerPicker extends ListActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.add_preset:
-				Log.v(TAG, "Add preset.");
 				Intent intent = new Intent(this, PresetEditor.class);
 				intent.setData(null);
 				startActivityForResult(intent, EDIT_PRESET);
@@ -237,7 +226,6 @@ public class TimerPicker extends ListActivity {
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
-		Log.v(TAG, "List Item Clicked: preset=" + uri);
 		setResult(RESULT_OK, new Intent().setData(uri));
 		finish();
 	}
@@ -246,7 +234,6 @@ public class TimerPicker extends ListActivity {
 
 		public MyOtherAdapter(Context context, Cursor c) {
 			super(context, c);
-			// TODO Auto-generated constructor stub
 		}
 
 		@Override
@@ -262,10 +249,15 @@ public class TimerPicker extends ListActivity {
 			int iso = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.PRESET_ISO));
 			((TextView) view.findViewById(R.id.iso)).setText(iso > 0 ? String.format("ISO %d", iso) : "");
 			float temp = cursor.getFloat(cursor.getColumnIndex(DarkroomPreset.PRESET_TEMP));
-			if(showTempsInF) {
-				((TextView) view.findViewById(R.id.temp)).setText(temp > 0 ? String.format(" @ %.0f¼F", temp * 9 / 5 + 32) : "");
+			TextView tempView = (TextView) view.findViewById(R.id.temp);
+			if(temp > 0) {
+				if(showTempsInF) {
+					tempView.setText(String.format(" @ %s¼F", temp * 9 / 5 + 32));
+				} else {
+					tempView.setText(String.format(" @ %s¼C", temp));
+				}
 			} else {
-				((TextView) view.findViewById(R.id.temp)).setText(temp > 0 ? String.format(" @ %.1f¼C", temp) : "");
+				tempView.setText("");
 			}
 		}
 
@@ -281,11 +273,10 @@ public class TimerPicker extends ListActivity {
 		public void run() {
 			ContentResolver cr = getContentResolver();
 
+			Log.w(TAG, "Initializing DB from XML resources.");
 			ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
 			try {
 				DarkroomPreset p = null;
-				@SuppressWarnings("unused")
-				DarkroomPreset.DarkroomStep step = null;
 				while (xrp.getEventType() != XmlResourceParser.END_DOCUMENT) {
 					if (xrp.getEventType() == XmlResourceParser.START_TAG) {
 						String s = xrp.getName();
@@ -294,7 +285,7 @@ public class TimerPicker extends ListActivity {
 									xrp.getAttributeIntValue(null, "iso", 0), xrp.getAttributeFloatValue(null, "temp", 0));
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
-							step = p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
+							p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
 									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
 									.getAttributeIntValue(null, "pour", 0));
 						}
@@ -314,7 +305,6 @@ public class TimerPicker extends ListActivity {
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(uri, "step"), preset.steps.get(j).toContentValues(presetId));
 				}
-				Log.v(TAG, "Inserted " + uri);
 			}
 
 			Message m = new Message();

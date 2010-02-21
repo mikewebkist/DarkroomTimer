@@ -14,38 +14,61 @@
 		<TextView
 			android:id="@+id/stepLabel"
 			android:text="Dummy Step"
-			android:layout_width="fill_parent"
+			android:layout_width="0dip"
 			android:layout_height="wrap_content"
-			android:gravity="center_horizontal"
+			android:gravity="left|bottom"
+			android:layout_weight="1"
 			style="@style/stepText" />
+
+
+		<FrameLayout
+			android:layout_height="fill_parent"
+			android:layout_width="0dip"
+			android:paddingRight="5dip"
+			android:layout_weight="1">
+			
+			<ViewAnimator
+				android:id="@+id/actionFlipper"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent">
+
+				<TextView
+					android:layout_width="fill_parent"
+					style="@style/actionText"
+					android:layout_height="fill_parent"
+					android:gravity="right|center_vertical"
+					android:text="" />
+				<TextView
+					android:layout_width="fill_parent"
+					style="@style/actionText"
+					android:layout_height="fill_parent"
+					android:gravity="right|center_vertical"
+					android:text="@string/prompt_pour" />
+				<TextView
+					android:layout_width="fill_parent"
+					style="@style/actionText"
+					android:layout_height="fill_parent"
+					android:gravity="right|center_vertical"
+					android:text="@string/prompt_agitate" />
+
+			</ViewAnimator>
+
+			<TextView
+				android:id="@+id/upcoming"
+			android:gravity="right|center_vertical"
+				android:layout_width="fill_parent"
+				android:layout_height="fill_parent"
+				style="@style/upcomingText" />
+				
+		</FrameLayout>
+
 	</LinearLayout>
 
-	<ViewAnimator
-		android:id="@+id/actionFlipper"
-		android:layout_weight="1"
+
+	<View
 		android:layout_width="fill_parent"
-		android:layout_height="0dip">
-
-		<TextView
-			android:layout_width="fill_parent"
-			style="@style/actionText"
-			android:layout_height="fill_parent"
-			android:gravity="center"
-			android:text="" />
-		<TextView
-			android:layout_width="fill_parent"
-			style="@style/actionText"
-			android:layout_height="fill_parent"
-			android:gravity="center"
-			android:text="@string/prompt_pour" />
-		<TextView
-			android:layout_width="fill_parent"
-			style="@style/actionText"
-			android:layout_height="fill_parent"
-			android:gravity="center"
-			android:text="@string/prompt_agitate" />
-
-	</ViewAnimator>
+		android:layout_height="0dip"
+		android:layout_weight="1" />
 
 <FrameLayout
 			android:layout_height="wrap_content"
@@ -70,15 +93,10 @@
 		android:text="00:00" />
 
 </FrameLayout>
-
-	<TextView
-		android:id="@+id/upcoming"
+	<View
 		android:layout_width="fill_parent"
 		android:layout_height="0dip"
-		android:gravity="center"
-		android:layout_weight="1"
-		style="@style/upcomingText" />
-
+		android:layout_weight="1" />
 
 	<LinearLayout
 		android:layout_width="fill_parent"

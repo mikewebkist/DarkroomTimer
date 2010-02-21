@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.app.Activity;
@@ -25,7 +26,12 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-public class DarkroomPreset implements BaseColumns {
+public class DarkroomPreset implements BaseColumns, Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	public static final String TAG = "DarkroomPreset";
+
 	public static final String AUTHORITY = "com.webkist.android.DarkroomTimer";
 	public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 	public static final Uri CONTENT_URI_PRESET = Uri.parse("content://" + AUTHORITY + "/preset");
@@ -42,11 +48,14 @@ public class DarkroomPreset implements BaseColumns {
 	public int iso;
 	public float temp;
 	public String id;
-	public Uri uri;
+	public String uri;
+	
 	private int currentStep = 0;
+	private boolean running = false;
+	
 	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
-	public static final String TAG = "DarkroomPreset";
+	private boolean done = false;
 
 	DarkroomPreset(String id, String name, int iso, float temp) {
 		this.name = name;
@@ -55,20 +64,11 @@ public class DarkroomPreset implements BaseColumns {
 		this.temp = temp;
 	}
 	
-//	DarkroomPreset(String id, String name) {
-//		this.name = name;
-//		this.id = id;
-//	}
-	
 	DarkroomPreset() {
 	}
 
-//	DarkroomPreset(String name) {
-////		this.name = name;
-//	}
-
 	public DarkroomPreset(Activity ctx, Uri uri) {
-		this.uri = uri;
+		this.uri = uri.toString();
 		Cursor cur = ctx.managedQuery(uri, null, null, null, DarkroomPreset.PRESET_NAME);
 
 		int idCol = cur.getColumnIndex(DarkroomPreset._ID);
@@ -91,7 +91,6 @@ public class DarkroomPreset implements BaseColumns {
 			int step_agitageEveryCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_AGITATION);
 			int step_pourForCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_POUR);
 
-			Log.v(TAG, "Steps found: " + step_cur.getCount());
 			if (step_cur.moveToFirst()) {
 				do {
 					int stepNum = step_cur.getInt(step_stepNumCol);
@@ -122,21 +121,51 @@ public class DarkroomPreset implements BaseColumns {
 	}
 
 	public String toString() {
-		return name;
+		if(iso > 0 || temp > 0) {
+			String title = String.format("%s (", name);
+			if(iso > 0) {
+				title = String.format("%sISO %d%s", title, iso, temp > 0 ? ", " : "");
+			}
+			if(temp > 0) {
+				title = String.format("%s @ %.1f¼C)", title, temp);
+			}
+			return title;
+		} else {
+			return name;
+		}
 	}
 
 	public void reset() {
 		currentStep = 0;
+		running = false;
 	}
 
-	public DarkroomStep nextStep() {
-		if (currentStep < steps.size()) {
-			return steps.get(currentStep++);
+	public boolean running() {
+		return running;
+	}
+
+	public void start() {
+		running = true;
+	}
+
+	public boolean done() {
+		return done;
+	}
+	public DarkroomStep currentStep() {
+		return steps.get(currentStep);
+	}
+	
+	public boolean nextStep() {
+		if (++currentStep < steps.size()) {
+			return true;
 		} else {
-			return null;
+			done=true;
+			running=false;
+			return false;
 		}
 	}
 
+	// Doesn't include pour times!
 	public int totalDuration() {
 		int total = 0;
 		for (int i = 0; i < steps.size(); i++) {
@@ -153,7 +182,8 @@ public class DarkroomPreset implements BaseColumns {
 		return vals;
 	}
 
-	public class DarkroomStep implements BaseColumns {
+	public class DarkroomStep implements BaseColumns, Serializable {
+		private static final long serialVersionUID = 1L;
 		public String name;
 		public int stepNum;
 		public int duration;

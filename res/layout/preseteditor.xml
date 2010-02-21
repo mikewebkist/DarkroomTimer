@@ -1,5 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
+	android:focusable="true" android:focusableInTouchMode="true"
 	android:layout_height="fill_parent">
 
 	<ViewFlipper android:id="@+id/details"
@@ -11,8 +13,26 @@
 
 			<EditText android:id="@+id/name" android:layout_width="fill_parent"
 				android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
-				android:gravity="center_vertical" android:inputType="textPersonName|textCapWords" 
+				android:gravity="center_vertical" android:inputType="textPersonName|textCapWords"
 				android:hint="@string/ghostData_name" />
+
+			<LinearLayout android:orientation="horizontal" android:gravity="center_vertical"
+				android:layout_width="fill_parent" android:layout_height="wrap_content">
+				
+				<Spinner android:id="@+id/isoSpinner" android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:gravity="right" />
+				<EditText android:id="@+id/tempEdit" android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
+					android:gravity="center_vertical|right" android:inputType="numberDecimal"
+					android:hint="temp" />
+				<ToggleButton android:textOff="ºC" android:textOn="ºF" android:textColor="#fff"
+				android:background="#00000000" android:textSize="12pt"
+					android:id="@+id/tempToggle" android:layout_width="wrap_content"
+					android:layout_height="wrap_content" android:gravity="center_vertical"  />
+			</LinearLayout>
+
+			<View android:layout_width="fill_parent" android:layout_height="1dip"
+				android:background="@drawable/gradientdivider" />
 
 			<FrameLayout android:layout_width="fill_parent"
 				android:layout_height="0dip" android:layout_weight="1">
@@ -48,13 +68,11 @@
 			android:visibility="gone" android:layout_marginRight="?android:attr/scrollbarSize">
 
 			<TextView android:id="@+id/nameEdit" style="@style/DarkroomTheme.StepEditor"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content" />
+				android:layout_width="fill_parent" android:layout_height="wrap_content" />
 			<View android:layout_width="fill_parent" android:layout_height="1dip"
 				android:background="@drawable/gradientdivider" />
 			<TextView android:id="@+id/durationEdit" style="@style/DarkroomTheme.StepEditor"
-				android:layout_width="fill_parent"
-				android:layout_height="wrap_content" />
+				android:layout_width="fill_parent" android:layout_height="wrap_content" />
 			<View android:layout_width="fill_parent" android:layout_height="1dip"
 				android:background="@drawable/gradientdivider" />
 			<TextView android:id="@+id/agitateEdit" style="@style/DarkroomTheme.StepEditor"
