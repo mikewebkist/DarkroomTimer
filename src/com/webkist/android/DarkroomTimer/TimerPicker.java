@@ -75,6 +75,7 @@ public class TimerPicker extends ListActivity {
 		}
 	};
 	private DarkroomPreset longClickPreset;
+	private boolean showTempsInF = true;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,6 +92,7 @@ public class TimerPicker extends ListActivity {
 		setListAdapter(adapter);
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
+		showTempsInF  = settings.getBoolean("showTempsInF", true);
 		if (!alreadyRan) {
 			showDialog(DIALOG_FIRST_RUN);
 		}
@@ -247,7 +249,16 @@ public class TimerPicker extends ListActivity {
 			int iso = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.PRESET_ISO));
 			((TextView) view.findViewById(R.id.iso)).setText(iso > 0 ? String.format("ISO %d", iso) : "");
 			float temp = cursor.getFloat(cursor.getColumnIndex(DarkroomPreset.PRESET_TEMP));
-			((TextView) view.findViewById(R.id.temp)).setText(temp > 0 ? String.format(" @ %s", DarkroomTimer.tempString(temp, "%.0f¼%s")) : "");
+			TextView tempView = (TextView) view.findViewById(R.id.temp);
+			if(temp > 0) {
+				if(showTempsInF) {
+					tempView.setText(String.format(" @ %s¼F", temp * 9 / 5 + 32));
+				} else {
+					tempView.setText(String.format(" @ %s¼C", temp));
+				}
+			} else {
+				tempView.setText("");
+			}
 		}
 
 	}

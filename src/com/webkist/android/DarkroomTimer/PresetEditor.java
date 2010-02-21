@@ -138,7 +138,8 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 							preset.temp = temp;
 						}
 					} catch(NumberFormatException e) {
-						Log.v(TAG, "Problem parsing temp value: " + tempEdit.getText().toString());
+						// This probably means a blank temp, which is fine.
+						preset.temp = 0;
 					}
 					
 					Spinner spinner = (Spinner) findViewById(R.id.isoSpinner);

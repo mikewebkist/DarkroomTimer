@@ -213,7 +213,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		super.onResume();
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		showTempsInF = settings.getBoolean("showTempsInF", false);
+		showTempsInF = settings.getBoolean("showTempsInF", true);
 
 		if(ping != null) {
 			
