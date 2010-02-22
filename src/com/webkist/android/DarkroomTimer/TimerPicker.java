@@ -63,7 +63,6 @@ public class TimerPicker extends ListActivity {
 	private static final int DUPLICATE_ID = 4;
 	private static final int DIALOG_DELETE_CONFIRM = 1;
 	private static final int EDIT_PRESET = 0;
-	private static final String PREFS_NAME = "TimerPickerPrefs";
 	private static final int DIALOG_FIRST_RUN = 4;
 	private Cursor listViewCursor;
 
