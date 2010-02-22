@@ -1,10 +1,5 @@
 <PreferenceScreen
 	xmlns:android="http://schemas.android.com/apk/res/android">
-	<CheckBoxPreference
-		android:key="showTempsInF"
-		android:defaultValue="true"
-		android:title="Temps in ºF"
-		android:summary="Show all temperatures in Farenheit." />
 	<RingtonePreference
 		android:key="alertTone"
 		android:title="Alert Tone"

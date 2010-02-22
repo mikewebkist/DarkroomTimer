@@ -46,7 +46,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 
 	public String name;
 	public int iso;
-	public float temp;
+	public String temp = "";
 	public String id;
 	public String uri;
 	
@@ -57,7 +57,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 
 	private boolean done = false;
 
-	DarkroomPreset(String id, String name, int iso, float temp) {
+	DarkroomPreset(String id, String name, int iso, String temp) {
 		this.name = name;
 		this.id = id;
 		this.iso = iso;
@@ -80,7 +80,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 			Uri stepUri = Uri.withAppendedPath(uri, "step");
 			this.name = cur.getString(nameCol);
 			this.id = cur.getString(idCol);
-			this.temp = cur.getFloat(tempCol);
+			this.temp = cur.getString(tempCol);
 			this.iso = cur.getInt(isoCol);
 			Log.v(TAG, "Creating " + this.name + " preset.");
 			Cursor step_cur = ctx.managedQuery(stepUri, null, null, null, DarkroomPreset.DarkroomStep.STEP_STEP);

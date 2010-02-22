@@ -80,8 +80,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	private Thread timer = null;
 	private boolean timerRunning = false;
 
-	private static boolean showTempsInF = true;
-
 	private ViewAnimator actionFlipper;
 
 	Handler threadMessageHandler = new Handler() {
@@ -204,8 +202,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		super.onResume();
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		showTempsInF = settings.getBoolean("showTempsInF", true);
-
 		String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
 		if(ring != "") {
 			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));			
@@ -221,12 +217,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		if (preset != null) {
 			String title = preset.name;
 		
-			if(preset.temp > 0) {
-				if(showTempsInF) {
-					title += String.format(" @ %.0f¼F", preset.temp * 9 / 5 + 32);
-				} else {
-					title += String.format(" @ %.0f¼C", preset.temp);
-				}
+			if(preset.temp.length() > 0) {
+				title += String.format(" @ %s", preset.temp);
 			}
 			if(preset.iso > 0) {
 				title += String.format(", ISO %d", preset.iso);

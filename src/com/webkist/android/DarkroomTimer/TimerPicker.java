@@ -76,7 +76,6 @@ public class TimerPicker extends ListActivity {
 		}
 	};
 	private DarkroomPreset longClickPreset;
-	private boolean showTempsInF = true;
 	private SharedPreferences settings;
 
 	@Override
@@ -99,7 +98,6 @@ public class TimerPicker extends ListActivity {
 	public void onResume() {
 		super.onResume();
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
-		showTempsInF  = settings.getBoolean("showTempsInF", true);
 		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
 		if (!alreadyRan) {
 			showDialog(DIALOG_FIRST_RUN);
@@ -255,14 +253,10 @@ public class TimerPicker extends ListActivity {
 			((TextView) view.findViewById(R.id.name)).setText(cursor.getString(cursor.getColumnIndex(DarkroomPreset.PRESET_NAME)));
 			int iso = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.PRESET_ISO));
 			((TextView) view.findViewById(R.id.iso)).setText(iso > 0 ? String.format("ISO %d", iso) : "");
-			float temp = cursor.getFloat(cursor.getColumnIndex(DarkroomPreset.PRESET_TEMP));
+			String temp = cursor.getString(cursor.getColumnIndex(DarkroomPreset.PRESET_TEMP));
 			TextView tempView = (TextView) view.findViewById(R.id.temp);
-			if(temp > 0) {
-				if(showTempsInF) {
-					tempView.setText(String.format(" @ %.0f¼F", temp * 9 / 5 + 32));
-				} else {
-					tempView.setText(String.format(" @ %.0f¼C", temp));
-				}
+			if(temp != null && temp.length() > 0) {
+				tempView.setText(String.format(" @ %s", temp));
 			} else {
 				tempView.setText("");
 			}
@@ -289,7 +283,7 @@ public class TimerPicker extends ListActivity {
 						String s = xrp.getName();
 						if (s.equals("preset")) {
 							p = new DarkroomPreset(xrp.getAttributeValue(null, "id"), xrp.getAttributeValue(null, "name"),
-									xrp.getAttributeIntValue(null, "iso", 0), xrp.getAttributeFloatValue(null, "temp", 0));
+									xrp.getAttributeIntValue(null, "iso", 0), xrp.getAttributeValue(null, "temp"));
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
 							p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
