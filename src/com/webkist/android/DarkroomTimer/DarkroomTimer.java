@@ -187,7 +187,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		actionFlipper = (ViewAnimator) findViewById(R.id.actionFlipper);
 		stepLabel = (TextView) findViewById(R.id.stepLabel);
 
-
 		if (savedInstanceState != null) {
 			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
 			startTime = savedInstanceState.getLong(RUNNING_START_TIME);
@@ -205,24 +204,24 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
-		if(ring != "") {
-			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));			
+		if (ring != "") {
+			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));
 		} else {
 			ping = null;
 		}
-		
+
 		int ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
 		timerText.setTextColor(ledColor);
 		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
 		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
-		
+
 		if (preset != null) {
 			String title = preset.name;
-		
-			if(preset.temp.length() > 0) {
+
+			if (preset.temp != null && preset.temp.length() > 0) {
 				title += String.format(" @ %s", preset.temp);
 			}
-			if(preset.iso > 0) {
+			if (preset.iso > 0) {
 				title += String.format(", ISO %d", preset.iso);
 			}
 			this.setTitle(title);
@@ -239,7 +238,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 			ToggleButton toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
 			toggleButton.setEnabled(!preset.done());
-			
+
 			if (preset.running() && startTime > 0) {
 				if (pauseTime > 0) {
 					toggleButton.setChecked(false);
@@ -283,7 +282,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			case R.id.preferences:
 				startActivity(new Intent(this, EditPreferences.class));
 				return true;
-				
+
 			case R.id.select_preset:
 				Intent intent = new Intent(this, TimerPicker.class);
 				startActivityForResult(intent, GET_PRESET);
@@ -369,9 +368,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 							int seconds = secClock.getCurrent();
 
 							preset.currentStep().duration = minutes * 60 + seconds;
-//							if(pauseTime > 0) {
-//								preset.currentStep().duration -= preset.currentStep().pourFor;
-//							}
+
 							Message m = new Message();
 							m.what = DarkroomTimer.TICK;
 							DarkroomTimer.this.threadMessageHandler.sendMessage(m);
@@ -391,8 +388,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			NumberPicker addClock = (NumberPicker) dialog.findViewById(R.id.addSeconds);
 			addClock.changeCurrent(0);
 		} else if (id == ADJUST_STOPPED_CLOCK) {
-			int duration = preset.currentStep().duration; // + preset.currentStep().pourFor;
-
+			int duration = preset.currentStep().duration;
+			
 			NumberPicker minClock = (NumberPicker) dialog.findViewById(R.id.minuteClock);
 			minClock.changeCurrent((int) duration / 60);
 

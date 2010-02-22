@@ -115,7 +115,6 @@ public class TimerPicker extends ListActivity {
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, info.id);
-		Log.v(TAG, "Context menu selection for: " + uri);
 		switch (item.getItemId()) {
 			case EDIT_ID:
 				editPreset(uri);
@@ -127,9 +126,9 @@ public class TimerPicker extends ListActivity {
 			case DUPLICATE_ID:
 				DarkroomPreset preset = new DarkroomPreset(this, uri);
 				preset.name = preset.name + " copy";
-				
+
 				ContentResolver cr = getContentResolver();
-				
+
 				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
 				String presetId = newUri.getPathSegments().get(1);
 				for (int j = 0; j < preset.steps.size(); j++) {
@@ -250,12 +249,13 @@ public class TimerPicker extends ListActivity {
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			((TextView) view.findViewById(R.id.name)).setText(cursor.getString(cursor.getColumnIndex(DarkroomPreset.PRESET_NAME)));
+			((TextView) view.findViewById(R.id.name)).setText(cursor.getString(cursor
+					.getColumnIndex(DarkroomPreset.PRESET_NAME)));
 			int iso = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.PRESET_ISO));
 			((TextView) view.findViewById(R.id.iso)).setText(iso > 0 ? String.format("ISO %d", iso) : "");
 			String temp = cursor.getString(cursor.getColumnIndex(DarkroomPreset.PRESET_TEMP));
 			TextView tempView = (TextView) view.findViewById(R.id.temp);
-			if(temp != null && temp.length() > 0) {
+			if (temp != null && temp.length() > 0) {
 				tempView.setText(String.format(" @ %s", temp));
 			} else {
 				tempView.setText("");
@@ -286,8 +286,8 @@ public class TimerPicker extends ListActivity {
 									xrp.getAttributeIntValue(null, "iso", 0), xrp.getAttributeValue(null, "temp"));
 							darkroomPresets.add(p);
 						} else if (s.equals("step")) {
-							p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(
-									null, "duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
+							p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(null,
+									"duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
 									.getAttributeIntValue(null, "pour", 0));
 						}
 					}

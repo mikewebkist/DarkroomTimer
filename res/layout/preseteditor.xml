@@ -8,11 +8,10 @@
 		android:layout_width="fill_parent" android:layout_height="fill_parent">
 
 		<LinearLayout android:layout_width="fill_parent"
-			android:layout_marginRight="?android:attr/scrollbarSize"
 			android:layout_height="fill_parent" android:orientation="vertical">
 
 			<EditText android:id="@+id/name" android:layout_width="fill_parent"
-				android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
+				android:layout_height="wrap_content"
 				android:gravity="center_vertical" android:inputType="textPersonName|textCapWords"
 				android:hint="@string/ghostData_name" />
 
@@ -22,7 +21,7 @@
 				<Spinner android:id="@+id/isoSpinner" android:layout_width="wrap_content"
 					android:layout_height="wrap_content" android:gravity="right" />
 				<EditText android:id="@+id/tempEdit" android:layout_width="wrap_content"
-					android:layout_height="wrap_content" android:layout_marginRight="?android:attr/scrollbarSize"
+					android:layout_height="wrap_content"
 					android:gravity="center_vertical|right" android:inputType="numberDecimal"
 					android:hint="temp" />
 				<ToggleButton android:textOff="ºC" android:textOn="ºF" android:textColor="#fff"
@@ -65,7 +64,7 @@
 
 		<LinearLayout android:layout_width="fill_parent"
 			android:layout_height="fill_parent" android:orientation="vertical"
-			android:visibility="gone" android:layout_marginRight="?android:attr/scrollbarSize">
+			android:visibility="gone">
 
 			<TextView android:id="@+id/nameEdit" style="@style/DarkroomTheme.StepEditor"
 				android:layout_width="fill_parent" android:layout_height="wrap_content" />

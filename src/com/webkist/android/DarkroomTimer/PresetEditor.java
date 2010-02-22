@@ -115,7 +115,6 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 					String temp = tempEdit.getText().toString();
 
 					if (temp.length() > 0) {
-						Log.v(TAG, "Saving temp: <" + temp + ">");
 						ToggleButton tempToggle = (ToggleButton) findViewById(R.id.tempToggle);
 						if (tempToggle.isChecked()) {
 							temp += "F";
@@ -166,7 +165,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			case EDIT_STEP:
 				final View v = factory.inflate(R.layout.editstep, null);
 
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("EditStep").setView(v).setPositiveButton(
+				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("Edit Step").setView(v).setPositiveButton(
 						R.string.time_picker_ok, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								modifiedStep.name = ((EditText) v.findViewById(R.id.nameEdit)).getText().toString();

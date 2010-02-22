@@ -15,21 +15,21 @@ import android.net.Uri;
 import android.util.Log;
 
 public class DarkroomPresetProvider extends ContentProvider {
-	private static final String		TAG					= "DarkroomPresetProvider";
+	private static final String TAG = "DarkroomPresetProvider";
 
-	private static final String		DATABASE_NAME		= "presets.db";
-	private static final int		DATABASE_VERSION	= 4;
+	private static final String DATABASE_NAME = "presets.db";
+	private static final int DATABASE_VERSION = 4;
 
-	private static final int		URI_PRESETS			= 1;
-	private static final int		URI_PRESET_ID		= 2;
-	private static final int		URI_STEP_ID			= 3;
-	private static final UriMatcher	sUriMatcher;
+	private static final int URI_PRESETS = 1;
+	private static final int URI_PRESET_ID = 2;
+	private static final int URI_STEP_ID = 3;
+	private static final UriMatcher sUriMatcher;
 
-	private static final String		PRESET_TABLE_NAME	= "presets";
-	private static final String		STEP_TABLE_NAME		= "steps";
+	private static final String PRESET_TABLE_NAME = "presets";
+	private static final String STEP_TABLE_NAME = "steps";
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
-		private Resources	res;
+		private Resources res;
 
 		DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,7 +51,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 		}
 	}
 
-	private DatabaseHelper	mOpenHelper;
+	private DatabaseHelper mOpenHelper;
 
 	@Override
 	public boolean onCreate() {
@@ -109,7 +109,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 					Uri presetUri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, rowId);
 					getContext().getContentResolver().notifyChange(presetUri, null);
 					getContext().getContentResolver().notifyChange(DarkroomPreset.CONTENT_URI_PRESET, null);
-					
+
 					return presetUri;
 				}
 				break;
@@ -136,7 +136,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 		SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
 		String orderBy = DarkroomPreset.PRESET_NAME;
-		
+
 		switch (sUriMatcher.match(uri)) {
 			case URI_PRESETS: // Get all presets
 				qb.setTables(PRESET_TABLE_NAME);
@@ -146,7 +146,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 				qb.setTables(PRESET_TABLE_NAME);
 				qb.appendWhere(DarkroomPreset._ID + "=" + uri.getPathSegments().get(1));
 				break;
-				
+
 			case URI_STEP_ID: // Get steps associated with a preset
 				qb.setTables(STEP_TABLE_NAME);
 				qb.appendWhere(DarkroomPreset.DarkroomStep.STEP_PRESET + "=" + uri.getPathSegments().get(1));

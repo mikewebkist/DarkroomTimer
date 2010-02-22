@@ -43,16 +43,15 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	public static final String PRESET_TEMP = "temp";
 	public static final String PRESET_ISO = "iso";
 
-
 	public String name;
 	public int iso;
 	public String temp = "";
 	public String id;
 	public String uri;
-	
+
 	private int currentStep = 0;
 	private boolean running = false;
-	
+
 	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
 	private boolean done = false;
@@ -63,7 +62,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		this.iso = iso;
 		this.temp = temp;
 	}
-	
+
 	DarkroomPreset() {
 	}
 
@@ -113,7 +112,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		steps.add(s);
 		s.fromBlank = false;
 	}
-	
+
 	public DarkroomStep addStep(int stepNum, String name, int duration, int agitateEvery, int pourFor) {
 		DarkroomStep s = new DarkroomStep(stepNum, name, duration, agitateEvery, pourFor);
 		steps.add(s);
@@ -140,16 +139,17 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	public boolean done() {
 		return done;
 	}
+
 	public DarkroomStep currentStep() {
 		return steps.get(currentStep);
 	}
-	
+
 	public boolean nextStep() {
 		if (++currentStep < steps.size()) {
 			return true;
 		} else {
-			done=true;
-			running=false;
+			done = true;
+			running = false;
 			return false;
 		}
 	}
@@ -200,7 +200,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		DarkroomStep() {
 			this.fromBlank = true;
 		}
-		
+
 		public DarkroomStep clone() {
 			DarkroomStep newStep = new DarkroomStep();
 			newStep.fromBlank = this.fromBlank;
@@ -218,7 +218,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 			this.agitateEvery = newStep.agitateEvery;
 			this.pourFor = newStep.pourFor;
 		}
-		
+
 		public ContentValues toContentValues(String presetId) {
 			ContentValues vals = new ContentValues();
 			vals.put(STEP_PRESET, presetId);
