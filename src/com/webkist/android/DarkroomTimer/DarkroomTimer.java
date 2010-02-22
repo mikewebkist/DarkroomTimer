@@ -374,6 +374,9 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 							int seconds = secClock.getCurrent();
 
 							preset.currentStep().duration = minutes * 60 + seconds;
+							if(pauseTime > 0) {
+								preset.currentStep().duration -= preset.currentStep().pourFor;
+							}
 							Message m = new Message();
 							m.what = DarkroomTimer.TICK;
 							DarkroomTimer.this.threadMessageHandler.sendMessage(m);
@@ -393,14 +396,13 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			NumberPicker addClock = (NumberPicker) dialog.findViewById(R.id.addSeconds);
 			addClock.changeCurrent(0);
 		} else if (id == ADJUST_STOPPED_CLOCK) {
-			int minutes = (int) preset.currentStep().duration / 60;
-			int seconds = (int) preset.currentStep().duration % 60;
+			int duration = preset.currentStep().duration + preset.currentStep().pourFor;
 
 			NumberPicker minClock = (NumberPicker) dialog.findViewById(R.id.minuteClock);
-			minClock.changeCurrent(minutes);
+			minClock.changeCurrent((int) duration / 60);
 
 			NumberPicker secClock = (NumberPicker) dialog.findViewById(R.id.secondClock);
-			secClock.changeCurrent(seconds);
+			secClock.changeCurrent((int) duration % 60);
 		}
 	}
 
@@ -408,7 +410,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onClick(View v) {
 		if (!preset.done()) {
 			if (v.getId() == R.id.stepClock) {
-				if (timerRunning) {
+				if (timerRunning && pauseTime == 0) {
 					showDialog(ADJUST_RUNNING_CLOCK);
 				} else {
 					showDialog(ADJUST_STOPPED_CLOCK);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 
 <preset-array>
-    <preset name="Tri-X 400 in D76" temp="20.0" iso="400">
+    <preset name="Kodak 400TX in D76" temp="20.0" iso="400">
 	<step name="Developer" duration="405" agitate="60" pour="10"/>
 	<step name="Wash" duration="30" />
 	<step name="Fix" duration="130" agitate="60" pour="10"/>
