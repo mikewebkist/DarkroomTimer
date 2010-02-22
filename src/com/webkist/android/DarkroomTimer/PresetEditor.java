@@ -27,10 +27,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -41,7 +39,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -50,9 +47,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
-public class PresetEditor extends Activity implements OnItemClickListener, OnCheckedChangeListener {
+public class PresetEditor extends Activity implements OnItemClickListener {
 	public static final String TAG = "PresetEditor";
 	private static final int EDIT_STEP = 1;
 
@@ -61,19 +57,6 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 	private DarkroomStep selectedStep;
 	private MyAdapter adapter;
 	private DarkroomStep modifiedStep;
-	private boolean showTempsInF;
-	
-	public String tempString(double temp) {
-		return String.format("%.1f¼%s", temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
-	}
-	
-	public double tempDouble(double temp) {
-		if (showTempsInF) {
-			return temp * 9 / 5 + 32;
-		} else {
-			return temp;
-		}
-	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -92,26 +75,26 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 		}
 
 		((TextView) findViewById(R.id.name)).setText(preset.name);
-		
+
 		Spinner spinner = (Spinner) findViewById(R.id.isoSpinner);
-	    ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(
-	            this, R.array.iso_values, android.R.layout.simple_spinner_item);
-	    spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-	    spinner.setAdapter(spinnerAdapter);
-	    
-	    if(preset.iso > 0) {
-	    	spinner.setSelection(spinnerAdapter.getPosition(String.format("%d", preset.iso)));
-	    }
-	    
-    	ToggleButton tempToggle = (ToggleButton) findViewById(R.id.tempToggle);
-    	tempToggle.setChecked(showTempsInF);
-    	tempToggle.setOnCheckedChangeListener(this);
-    	
-    	EditText tempEdit = (EditText) findViewById(R.id.tempEdit);
-	    if(preset.temp > 0) {
-	    	tempEdit.setText(String.format("%.1f", tempDouble(preset.temp)));
-	    }
-	    
+		ArrayAdapter<CharSequence> spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.iso_values,
+				android.R.layout.simple_spinner_item);
+		spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spinner.setAdapter(spinnerAdapter);
+
+		if (preset.iso > 0) {
+			spinner.setSelection(spinnerAdapter.getPosition(String.format("%d", preset.iso)));
+		}
+
+		EditText tempEdit = (EditText) findViewById(R.id.tempEdit);
+		if (preset.temp != null && preset.temp.length() > 2) {
+			tempEdit.setText(preset.temp.substring(0, preset.temp.length() - 1));
+			ToggleButton tempToggle = (ToggleButton) findViewById(R.id.tempToggle);
+			tempToggle.setChecked(preset.temp.endsWith("F"));
+		} else {
+			tempEdit.setText("");
+		}
+
 		adapter = new MyAdapter(this, preset.steps);
 		LinearLayout v = (LinearLayout) getLayoutInflater().inflate(android.R.layout.two_line_list_item, lv, false);
 		TextView t = (TextView) v.findViewById(android.R.id.text1);
@@ -125,31 +108,32 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 		Button saveBtn = (Button) findViewById(R.id.saveButton);
 		saveBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				if(preset.steps.size() == 0) {
+				if (preset.steps.size() == 0) {
 					Toast.makeText(getBaseContext(), "You can't create an empty preset!", Toast.LENGTH_LONG).show();
 				} else {
 					EditText tempEdit = (EditText) findViewById(R.id.tempEdit);
-					try {
-						Float temp = Float.parseFloat(tempEdit.getText().toString());
-				    	ToggleButton tempToggle = (ToggleButton) findViewById(R.id.tempToggle);
+					String temp = tempEdit.getText().toString();
 
-						if(tempToggle.isChecked()) {
-							preset.temp = (temp - 32) / 9 * 5;
+					if (temp.length() > 0) {
+						Log.v(TAG, "Saving temp: <" + temp + ">");
+						ToggleButton tempToggle = (ToggleButton) findViewById(R.id.tempToggle);
+						if (tempToggle.isChecked()) {
+							temp += "F";
 						} else {
-							preset.temp = temp;
+							temp += "C";
 						}
-					} catch(NumberFormatException e) {
-						// This probably means a blank temp, which is fine.
-						preset.temp = 0;
+						preset.temp = temp;
+					} else {
+						preset.temp = "";
 					}
-					
+
 					Spinner spinner = (Spinner) findViewById(R.id.isoSpinner);
-					if(spinner.getSelectedItemPosition() > 0) {
+					if (spinner.getSelectedItemPosition() > 0) {
 						preset.iso = Integer.parseInt(spinner.getSelectedItem().toString());
 					} else {
 						preset.iso = 0;
 					}
-					
+
 					ContentResolver cr = getContentResolver();
 					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
 					if (uri != null) {
@@ -175,13 +159,6 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		showTempsInF  = settings.getBoolean("showTempsInF", true);
-	}
-
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog = null;
 		LayoutInflater factory = LayoutInflater.from(this);
@@ -189,32 +166,33 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 			case EDIT_STEP:
 				final View v = factory.inflate(R.layout.editstep, null);
 
-				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("EditStep").setView(
-						v).setPositiveButton(R.string.time_picker_ok, new DialogInterface.OnClickListener() {							
+				dialog = new AlertDialog.Builder(PresetEditor.this).setTitle("EditStep").setView(v).setPositiveButton(
+						R.string.time_picker_ok, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								modifiedStep.name = ((EditText) v.findViewById(R.id.nameEdit)).getText().toString();
-								String  newDuration = ((EditText) v.findViewById(R.id.durationEdit)).getText().toString();
+								String newDuration = ((EditText) v.findViewById(R.id.durationEdit)).getText().toString();
 								int minutes = Integer.parseInt(newDuration.substring(0, newDuration.indexOf(":")));
 								int seconds = Integer.parseInt(newDuration.substring(newDuration.indexOf(":") + 1));
 								modifiedStep.duration = minutes * 60 + seconds;
-								modifiedStep.agitateEvery = Integer.parseInt(((EditText) v.findViewById(R.id.agitateEdit)).getText().toString());
+								modifiedStep.agitateEvery = Integer.parseInt(((EditText) v.findViewById(R.id.agitateEdit))
+										.getText().toString());
 								CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
-								if(cb.isChecked()) {
+								if (cb.isChecked()) {
 									modifiedStep.pourFor = 10;
 								}
 								selectedStep.overwrite(modifiedStep);
 								adapter.notifyDataSetChanged();
 							}
 						}).setNegativeButton(R.string.time_picker_cancel, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								// Do nothing on cancel.
-							}
-						}).setNeutralButton("Delete", new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								preset.steps.remove(selectedStep);
-								adapter.notifyDataSetChanged();
-							}
-						}).create();
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Do nothing on cancel.
+					}
+				}).setNeutralButton("Delete", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						preset.steps.remove(selectedStep);
+						adapter.notifyDataSetChanged();
+					}
+				}).create();
 				break;
 
 			default:
@@ -228,15 +206,16 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 			case EDIT_STEP:
 				((EditText) dialog.findViewById(R.id.nameEdit)).setText(modifiedStep.name);
 				((EditText) dialog.findViewById(R.id.nameEdit)).clearFocus();
-				
-				((EditText) dialog.findViewById(R.id.durationEdit)).setText(String.format("%d:%02d", modifiedStep.duration / 60, modifiedStep.duration % 60));
+
+				((EditText) dialog.findViewById(R.id.durationEdit)).setText(String.format("%d:%02d",
+						modifiedStep.duration / 60, modifiedStep.duration % 60));
 				((EditText) dialog.findViewById(R.id.durationEdit)).clearFocus();
-				
+
 				((EditText) dialog.findViewById(R.id.agitateEdit)).setText(String.format("%d", modifiedStep.agitateEvery));
 				((EditText) dialog.findViewById(R.id.agitateEdit)).clearFocus();
-				
+
 				CheckBox cb = (CheckBox) dialog.findViewById(R.id.pourCheck);
-				if(modifiedStep.pourFor > 0) {
+				if (modifiedStep.pourFor > 0) {
 					cb.setChecked(true);
 				} else {
 					cb.setChecked(false);
@@ -271,13 +250,13 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 			}
 
 			String name = String.format("%s for %d:%02d", step.name, step.duration / 60, step.duration % 60);
-			if(step.pourFor > 0) {
+			if (step.pourFor > 0) {
 				name = String.format("%s + %d sec pour", name, step.pourFor);
 			}
 			((TextView) convertView.findViewById(android.R.id.text1)).setText(name);
 
 			String details = step.agitateEvery > 0 ? String.format("agitate: %ds", step.agitateEvery) : "";
-			
+
 			TextView tv = (TextView) convertView.findViewById(android.R.id.text2);
 			tv.setGravity(Gravity.RIGHT);
 			tv.setText(details);
@@ -285,21 +264,4 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 			return convertView;
 		}
 	}
-
-	@Override
-	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-		EditText tempEdit = (EditText) findViewById(R.id.tempEdit);
-		
-		try {
-			Float temp = Float.parseFloat(tempEdit.getText().toString());
-			if(isChecked) {
-				tempEdit.setText(String.format("%.1f" ,temp * 9 / 5 + 32));
-			} else {
-				tempEdit.setText(String.format("%.1f" ,(temp - 32) / 9 * 5));
-			}
-		} catch(NumberFormatException e) {
-			Log.v(TAG, "Problem parsing temp value: " + tempEdit.getText().toString());
-		}
-	}
-
 }

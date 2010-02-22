@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 
 <preset-array>
-    <preset name="Kodak 400TX in D76" temp="20.0" iso="400">
+    <preset name="Kodak 400TX in D76" temp="68F" iso="400">
 	<step name="Developer" duration="405" agitate="60" pour="10"/>
 	<step name="Wash" duration="30" />
 	<step name="Fix" duration="130" agitate="60" pour="10"/>
@@ -11,7 +11,7 @@
 	<step name="Photo-Flo" duration="30" />
     </preset>
 
-    <preset name="HP5+ in Edwal FG7 (1+3)" temp="21.0" iso="320">
+    <preset name="HP5+ in Edwal FG7 (1+3)" temp="70F" iso="320">
 	<step name="Developer" duration="270" agitate="60" pour="10"/>
 	<step name="Wash" duration="30" />
 	<step name="Fix" duration="130" agitate="60" pour="10"/>
@@ -32,7 +32,7 @@
 	<step name="Photo-Flo" duration="30" />
     </preset>
 
-    <preset name="C-41 (Tetenal 5L Kit)" temp="37.7">
+    <preset name="C-41 (Tetenal 5L Kit)" temp="100F">
 	<step name="Developer" duration="225" agitate="30" pour="10"/>
 	<step name="Blix" duration="225" agitate="30" pour="10"/>
 	<step name="Wash" duration="360" />
