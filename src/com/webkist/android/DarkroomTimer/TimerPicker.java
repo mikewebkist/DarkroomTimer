@@ -32,12 +32,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -76,6 +78,7 @@ public class TimerPicker extends ListActivity {
 	};
 	private DarkroomPreset longClickPreset;
 	private boolean showTempsInF = true;
+	private SharedPreferences settings;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -90,13 +93,18 @@ public class TimerPicker extends ListActivity {
 
 		MyOtherAdapter adapter = new MyOtherAdapter(this, listViewCursor);
 		setListAdapter(adapter);
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
+		registerForContextMenu(getListView());
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		settings = PreferenceManager.getDefaultSharedPreferences(this);
 		showTempsInF  = settings.getBoolean("showTempsInF", true);
+		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
 		if (!alreadyRan) {
 			showDialog(DIALOG_FIRST_RUN);
 		}
-		registerForContextMenu(getListView());
 	}
 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -177,7 +185,7 @@ public class TimerPicker extends ListActivity {
 						R.string.first_run_message).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
-								SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, 0).edit();
+								Editor editor = settings.edit();
 								editor.putBoolean("AlreadyRanFlag", true);
 								editor.commit();
 							}
@@ -252,9 +260,9 @@ public class TimerPicker extends ListActivity {
 			TextView tempView = (TextView) view.findViewById(R.id.temp);
 			if(temp > 0) {
 				if(showTempsInF) {
-					tempView.setText(String.format(" @ %s¼F", temp * 9 / 5 + 32));
+					tempView.setText(String.format(" @ %.0f¼F", temp * 9 / 5 + 32));
 				} else {
-					tempView.setText(String.format(" @ %s¼C", temp));
+					tempView.setText(String.format(" @ %.0f¼C", temp));
 				}
 			} else {
 				tempView.setText("");

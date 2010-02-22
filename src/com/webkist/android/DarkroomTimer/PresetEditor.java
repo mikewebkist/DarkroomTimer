@@ -27,8 +27,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -59,13 +61,12 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 	private DarkroomStep selectedStep;
 	private MyAdapter adapter;
 	private DarkroomStep modifiedStep;
-	private boolean showTempsInF = DarkroomTimer.showTempsInF();
-
+	private boolean showTempsInF;
 	
 	public String tempString(double temp) {
 		return String.format("%.1f¼%s", temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
 	}
-
+	
 	public double tempDouble(double temp) {
 		if (showTempsInF) {
 			return temp * 9 / 5 + 32;
@@ -172,6 +173,13 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 			}
 		});
 
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		showTempsInF  = settings.getBoolean("showTempsInF", true);
 	}
 
 	protected Dialog onCreateDialog(int id) {

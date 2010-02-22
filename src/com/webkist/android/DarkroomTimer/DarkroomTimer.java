@@ -84,15 +84,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 	private ViewAnimator actionFlipper;
 
-	// The format should be in the form "%.1f¼%s"
-	public static String tempString(double temp, String format) {
-		return String.format(format, temp * 9 / 5 + 32, showTempsInF ? "F" : "C");
-	}
-
-	public static boolean showTempsInF() {
-		return showTempsInF;
-	}
-
 	Handler threadMessageHandler = new Handler() {
 
 		public void handleMessage(Message msg) {
@@ -215,9 +206,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		showTempsInF = settings.getBoolean("showTempsInF", true);
 
-		if(ping != null) {
-			
-		}
 		String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
 		if(ring != "") {
 			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));			
@@ -225,13 +213,25 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			ping = null;
 		}
 		
-		int ledColor = Color.parseColor(settings.getString("ledColor", "red"));
+		int ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
 		timerText.setTextColor(ledColor);
 		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
 		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
 		
 		if (preset != null) {
-			this.setTitle(preset.toString());
+			String title = preset.name;
+		
+			if(preset.temp > 0) {
+				if(showTempsInF) {
+					title += String.format(" @ %.0f¼F", preset.temp * 9 / 5 + 32);
+				} else {
+					title += String.format(" @ %.0f¼C", preset.temp);
+				}
+			}
+			if(preset.iso > 0) {
+				title += String.format(", ISO %d", preset.iso);
+			}
+			this.setTitle(title);
 
 			if (preset.done()) {
 				stepLabel.setText(R.string.prompt_done);
