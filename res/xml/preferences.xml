@@ -1,0 +1,23 @@
+<PreferenceScreen
+	xmlns:android="http://schemas.android.com/apk/res/android">
+	<CheckBoxPreference
+		android:key="showTempsInF"
+		android:defaultValue="true"
+		android:title="Temps in ºF"
+		android:summary="Show all temperatures in Farenheit." />
+	<RingtonePreference
+		android:key="alertTone"
+		android:title="Alert Tone"
+		android:ringtoneType="notification"
+		android:showDefault="true"
+		android:showSilent="true"
+		android:summary="Tone to play when step is finishing." />
+	<ListPreference
+		android:key="ledColor"
+		android:title="LED Color"
+		android:entries="@array/ledColorNames"
+		android:entryValues="@array/ledColors"
+		android:dialogTitle="Choose an LED color"
+		android:defaultValue="#ffff0000"
+		android:summary="Clock number color" />
+</PreferenceScreen>

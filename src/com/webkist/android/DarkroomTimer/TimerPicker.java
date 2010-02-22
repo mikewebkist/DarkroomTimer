@@ -28,17 +28,18 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -62,7 +63,6 @@ public class TimerPicker extends ListActivity {
 	private static final int DUPLICATE_ID = 4;
 	private static final int DIALOG_DELETE_CONFIRM = 1;
 	private static final int EDIT_PRESET = 0;
-	private static final String PREFS_NAME = "TimerPickerPrefs";
 	private static final int DIALOG_FIRST_RUN = 4;
 	private Cursor listViewCursor;
 
@@ -76,7 +76,8 @@ public class TimerPicker extends ListActivity {
 		}
 	};
 	private DarkroomPreset longClickPreset;
-	private boolean showTempsInF;
+	private boolean showTempsInF = true;
+	private SharedPreferences settings;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,13 +92,18 @@ public class TimerPicker extends ListActivity {
 
 		MyOtherAdapter adapter = new MyOtherAdapter(this, listViewCursor);
 		setListAdapter(adapter);
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+		registerForContextMenu(getListView());
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		settings = PreferenceManager.getDefaultSharedPreferences(this);
+		showTempsInF  = settings.getBoolean("showTempsInF", true);
 		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
-		showTempsInF = settings.getBoolean("showTempsInF", true);
 		if (!alreadyRan) {
 			showDialog(DIALOG_FIRST_RUN);
 		}
-		registerForContextMenu(getListView());
 	}
 
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
@@ -122,10 +128,11 @@ public class TimerPicker extends ListActivity {
 				return true;
 			case DUPLICATE_ID:
 				DarkroomPreset preset = new DarkroomPreset(this, uri);
-				ContentValues vals = new ContentValues();
+				preset.name = preset.name + " copy";
+				
 				ContentResolver cr = getContentResolver();
-				vals.put(DarkroomPreset.PRESET_NAME, preset.name + " copy");
-				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, vals);
+				
+				Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
 				String presetId = newUri.getPathSegments().get(1);
 				for (int j = 0; j < preset.steps.size(); j++) {
 					cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
@@ -177,7 +184,7 @@ public class TimerPicker extends ListActivity {
 						R.string.first_run_message).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
-								SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, 0).edit();
+								Editor editor = settings.edit();
 								editor.putBoolean("AlreadyRanFlag", true);
 								editor.commit();
 							}
@@ -249,10 +256,15 @@ public class TimerPicker extends ListActivity {
 			int iso = cursor.getInt(cursor.getColumnIndex(DarkroomPreset.PRESET_ISO));
 			((TextView) view.findViewById(R.id.iso)).setText(iso > 0 ? String.format("ISO %d", iso) : "");
 			float temp = cursor.getFloat(cursor.getColumnIndex(DarkroomPreset.PRESET_TEMP));
-			if(showTempsInF) {
-				((TextView) view.findViewById(R.id.temp)).setText(temp > 0 ? String.format(" @ %.0f¼F", temp * 9 / 5 + 32) : "");
+			TextView tempView = (TextView) view.findViewById(R.id.temp);
+			if(temp > 0) {
+				if(showTempsInF) {
+					tempView.setText(String.format(" @ %.0f¼F", temp * 9 / 5 + 32));
+				} else {
+					tempView.setText(String.format(" @ %.0f¼C", temp));
+				}
 			} else {
-				((TextView) view.findViewById(R.id.temp)).setText(temp > 0 ? String.format(" @ %.1f¼C", temp) : "");
+				tempView.setText("");
 			}
 		}
 
