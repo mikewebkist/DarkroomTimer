@@ -106,6 +106,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 							stepLabel.setText(R.string.prompt_done);
 							timerText.setText(R.string.prompt_done);
 							actionFlipper.setDisplayedChild(PROMPT_NONE);
+							ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
+							startButton.setEnabled(false);
 						}
 
 					} else {
@@ -236,7 +238,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			}
 
 			ToggleButton toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
-
+			toggleButton.setEnabled(!preset.done());
+			
 			if (preset.running() && startTime > 0) {
 				if (pauseTime > 0) {
 					toggleButton.setChecked(false);
@@ -412,8 +415,10 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	}
 
 	private void startTimer() {
-		if (timerRunning) {
+		if (timerRunning || preset.done()) {
 			// Nothing happens if the timer is already running.
+			// Also if preset == null (which is the case after the timer
+			// finishes) noop.
 		} else {
 			if (pauseTime > 0 && startTime > 0) {
 				startTime += System.currentTimeMillis() - pauseTime;
