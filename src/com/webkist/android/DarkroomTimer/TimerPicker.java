@@ -230,8 +230,10 @@ public class TimerPicker extends ListActivity {
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
-		setResult(RESULT_OK, new Intent().setData(uri));
-		finish();
+		Intent i = new Intent(this, DarkroomTimer.class);
+		i.setData(uri);
+		
+		startActivity(i);
 	}
 
 	private class MyOtherAdapter extends CursorAdapter {
