@@ -41,7 +41,6 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.widget.ViewAnimator;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -191,9 +190,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			preset = (DarkroomPreset) savedInstanceState.getSerializable(SELECTED_PRESET);
 			startTime = savedInstanceState.getLong(RUNNING_START_TIME);
 			pauseTime = savedInstanceState.getLong(RUNNING_PAUSE_TIME);
-		} else {
-			Intent intent = new Intent(this, TimerPicker.class);
-			startActivityForResult(intent, GET_PRESET);
 		}
 
 	}
@@ -202,20 +198,29 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onResume() {
 		super.onResume();
 
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
-		if (ring != "") {
-			ping = RingtoneManager.getRingtone(this, Uri.parse(ring));
-		} else {
-			ping = null;
+		if(preset == null && getIntent() != null && getIntent().getData() != null) {
+			Log.v(TAG, "in onResume() with null preset and a good intent.");
+			preset = new DarkroomPreset(this, getIntent().getData());
 		}
+		
+		if(preset == null) {
+			Log.v(TAG, "in onResume() with null preset and a bad intent, I guess.");
+			startActivity(new Intent(this, TimerPicker.class));
+		} else {
+			Log.v(TAG, "in onResume() with a preset.");
+			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+			String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
+			if (ring != "") {
+				ping = RingtoneManager.getRingtone(this, Uri.parse(ring));
+			} else {
+				ping = null;
+			}
 
-		int ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
-		timerText.setTextColor(ledColor);
-		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
-		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
+			int ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
+			timerText.setTextColor(ledColor);
+			TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
+			timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
 
-		if (preset != null) {
 			String title = preset.name;
 
 			if (preset.temp != null && preset.temp.length() > 0) {
@@ -262,15 +267,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		outState.putLong(RUNNING_PAUSE_TIME, pauseTime);
 	}
 
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-			Intent intent = new Intent(this, TimerPicker.class);
-			startActivityForResult(intent, GET_PRESET);
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
-
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.darkroomtimer, menu);
@@ -285,7 +281,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 			case R.id.select_preset:
 				Intent intent = new Intent(this, TimerPicker.class);
-				startActivityForResult(intent, GET_PRESET);
+				startActivity(intent);
 				return true;
 		}
 		return false;
