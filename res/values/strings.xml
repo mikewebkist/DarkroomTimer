@@ -25,6 +25,9 @@
 	<string name="editPreset_title_edit">Edit Existing Preset</string>
 	<string name="editPreset_title_insert">Create New Preset</string>
 	<string name="preseteditor_noSteps">Add a step.</string>
+	
+	<string name="shortcuts">Darkroom Presets</string>
+	
 	<string name="first_run_message">
 	<b>Welcome to the Darkroom Timer!</b>
 	
