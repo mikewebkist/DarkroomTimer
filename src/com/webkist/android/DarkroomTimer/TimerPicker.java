@@ -231,6 +231,7 @@ public class TimerPicker extends ListActivity {
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
 		Intent i = new Intent(this, DarkroomTimer.class);
+		i.setAction(Intent.ACTION_VIEW);
 		i.setData(uri);
 		
 		startActivity(i);
