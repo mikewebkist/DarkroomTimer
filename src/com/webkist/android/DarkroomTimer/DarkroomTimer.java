@@ -191,29 +191,42 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			startTime = savedInstanceState.getLong(RUNNING_START_TIME);
 			pauseTime = savedInstanceState.getLong(RUNNING_PAUSE_TIME);
 		}
-
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
+		Log.v(TAG, "in onResume()");
 
-		if(preset == null && getIntent() != null && getIntent().getData() != null) {
-			Log.v(TAG, "in onResume() with null preset and a good intent.");
-			preset = new DarkroomPreset(this, getIntent().getData());
+		final Intent intent = getIntent();
+
+		if (intent != null) {
+			final String action = intent.getAction();
+			if (Intent.ACTION_VIEW.equals(action)) {
+				preset = new DarkroomPreset(this, intent.getData());
+			}
 		}
-		
-		if(preset == null) {
-			Log.v(TAG, "in onResume() with null preset and a bad intent, I guess.");
+
+		if (preset == null) {
+			Log.v(TAG, "We have no preset.");
 			startActivity(new Intent(this, TimerPicker.class));
 		} else {
+			Log.v(TAG, "We have a preset.");
+
 			Log.v(TAG, "in onResume() with a preset.");
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-			String ring = settings.getString("alertTone", Settings.System.DEFAULT_NOTIFICATION_URI.toString());
-			if (ring != "") {
+			String ring = settings.getString("alertTone", null);
+
+			// ping will remain null iff alertTone preference is set to
+			// "Silent".
+			ping = null;
+
+			if (ring == null) {
+				// if null, preference is unset so use the system default.
+				ping = RingtoneManager.getRingtone(this, Settings.System.DEFAULT_NOTIFICATION_URI);
+			} else if (ring != "") {
+				// if not empty string, preference is set to a real ringtone.
 				ping = RingtoneManager.getRingtone(this, Uri.parse(ring));
-			} else {
-				ping = null;
 			}
 
 			int ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
@@ -385,7 +398,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			addClock.changeCurrent(0);
 		} else if (id == ADJUST_STOPPED_CLOCK) {
 			int duration = preset.currentStep().duration;
-			
+
 			NumberPicker minClock = (NumberPicker) dialog.findViewById(R.id.minuteClock);
 			minClock.changeCurrent((int) duration / 60);
 
