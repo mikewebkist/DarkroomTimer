@@ -203,7 +203,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 						}
 					}
 					if (temp != null && temp.length() > 0) {
-						description += " @ " + temp;
+						description += temp;
 					}
 					Log.v(TAG, "In query, description=" + description + " for " + uri);
 					mc.addRow(new Object[] { c.getLong(c.getColumnIndex(DarkroomPreset._ID)),
