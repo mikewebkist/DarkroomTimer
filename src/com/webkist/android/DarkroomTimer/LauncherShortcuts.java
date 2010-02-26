@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 public class LauncherShortcuts extends ListActivity {
 		
+	public static final Uri PRESET_URI = Uri.parse("content://" + DarkroomPreset.AUTHORITY + "/preset/#");
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
@@ -61,6 +62,7 @@ public class LauncherShortcuts extends ListActivity {
         intent.putExtra(LiveFolders.EXTRA_LIVE_FOLDER_ICON,
                 Intent.ShortcutIconResource.fromContext(context, icon));
         intent.putExtra(LiveFolders.EXTRA_LIVE_FOLDER_DISPLAY_MODE, LiveFolders.DISPLAY_MODE_LIST);
+        intent.putExtra(LiveFolders.EXTRA_LIVE_FOLDER_BASE_INTENT, new Intent(Intent.ACTION_VIEW, PRESET_URI));
 
         return intent;
     }

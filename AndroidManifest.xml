@@ -5,24 +5,36 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<application android:label="@string/app_name"
 		android:theme="@style/DarkroomTheme" android:icon="@drawable/darkroomtimer">
+		
 		<activity android:name=".TimerPicker" android:label="@string/app_name">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
+			<intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="vnd.android.cursor.dir/vnd.webkist.preset" />				
+            </intent-filter>			
 		</activity>
+		
 		<activity android:name=".PresetEditor" android:label="@string/app_name">
 			<intent-filter>
-				<action android:name="android.intent.action.EDIT"></action>
+				<action android:name="android.intent.action.EDIT" />
+				<category android:name="android.intent.category.DEFAULT" />
 			</intent-filter>
 		</activity>
+		
 		<activity android:name=".DarkroomTimer" android:label="@string/app_name">
 			<intent-filter>
-				<action android:name="android.intent.action.VIEW"></action>
+				<action android:name="android.intent.action.VIEW" />
 				<category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="vnd.android.cursor.item/vnd.webkist.preset" />
 			</intent-filter>
 		</activity>
+		
 		<activity
 			android:name=".EditPreferences"
 			android:label="@string/app_name">
