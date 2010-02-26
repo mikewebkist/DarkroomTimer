@@ -41,7 +41,7 @@ public class LauncherShortcuts extends ListActivity {
         final String action = intent.getAction();
         
         if(LiveFolders.ACTION_CREATE_LIVE_FOLDER.equals(action)) {
-        	setResult(RESULT_OK, createLiveFolder(this, DarkroomPreset.CONTENT_URI_PRESET, "Darkroom Presets", R.drawable.darkroomtimer));
+        	setResult(RESULT_OK, createLiveFolder(this, Uri.withAppendedPath(DarkroomPreset.CONTENT_URI, "live_folder/presets"), "Darkroom Presets", R.drawable.darkroomtimer));
             finish();
         } else if(Intent.ACTION_CREATE_SHORTCUT.equals(action)) {
     		Cursor listViewCursor = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
