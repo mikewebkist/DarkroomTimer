@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -185,7 +186,37 @@ public class DarkroomPresetProvider extends ContentProvider {
 		SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, orderBy);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
-		return c;
+
+		if(sUriMatcher.match(uri) == URI_LIVE_FOLDER) {
+			MatrixCursor mc = new MatrixCursor(new String[] { LiveFolders._ID, LiveFolders.DESCRIPTION });
+
+			try {
+				while(c.moveToNext()) {
+					int iso = c.getInt(c.getColumnIndex(DarkroomPreset.PRESET_ISO));
+					String temp = c.getString(c.getColumnIndex(DarkroomPreset.PRESET_TEMP));
+					String description = "";
+					if(iso > 0) {
+						description += "ISO " + iso;
+						if(temp != null && temp.length() > 0) {
+							description += ", ";
+						}
+					}
+					if (temp != null && temp.length() > 0) {
+						description += " @ " + temp;
+					}
+					
+					mc.addRow(new Object[] { c.getLong(0), c.getString(c.getColumnIndex(DarkroomPreset.PRESET_NAME)),
+							description });
+				}
+				return mc;
+			} catch (Exception e) {
+				return null;
+			} finally {
+				c.close();
+			}
+		} else {
+			return c;
+		}
 	}
 
 	@Override
