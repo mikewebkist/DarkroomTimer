@@ -169,16 +169,40 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 						R.string.time_picker_ok, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								modifiedStep.name = ((EditText) v.findViewById(R.id.nameEdit)).getText().toString();
+								
 								String newDuration = ((EditText) v.findViewById(R.id.durationEdit)).getText().toString();
-								int minutes = Integer.parseInt(newDuration.substring(0, newDuration.indexOf(":")));
-								int seconds = Integer.parseInt(newDuration.substring(newDuration.indexOf(":") + 1));
+								int colon = newDuration.indexOf(":");
+								int minutes = 0;
+								int seconds = 0;
+								try {
+									if (colon == -1) {
+										// MM
+										minutes = Integer.parseInt(newDuration);
+									} else if (colon == 0) {
+										// :SS
+										seconds = Integer.parseInt(newDuration.substring(1));
+									} else {
+										// MM:SS
+										minutes = Integer.parseInt(newDuration.substring(0, colon));
+										seconds = Integer.parseInt(newDuration.substring(colon + 1));
+									}
+								} catch (NumberFormatException e) {
+									Log.w(TAG, "Problem with duration \"" + newDuration + "\": " + e);
+								}
 								modifiedStep.duration = minutes * 60 + seconds;
-								modifiedStep.agitateEvery = Integer.parseInt(((EditText) v.findViewById(R.id.agitateEdit))
-										.getText().toString());
+								
+								try {
+									modifiedStep.agitateEvery = Integer.parseInt(((EditText) v
+											.findViewById(R.id.agitateEdit)).getText().toString());
+								} catch (NumberFormatException e) {
+									modifiedStep.agitateEvery = 0;
+								}
+								
 								CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
 								if (cb.isChecked()) {
 									modifiedStep.pourFor = 10;
 								}
+								
 								selectedStep.overwrite(modifiedStep);
 								adapter.notifyDataSetChanged();
 							}
