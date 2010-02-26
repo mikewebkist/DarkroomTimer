@@ -26,10 +26,12 @@ import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -204,6 +206,10 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			final String action = intent.getAction();
 			if (Intent.ACTION_VIEW.equals(action)) {
 				preset = new DarkroomPreset(this, intent.getData());
+			} else {
+				ContentResolver cr = getContentResolver();
+				Log.e(TAG, "Don't know what to do with intent.getAction() == " + action + " for content type: "
+						+ getContentResolver().getType(intent.getData()));
 			}
 		}
 

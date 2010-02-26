@@ -71,6 +71,7 @@ public class LauncherShortcuts extends ListActivity {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
 		Intent shortcutIntent = new Intent(this, DarkroomTimer.class);
 		shortcutIntent.setData(uri);
+		shortcutIntent.setAction(Intent.ACTION_VIEW);
 		
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);

@@ -33,13 +33,14 @@ public class DarkroomPresetProvider extends ContentProvider {
 	private static final String PRESET_TABLE_NAME = "presets";
 	private static final String STEP_TABLE_NAME = "steps";
 
-    private static final HashMap<String, String> LIVE_FOLDER_PROJECTION_MAP;
-    static {
-        LIVE_FOLDER_PROJECTION_MAP = new HashMap<String, String>();
-        LIVE_FOLDER_PROJECTION_MAP.put(LiveFolders._ID, DarkroomPreset._ID + " AS " + LiveFolders._ID);
-        LIVE_FOLDER_PROJECTION_MAP.put(LiveFolders.NAME, DarkroomPreset.PRESET_NAME + " AS " + LiveFolders.NAME);
-        LIVE_FOLDER_PROJECTION_MAP.put(LiveFolders.DESCRIPTION, DarkroomPreset.PRESET_ISO + " AS " + LiveFolders.DESCRIPTION);
-    }
+	private static final HashMap<String, String> LIVE_FOLDER_PROJECTION_MAP;
+	static {
+		LIVE_FOLDER_PROJECTION_MAP = new HashMap<String, String>();
+		LIVE_FOLDER_PROJECTION_MAP.put(LiveFolders._ID, DarkroomPreset._ID + " AS " + LiveFolders._ID);
+		LIVE_FOLDER_PROJECTION_MAP.put(LiveFolders.NAME, DarkroomPreset.PRESET_NAME + " AS " + LiveFolders.NAME);
+		LIVE_FOLDER_PROJECTION_MAP
+				.put(LiveFolders.DESCRIPTION, DarkroomPreset.PRESET_ISO + " AS " + LiveFolders.DESCRIPTION);
+	}
 
 	static {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
@@ -176,9 +177,9 @@ public class DarkroomPresetProvider extends ContentProvider {
 
 			case URI_LIVE_FOLDER:
 				qb.setTables(PRESET_TABLE_NAME);
-				qb.setProjectionMap(LIVE_FOLDER_PROJECTION_MAP);
+				// qb.setProjectionMap(LIVE_FOLDER_PROJECTION_MAP);
 				break;
-				
+
 			default:
 				throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
@@ -187,26 +188,26 @@ public class DarkroomPresetProvider extends ContentProvider {
 		Cursor c = qb.query(db, projection, selection, selectionArgs, null, null, orderBy);
 		c.setNotificationUri(getContext().getContentResolver(), uri);
 
-		if(sUriMatcher.match(uri) == URI_LIVE_FOLDER) {
-			MatrixCursor mc = new MatrixCursor(new String[] { LiveFolders._ID, LiveFolders.DESCRIPTION });
+		if (sUriMatcher.match(uri) == URI_LIVE_FOLDER) {
+			MatrixCursor mc = new MatrixCursor(new String[] { LiveFolders._ID, LiveFolders.NAME, LiveFolders.DESCRIPTION });
 
 			try {
-				while(c.moveToNext()) {
+				while (c.moveToNext()) {
 					int iso = c.getInt(c.getColumnIndex(DarkroomPreset.PRESET_ISO));
 					String temp = c.getString(c.getColumnIndex(DarkroomPreset.PRESET_TEMP));
 					String description = "";
-					if(iso > 0) {
+					if (iso > 0) {
 						description += "ISO " + iso;
-						if(temp != null && temp.length() > 0) {
+						if (temp != null && temp.length() > 0) {
 							description += ", ";
 						}
 					}
 					if (temp != null && temp.length() > 0) {
 						description += " @ " + temp;
 					}
-					
-					mc.addRow(new Object[] { c.getLong(0), c.getString(c.getColumnIndex(DarkroomPreset.PRESET_NAME)),
-							description });
+					Log.v(TAG, "In query, description=" + description + " for " + uri);
+					mc.addRow(new Object[] { c.getLong(c.getColumnIndex(DarkroomPreset._ID)),
+							c.getString(c.getColumnIndex(DarkroomPreset.PRESET_NAME)), description });
 				}
 				return mc;
 			} catch (Exception e) {
