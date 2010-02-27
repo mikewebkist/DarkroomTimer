@@ -24,6 +24,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.LiveFolders;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,25 +33,45 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 public class LauncherShortcuts extends ListActivity {
-	
+		
+	public static final Uri PRESET_URI = Uri.parse("content://" + DarkroomPreset.AUTHORITY + "/preset/#");
 	public void onCreate(Bundle icicle) {
 		super.onCreate(icicle);
 
-		// Resolve the intent
-
 		final Intent intent = getIntent();
-		final String action = intent.getAction();
-
-		// Inflate our UI from its XML layout description.
-		Cursor listViewCursor = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
-		MyOtherAdapter adapter = new MyOtherAdapter(this, listViewCursor);
-		setListAdapter(adapter);
+        final String action = intent.getAction();
+        
+        if(LiveFolders.ACTION_CREATE_LIVE_FOLDER.equals(action)) {
+        	setResult(RESULT_OK, createLiveFolder(this, Uri.withAppendedPath(DarkroomPreset.CONTENT_URI, "live_folder/presets"), "Darkroom Presets", R.drawable.darkroomtimer));
+            finish();
+        } else if(Intent.ACTION_CREATE_SHORTCUT.equals(action)) {
+    		Cursor listViewCursor = managedQuery(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, DarkroomPreset.PRESET_NAME);
+    		MyOtherAdapter adapter = new MyOtherAdapter(this, listViewCursor);
+    		setListAdapter(adapter);        	
+        } else {
+        	setResult(RESULT_CANCELED);
+            finish();
+        }
 	}
+
+	private static Intent createLiveFolder(Context context, Uri uri, String name, int icon) {
+        final Intent intent = new Intent();
+
+        intent.setData(uri);
+        intent.putExtra(LiveFolders.EXTRA_LIVE_FOLDER_NAME, name);
+        intent.putExtra(LiveFolders.EXTRA_LIVE_FOLDER_ICON,
+                Intent.ShortcutIconResource.fromContext(context, icon));
+        intent.putExtra(LiveFolders.EXTRA_LIVE_FOLDER_DISPLAY_MODE, LiveFolders.DISPLAY_MODE_LIST);
+        intent.putExtra(LiveFolders.EXTRA_LIVE_FOLDER_BASE_INTENT, new Intent(Intent.ACTION_VIEW, PRESET_URI));
+
+        return intent;
+    }
 	
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, id);
 		Intent shortcutIntent = new Intent(this, DarkroomTimer.class);
 		shortcutIntent.setData(uri);
+		shortcutIntent.setAction(Intent.ACTION_VIEW);
 		
 		Intent intent = new Intent();
 		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);

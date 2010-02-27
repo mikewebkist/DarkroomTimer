@@ -101,6 +101,8 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 
 				} while (step_cur.moveToNext());
 			}
+		} else {
+			throw new IllegalArgumentException("Unknown URI: " + uri); 
 		}
 	}
 
