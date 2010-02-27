@@ -205,7 +205,12 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		if (intent != null) {
 			final String action = intent.getAction();
 			if (Intent.ACTION_VIEW.equals(action)) {
-				preset = new DarkroomPreset(this, intent.getData());
+				try {
+					preset = new DarkroomPreset(this, intent.getData());
+				} catch (IllegalArgumentException e) {
+					Log.e(TAG, e.toString());
+					preset = null;
+				}
 			} else {
 				ContentResolver cr = getContentResolver();
 				Log.e(TAG, "Don't know what to do with intent.getAction() == " + action + " for content type: "
