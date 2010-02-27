@@ -135,10 +135,17 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 					ContentResolver cr = getContentResolver();
 					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
+					
+					// TODO: We need to actually use cr.update() here. Otherwise the 
+					// _ID values change every time a preset is edited, making shortcuts
+					// stop working.
 					if (uri != null) {
 						cr.delete(uri, null, null);
 					}
 					Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
+					
+					// TODO: This will still have to delete/insert to keep the steps
+					// in the right order, etc.
 					String presetId = newUri.getPathSegments().get(1);
 					for (int j = 0; j < preset.steps.size(); j++) {
 						cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
