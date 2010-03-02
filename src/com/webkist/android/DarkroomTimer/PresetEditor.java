@@ -202,6 +202,8 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 								CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
 								if (cb.isChecked()) {
 									modifiedStep.pourFor = 10;
+								} else {
+									modifiedStep.pourFor = 0;
 								}
 								
 								selectedStep.overwrite(modifiedStep);
