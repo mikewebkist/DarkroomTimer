@@ -136,19 +136,13 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 					ContentResolver cr = getContentResolver();
 					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
 					
-					// TODO: We need to actually use cr.update() here. Otherwise the 
-					// _ID values change every time a preset is edited, making shortcuts
-					// stop working.
-					if (uri != null) {
-						cr.delete(uri, null, null);
-					}
-					Uri newUri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
+					cr.update(uri, preset.toContentValues(), null, null);
 					
-					// TODO: This will still have to delete/insert to keep the steps
-					// in the right order, etc.
-					String presetId = newUri.getPathSegments().get(1);
+					Uri stepUri = Uri.withAppendedPath(uri, "step");
+					cr.delete(stepUri, null, null);
+					String presetId = uri.getPathSegments().get(1);
 					for (int j = 0; j < preset.steps.size(); j++) {
-						cr.insert(Uri.withAppendedPath(newUri, "step"), preset.steps.get(j).toContentValues(presetId));
+						cr.insert(stepUri, preset.steps.get(j).toContentValues(presetId));
 					}
 					finish();
 				}
@@ -208,6 +202,8 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 								CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
 								if (cb.isChecked()) {
 									modifiedStep.pourFor = 10;
+								} else {
+									modifiedStep.pourFor = 0;
 								}
 								
 								selectedStep.overwrite(modifiedStep);
