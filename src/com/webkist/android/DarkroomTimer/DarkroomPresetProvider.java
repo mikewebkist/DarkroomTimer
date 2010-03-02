@@ -26,7 +26,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 
 	private static final int URI_PRESETS = 1;
 	private static final int URI_PRESET_ID = 2;
-	private static final int URI_STEP_ID = 3;
+	private static final int URI_PRESET_STEPS = 3;
 	private static final int URI_LIVE_FOLDER = 4;
 	private static final UriMatcher sUriMatcher;
 
@@ -46,7 +46,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 		sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset", URI_PRESETS);
 		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset/#", URI_PRESET_ID);
-		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset/#/step", URI_STEP_ID);
+		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "preset/#/step", URI_PRESET_STEPS);
 		sUriMatcher.addURI(DarkroomPreset.AUTHORITY, "live_folder/presets", URI_LIVE_FOLDER);
 	}
 
@@ -85,13 +85,19 @@ public class DarkroomPresetProvider extends ContentProvider {
 	public int delete(Uri uri, String where, String[] whereArgs) {
 		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
 		int count;
+		String presetId;
 		switch (sUriMatcher.match(uri)) {
 			case URI_PRESET_ID:
-				String presetId = uri.getPathSegments().get(1);
+				presetId = uri.getPathSegments().get(1);
 				count = db.delete(PRESET_TABLE_NAME, DarkroomPreset._ID + "=" + presetId, null);
-				count += db.delete(STEP_TABLE_NAME, DarkroomPreset.DarkroomStep.STEP_PRESET + "=" + presetId, null);
+				count += this.delete(Uri.withAppendedPath(uri, "step"), null, null);
 				break;
 
+			case URI_PRESET_STEPS:
+				presetId = uri.getPathSegments().get(1);
+				count = db.delete(STEP_TABLE_NAME, DarkroomPreset.DarkroomStep.STEP_PRESET + "=" + presetId, null);
+				break;
+				
 			default:
 				throw new IllegalArgumentException("Unknown URI " + uri);
 		}
@@ -135,7 +141,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 					return presetUri;
 				}
 				break;
-			case URI_STEP_ID:
+			case URI_PRESET_STEPS:
 				// Deal with default values in the DarkroomPreset class.
 				String presetId = uri.getPathSegments().get(1);
 				rowId = db.insert(STEP_TABLE_NAME, DarkroomPreset.DarkroomStep.STEP_NAME, values);
@@ -169,7 +175,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 				qb.appendWhere(DarkroomPreset._ID + "=" + uri.getPathSegments().get(1));
 				break;
 
-			case URI_STEP_ID: // Get steps associated with a preset
+			case URI_PRESET_STEPS: // Get steps associated with a preset
 				qb.setTables(STEP_TABLE_NAME);
 				qb.appendWhere(DarkroomPreset.DarkroomStep.STEP_PRESET + "=" + uri.getPathSegments().get(1));
 				orderBy = DarkroomPreset.DarkroomStep.STEP_STEP;
@@ -222,7 +228,27 @@ public class DarkroomPresetProvider extends ContentProvider {
 
 	@Override
 	public int update(Uri uri, ContentValues values, String where, String[] whereArgs) {
-		Log.w(TAG, "Updating unimplemented: " + uri);
-		return 0;
+		Log.w(TAG, "Updating <" + uri + ">");
+		SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+		int count;
+		switch (sUriMatcher.match(uri)) {
+			case URI_PRESET_ID:
+				String presetId = uri.getPathSegments().get(1);
+				Log.v(TAG, "Updating a URI_PRESET_ID: " + presetId);
+				count = db.update(PRESET_TABLE_NAME, values, DarkroomPreset._ID + "=" + presetId, whereArgs);
+				break;
+			case URI_PRESETS:
+				throw new IllegalArgumentException("Can't update URI_PRESETS: " + uri);
+			case URI_PRESET_STEPS:
+				throw new IllegalArgumentException("Can't update URI_PRESET_STEPS: " + uri);
+			case URI_LIVE_FOLDER:
+				throw new IllegalArgumentException("Can't update URI_LIVE_FOLDER: " + uri);
+			default:
+				throw new IllegalArgumentException("Unknown URI " + uri);
+		}
+		
+		getContext().getContentResolver().notifyChange(uri, null);
+
+		return count;
 	}
 }
