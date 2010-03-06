@@ -83,90 +83,98 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 	private ViewAnimator actionFlipper;
 
+	private boolean ignoreToggle = false;
+	private Ringtone agitatePing = null;
+	private boolean agitatePingPlayed = false;
+
 	Handler threadMessageHandler = new Handler() {
 
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
-				case TICK:
-					long remaining = stepTimeRemaining();
+			case TICK:
+				long remaining = stepTimeRemaining();
 
-					if (remaining <= 0) {
-						// DONE
-						stopThread();
-						startTime = 0;
+				if (remaining <= 0) {
+					// DONE
+					stopThread();
+					startTime = 0;
 
-						upcomingText.setText("");
+					upcomingText.setText("");
 
-						if (preset.nextStep()) {
-							long dur = stepTimeRemaining() / 1000;
-							stepLabel.setText(preset.currentStep().name);
-							timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
-							actionFlipper.setDisplayedChild(PROMPT_NONE);
-							((ToggleButton) findViewById(R.id.toggleButton)).setChecked(false);
-						} else {
-							stepLabel.setText(R.string.prompt_done);
-							timerText.setText(R.string.prompt_done);
-							actionFlipper.setDisplayedChild(PROMPT_NONE);
-							ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
-							startButton.setEnabled(false);
-						}
-
+					if (preset.nextStep()) {
+						long dur = stepTimeRemaining() / 1000;
+						stepLabel.setText(preset.currentStep().name);
+						timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
+						actionFlipper.setDisplayedChild(PROMPT_NONE);
+						((ToggleButton) findViewById(R.id.toggleButton)).setChecked(false);
 					} else {
-						int minutes = (int) remaining / 60000;
-						int seconds = (int) ((remaining % 60000) / 1000);
+						stepLabel.setText(R.string.prompt_done);
+						timerText.setText(R.string.prompt_done);
+						actionFlipper.setDisplayedChild(PROMPT_NONE);
+						ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
+						startButton.setEnabled(false);
+					}
 
-						timerText.setText(String.format("%02d:%02d", minutes, seconds));
-						double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
-						DarkroomStep step = preset.currentStep();
+				} else {
+					int minutes = (int) remaining / 60000;
+					int seconds = (int) ((remaining % 60000) / 1000);
 
-						// If we're close to the end, play the notification
-						// sound as often as possible.
-						if (ping != null && remaining <= 5000 && !ping.isPlaying()) {
-							ping.play();
-						}
+					timerText.setText(String.format("%02d:%02d", minutes, seconds));
+					double elapsedSecs = (System.currentTimeMillis() - startTime) / 1000;
+					DarkroomStep step = preset.currentStep();
 
-						// Figure out what the user should be doing now.
-						if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
-							// Pour.
-							actionFlipper.setDisplayedChild(PROMPT_POUR);
-						} else if (step.agitateEvery > 0) {
-							if (elapsedSecs < (step.pourFor + step.agitateFor)) {
-								// Agitate after pour.
-								actionFlipper.setDisplayedChild(PROMPT_AGITATE);
-							} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
-								// Agitate.
-								actionFlipper.setDisplayedChild(PROMPT_AGITATE);
-							} else {
-								// Nothing.
-								actionFlipper.setDisplayedChild(PROMPT_NONE);
-							}
-						} else { // This clears the "Click to start..." prompt.
+					// If we're close to the end, play the notification
+					// sound as often as possible.
+					if (ping != null && remaining <= 5000 && !ping.isPlaying()) {
+						ping.play();
+					}
+
+					// Figure out what the user should be doing now.
+					if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
+						// Pour.
+						actionFlipper.setDisplayedChild(PROMPT_POUR);
+					} else if (step.agitateEvery > 0) {
+						if (elapsedSecs < (step.pourFor + step.agitateFor)) {
+							// Agitate after pour.
+							actionFlipper.setDisplayedChild(PROMPT_AGITATE);
+						} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
+							// Agitate.
+							actionFlipper.setDisplayedChild(PROMPT_AGITATE);
+							agitatePingPlayed = false;
+						} else {
+							// Nothing.
 							actionFlipper.setDisplayedChild(PROMPT_NONE);
 						}
+					} else { // This clears the "Click to start..." prompt.
+						actionFlipper.setDisplayedChild(PROMPT_NONE);
+					}
 
-						// What's coming up.
-						if (step.agitateEvery > 0) {
-							double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
+					// What's coming up.
+					if (step.agitateEvery > 0) {
+						double elapsedRemainder = (elapsedSecs - step.pourFor) % step.agitateEvery;
 
-							if (elapsedRemainder > (step.agitateEvery - 10) && (remaining / 1000) >= (step.agitateFor + 10)) {
-								double agitateIn = step.agitateEvery - elapsedRemainder;
-								Resources res = getResources();
-								upcomingText.setText(String.format("%s in %02d:%02d",
-										res.getString(R.string.prompt_agitate), (int) agitateIn / 60, (int) agitateIn % 60));
-							} else {
-								upcomingText.setText("");
+						if (elapsedRemainder > (step.agitateEvery - 10) && (remaining / 1000) >= (step.agitateFor + 10)) {
+							double agitateIn = step.agitateEvery - elapsedRemainder;
+							Resources res = getResources();
+							if ((elapsedRemainder > (step.agitateEvery - 3)) && !agitatePingPlayed && agitatePing != null
+									&& !agitatePing.isPlaying()) {
+								agitatePing.play();
+								agitatePingPlayed = true;
 							}
+							upcomingText.setText(String.format("%s in %02d:%02d", res.getString(R.string.prompt_agitate),
+									(int) agitateIn / 60, (int) agitateIn % 60));
 						} else {
 							upcomingText.setText("");
 						}
+					} else {
+						upcomingText.setText("");
 					}
+				}
 
-					break;
+				break;
 			}
 		}
 	};
-
-	private boolean ignoreToggle = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -212,7 +220,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 					preset = null;
 				}
 			} else {
-				ContentResolver cr = getContentResolver();
 				Log.e(TAG, "Don't know what to do with intent.getAction() == " + action + " for content type: "
 						+ getContentResolver().getType(intent.getData()));
 			}
@@ -227,10 +234,12 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			Log.v(TAG, "in onResume() with a preset.");
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 			String ring = settings.getString("alertTone", null);
+			String agitateRing = settings.getString("agitateTone", null);
 
 			// ping will remain null iff alertTone preference is set to
 			// "Silent".
 			ping = null;
+			agitatePing = null;
 
 			if (ring == null) {
 				// if null, preference is unset so use the system default.
@@ -238,6 +247,14 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			} else if (ring != "") {
 				// if not empty string, preference is set to a real ringtone.
 				ping = RingtoneManager.getRingtone(this, Uri.parse(ring));
+			}
+
+			if (agitateRing == null) {
+				// if null, preference is unset so use the system default.
+				agitatePing = RingtoneManager.getRingtone(this, Settings.System.DEFAULT_NOTIFICATION_URI);
+			} else if (agitateRing != "") {
+				// if not empty string, preference is set to a real ringtone.
+				agitatePing = RingtoneManager.getRingtone(this, Uri.parse(agitateRing));
 			}
 
 			int ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
@@ -299,14 +316,14 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-			case R.id.preferences:
-				startActivity(new Intent(this, EditPreferences.class));
-				return true;
+		case R.id.preferences:
+			startActivity(new Intent(this, EditPreferences.class));
+			return true;
 
-			case R.id.select_preset:
-				Intent intent = new Intent(this, TimerPicker.class);
-				startActivity(intent);
-				return true;
+		case R.id.select_preset:
+			Intent intent = new Intent(this, TimerPicker.class);
+			startActivity(intent);
+			return true;
 		}
 		return false;
 	}

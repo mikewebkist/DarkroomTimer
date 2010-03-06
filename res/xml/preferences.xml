@@ -7,6 +7,15 @@
 		android:showDefault="true"
 		android:showSilent="true"
 		android:summary="Tone to play when step is finishing." />
+
+	<RingtonePreference
+		android:key="agitateTone"
+		android:title="Agitate Tone"
+		android:ringtoneType="notification"
+		android:showDefault="true"
+		android:showSilent="true"
+		android:summary="Tone to play when it's time to agitate." />
+		
 	<ListPreference
 		android:key="ledColor"
 		android:title="LED Color"
