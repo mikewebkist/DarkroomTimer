@@ -206,7 +206,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	@Override
 	public void onResume() {
 		super.onResume();
-		Log.v(TAG, "in onResume()");
 
 		final Intent intent = getIntent();
 
@@ -219,6 +218,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 					Log.e(TAG, e.toString());
 					preset = null;
 				}
+				// After we setup the preset, clear the Intent.
+				setIntent(null);
 			} else {
 				Log.e(TAG, "Don't know what to do with intent.getAction() == " + action + " for content type: "
 						+ getContentResolver().getType(intent.getData()));
@@ -226,12 +227,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		}
 
 		if (preset == null) {
-			Log.v(TAG, "We have no preset.");
 			startActivity(new Intent(this, TimerPicker.class));
 		} else {
-			Log.v(TAG, "We have a preset.");
-
-			Log.v(TAG, "in onResume() with a preset.");
 			SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 			String ring = settings.getString("alertTone", null);
 			String agitateRing = settings.getString("agitateTone", null);
@@ -331,7 +328,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == GET_PRESET) {
 			if (resultCode == RESULT_OK) {
-				timerRunning = false;
+				timerRunning(false);
 				startTime = 0;
 				stopThread();
 
@@ -439,7 +436,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onClick(View v) {
 		if (!preset.done()) {
 			if (v.getId() == R.id.stepClock) {
-				if (timerRunning && pauseTime == 0) {
+				if (timerRunning() && pauseTime == 0) {
 					showDialog(ADJUST_RUNNING_CLOCK);
 				} else {
 					showDialog(ADJUST_STOPPED_CLOCK);
@@ -449,7 +446,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	}
 
 	private void startTimer() {
-		if (timerRunning || preset.done()) {
+		if (timerRunning() || preset.done()) {
 			// Nothing happens if the timer is already running.
 			// Also if preset == null (which is the case after the timer
 			// finishes) noop.
@@ -466,7 +463,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	}
 
 	private void pauseTimer() {
-		if (timerRunning) {
+		if (timerRunning()) {
 			pauseTime = System.currentTimeMillis();
 			stopThread();
 		}
@@ -479,17 +476,17 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	}
 
 	private void startThread() {
-		if (!timerRunning) {
-			timerRunning = true;
+		if (!timerRunning()) {
+			timerRunning(true);
 			timer = new Thread(new TimerThread());
 			timer.start();
 		}
 	}
 
 	private void stopThread() {
-		if (timerRunning) {
+		if (timerRunning()) {
 			timer.interrupt();
-			timerRunning = false;
+			timerRunning(false);
 		}
 	}
 
@@ -523,6 +520,14 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		}
 	}
 
+	private boolean timerRunning() {
+		return timerRunning;
+	}
+
+	private void timerRunning(boolean flag) {
+		timerRunning = flag;
+	}
+	
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 		if (ignoreToggle) {
