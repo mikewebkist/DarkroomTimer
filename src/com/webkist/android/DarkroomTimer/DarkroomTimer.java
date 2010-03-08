@@ -179,6 +179,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.w(TAG, "onCreate");
 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -203,9 +204,20 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		}
 	}
 
+	public void onStart() {
+		super.onStart();
+		Log.w(TAG, "onStart");
+	}
+
+	public void onRestart() {
+		super.onRestart();
+		Log.w(TAG, "onRestart");
+	}
+
 	@Override
 	public void onResume() {
 		super.onResume();
+		Log.w(TAG, "onResume");
 
 		final Intent intent = getIntent();
 
@@ -472,9 +484,20 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	@Override
 	public void onPause() {
 		super.onPause();
+		Log.w(TAG, "onPause");
 		stopThread();
 	}
 
+	public void onStop() {
+		super.onStop();
+		Log.w(TAG, "onStop");
+	}
+	
+	public void onDestroy() {
+		super.onDestroy();
+		Log.w(TAG, "onDestroy");
+	}
+	
 	private void startThread() {
 		if (!timerRunning()) {
 			timerRunning(true);
@@ -525,11 +548,13 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	}
 
 	private void timerRunning(boolean flag) {
+		Log.v(TAG, "timerRunning: changing from " + (timerRunning ? "T" : "F") + " to " + (flag ? "T" : "F"));
 		timerRunning = flag;
 	}
 	
 	@Override
 	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		Log.v(TAG, "In onCheckedChanged with ignoreToggle = " + (ignoreToggle ? "T" : "F"));
 		if (ignoreToggle) {
 			ignoreToggle = false;
 		} else {
