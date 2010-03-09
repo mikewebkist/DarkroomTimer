@@ -135,9 +135,13 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 					ContentResolver cr = getContentResolver();
 					preset.name = ((TextView) findViewById(R.id.name)).getText().toString();
-					
-					cr.update(uri, preset.toContentValues(), null, null);
-					
+
+					if (uri == null) {
+						uri = cr.insert(DarkroomPreset.CONTENT_URI_PRESET, preset.toContentValues());
+					} else {
+						cr.update(uri, preset.toContentValues(), null, null);
+					}
+
 					Uri stepUri = Uri.withAppendedPath(uri, "step");
 					cr.delete(stepUri, null, null);
 					String presetId = uri.getPathSegments().get(1);
@@ -170,7 +174,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 						R.string.time_picker_ok, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								modifiedStep.name = ((EditText) v.findViewById(R.id.nameEdit)).getText().toString();
-								
+
 								String newDuration = ((EditText) v.findViewById(R.id.durationEdit)).getText().toString();
 								int colon = newDuration.indexOf(":");
 								int minutes = 0;
@@ -191,21 +195,21 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 									Log.w(TAG, "Problem with duration \"" + newDuration + "\": " + e);
 								}
 								modifiedStep.duration = minutes * 60 + seconds;
-								
+
 								try {
 									modifiedStep.agitateEvery = Integer.parseInt(((EditText) v
 											.findViewById(R.id.agitateEdit)).getText().toString());
 								} catch (NumberFormatException e) {
 									modifiedStep.agitateEvery = 0;
 								}
-								
+
 								CheckBox cb = (CheckBox) v.findViewById(R.id.pourCheck);
 								if (cb.isChecked()) {
 									modifiedStep.pourFor = 10;
 								} else {
 									modifiedStep.pourFor = 0;
 								}
-								
+
 								selectedStep.overwrite(modifiedStep);
 								adapter.notifyDataSetChanged();
 							}
