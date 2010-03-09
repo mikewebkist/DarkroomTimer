@@ -108,6 +108,11 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 							actionFlipper.setDisplayedChild(PROMPT_NONE);
 							ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
 							startButton.setEnabled(false);
+							// On orientation change, this will restart everything.
+							currentStep = 0;
+							startTime = 0;
+							pauseTime = 0;
+							currentStepRunning = false;
 						} else {
 							currentStep++;
 							long dur = stepTimeRemaining() / 1000;
