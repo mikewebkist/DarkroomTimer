@@ -16,12 +16,20 @@
 		android:showSilent="true"
 		android:summary="Tone to play when it's time to agitate." />
 		
+	<CheckBoxPreference
+		android:key="normalmode"
+		android:title="Normal Mode"
+		android:defaultValue="true"
+		android:summary="Uncheck to enable redlight mode." />
+		
 	<ListPreference
 		android:key="ledColor"
 		android:title="LED Color"
+		android:dependency="normalmode"
 		android:entries="@array/ledColorNames"
 		android:entryValues="@array/ledColors"
 		android:dialogTitle="Choose an LED color"
 		android:defaultValue="#ffff0000"
 		android:summary="Clock number color" />
+
 </PreferenceScreen>
