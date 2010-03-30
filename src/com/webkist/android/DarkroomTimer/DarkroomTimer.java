@@ -247,10 +247,17 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		String ring = settings.getString("alertTone", null);
 		String agitateRing = settings.getString("agitateTone", null);
-
+		boolean normalMode = settings.getBoolean("normalmode", true);
+		
 		ping = null;
 		agitatePing = null;
 
+		if(normalMode) {
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		} else {
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		}
+		
 		if (ring == null) {
 			// if null, preference is unset so use the system default.
 			ping = RingtoneManager.getRingtone(this, Settings.System.DEFAULT_NOTIFICATION_URI);
