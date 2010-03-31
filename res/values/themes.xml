@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<style name="DarkroomTheme" parent="@android:style/Theme.Black">
+		<item name="android:windowFullscreen">true</item>
+		<item name="android:typeface">sans</item>
+	</style>
+	
+	<style name="DarkroomTheme.Red">
+		<item name="android:windowFullscreen">true</item>
+		<item name="android:windowTitleBackgroundStyle">@style/WindowTitleBackgroundRed</item>
+		<item name="android:windowTitleStyle">@style/WindowTitleRed</item>
+	</style>
+	
+	<style name="DarkroomTheme.StepEditor">
+		<item name="android:textSize">16sp</item>
+		<item name="android:paddingBottom">16sp</item>
+		<item name="android:clickable">true</item>
+		<item name="android:focusable">true</item>
+    </style>
+</resources>
