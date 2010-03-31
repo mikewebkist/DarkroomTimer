@@ -58,7 +58,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:gravity="center_horizontal"
-		style="@style/timer.black"
+		style="@style/DarkroomTheme.timer.black"
 		android:text="88:88" />
 			
 	<TextView
@@ -66,7 +66,7 @@
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:gravity="center_horizontal"
-		style="@style/timer"
+		style="@style/DarkroomTheme.timer"
 		android:text="00:00" />
 
 </FrameLayout>

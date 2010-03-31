@@ -187,6 +187,15 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean normalMode = settings.getBoolean("normalmode", true);
+
+		if(normalMode) {
+			setTheme(R.style.DarkroomTheme);
+		} else {
+			setTheme(R.style.DarkroomTheme_Red);
+		}
+
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		setContentView(R.layout.main);
@@ -247,16 +256,9 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		String ring = settings.getString("alertTone", null);
 		String agitateRing = settings.getString("agitateTone", null);
-		boolean normalMode = settings.getBoolean("normalmode", true);
 		
 		ping = null;
 		agitatePing = null;
-
-		if(normalMode) {
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		} else {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		}
 		
 		if (ring == null) {
 			// if null, preference is unset so use the system default.
