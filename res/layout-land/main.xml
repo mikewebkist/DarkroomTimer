@@ -70,29 +70,8 @@
 		android:layout_height="0dip"
 		android:layout_weight="1" />
 
-<FrameLayout
-			android:layout_height="wrap_content"
-			android:layout_width="fill_parent"
-			android:gravity="right|bottom"
-			android:layout_weight="1">
+	<include layout="@layout/clock" />
 
-	<TextView
-		android:id="@+id/stepClockBlack"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center_horizontal"
-		style="@style/DarkroomTheme.timer.black"
-		android:text="88:88" />
-			
-	<TextView
-		android:id="@+id/stepClock"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center_horizontal"
-		style="@style/DarkroomTheme.timer"
-		android:text="00:00" />
-
-</FrameLayout>
 	<View
 		android:layout_width="fill_parent"
 		android:layout_height="0dip"
