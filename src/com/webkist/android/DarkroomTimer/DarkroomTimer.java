@@ -188,7 +188,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		setContentView(R.layout.main);
 		ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
@@ -275,9 +275,11 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		if(normalMode) {
 			ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
 			normalColor = Color.parseColor("#ffffffff");
+			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		} else {
 			ledColor = Color.parseColor("#ffff0000");
 			normalColor = ledColor;
+			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 
 		((LinearLayout) findViewById(R.id.stepBlock)).setBackgroundColor(normalColor);
