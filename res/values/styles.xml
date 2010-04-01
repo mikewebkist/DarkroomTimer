@@ -12,6 +12,9 @@
 	<style name="DarkroomTheme.timer">
 		<item name="android:textSize">125sp</item>
 		<item name="android:textColor">#ff0000</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:gravity">center_horizontal</item>
 	</style>
 
 	<style name="DarkroomTheme.timer.black">

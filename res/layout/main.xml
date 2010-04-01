@@ -57,20 +57,6 @@
 		android:layout_weight="1"
 		style="@style/upcomingText" />
 
+	<include layout="@layout/button" />
 
-	<LinearLayout
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:orientation="horizontal"
-		style="@android:style/ButtonBar">
-
-		<ToggleButton
-			android:textOff="@string/prompt_start"
-			android:textOn="@string/prompt_pause"
-			android:id="@+id/toggleButton"
-			style="@style/startButton"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content" />
-
-	</LinearLayout>
 </LinearLayout>

@@ -55,7 +55,7 @@
 
 			<TextView
 				android:id="@+id/upcoming"
-			android:gravity="right|center_vertical"
+				android:gravity="right|center_vertical"
 				android:layout_width="fill_parent"
 				android:layout_height="fill_parent"
 				style="@style/upcomingText" />
@@ -77,19 +77,6 @@
 		android:layout_height="0dip"
 		android:layout_weight="1" />
 
-	<LinearLayout
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:orientation="horizontal"
-		style="@android:style/ButtonBar">
+	<include layout="@layout/button" />
 
-		<ToggleButton
-			android:textOff="@string/prompt_start"
-			android:textOn="@string/prompt_pause"
-			android:id="@+id/toggleButton"
-			style="@style/startButton"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content" />
-
-	</LinearLayout>
 </LinearLayout>
