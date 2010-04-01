@@ -6,6 +6,8 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
+	<include layout="@layout/custom_title" />
+
 	<LinearLayout
 		android:id="@+id/stepBlock"
 		android:orientation="horizontal"

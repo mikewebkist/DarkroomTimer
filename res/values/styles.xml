@@ -15,6 +15,11 @@
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:gravity">center_horizontal</item>
 	</style>
+	
+	<style name="customTitle">
+		<item name="android:textSize">25sp</item>
+		<item name="android:textStyle">bold</item>
+	</style>
 
 	<style name="timePicker">
 		<item name="android:textSize">48sp</item>
@@ -30,7 +35,7 @@
 		<item name="android:textSize">36sp</item>
 		<item name="android:textStyle">bold</item>
 	</style>
-
+	
 	<style name="actionText">
 		<item name="android:textSize">36sp</item>
 		<item name="android:textColor">#ccc</item>

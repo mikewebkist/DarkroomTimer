@@ -32,12 +32,15 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.widget.ViewAnimator;
@@ -47,6 +50,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 
@@ -184,13 +188,17 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		}
 	};
 
+	private TextView customTitle;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
 		setContentView(R.layout.main);
+
 		ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
 		startButton.setOnCheckedChangeListener(this);
 
@@ -276,14 +284,20 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
 			normalColor = Color.parseColor("#ffffffff");
 			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			((ToggleButton) findViewById(R.id.toggleButton)).setBackgroundResource(android.R.drawable.btn_default);
 		} else {
 			ledColor = Color.parseColor("#ffff0000");
 			normalColor = ledColor;
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			((ToggleButton) findViewById(R.id.toggleButton)).setBackgroundResource(R.drawable.btn_red);
 		}
 
 		((LinearLayout) findViewById(R.id.stepBlock)).setBackgroundColor(normalColor);
 		((TextView) findViewById(R.id.stepLabel)).setTextColor(normalColor);
+		
+		((TextView) findViewById(R.id.customTitle)).setTextColor(normalColor);
+		((LinearLayout) findViewById(R.id.customTitleLayout)).setBackgroundColor(normalColor & 0x99ffffff);
+		((LinearLayout) findViewById(R.id.buttonBar)).setBackgroundColor(normalColor & 0x99ffffff);
 		
 		timerText.setTextColor(ledColor);
 		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
@@ -298,7 +312,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		if (preset.iso > 0) {
 			title += String.format(", ISO %d", preset.iso);
 		}
-		this.setTitle(title);
+//		this.setTitle(title);
+		((TextView) findViewById(R.id.customTitle)).setText(title);
 		ToggleButton toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
 
 		if (preset.steps.size() == (currentStep + 1) && startTime > 0 && !currentStepRunning) {
