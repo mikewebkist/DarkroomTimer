@@ -10,13 +10,14 @@
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
-		android:background="@drawable/gradient_step_bg">
+		android:id="@+id/stepBlock">
 		<TextView
 			android:id="@+id/stepLabel"
 			android:text="Dummy Step"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center_horizontal"
+			android:background="@drawable/gradient_step_bg"
 			style="@style/stepText" />
 	</LinearLayout>
 

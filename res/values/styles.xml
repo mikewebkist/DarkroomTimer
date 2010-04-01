@@ -11,15 +11,9 @@
 	
 	<style name="DarkroomTheme.timer">
 		<item name="android:textSize">125sp</item>
-		<item name="android:textColor">#ff0000</item>
 		<item name="android:layout_width">fill_parent</item>
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:gravity">center_horizontal</item>
-	</style>
-
-	<style name="DarkroomTheme.timer.black">
-		<item name="android:textColor">#000000</item>
-		<item name="android:background">#200</item>
 	</style>
 
 	<style name="timePicker">
@@ -30,12 +24,10 @@
 	<style name="upcomingText">
 		<item name="android:textSize">25sp</item>
 		<item name="android:textColor">#aaaaaa</item>
-		<item name="android:typeface">serif</item>
 	</style>
 	
 	<style name="stepText">
 		<item name="android:textSize">36sp</item>
-		<item name="android:textColor">#fff</item>
 		<item name="android:textStyle">bold</item>
 	</style>
 

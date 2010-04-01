@@ -9,7 +9,7 @@
 
 	<TextView
 		android:id="@+id/stepClockBlack"
-		style="@style/DarkroomTheme.timer.black"
+		style="@style/DarkroomTheme.timer"
 		android:text="88:88" />
 
 	<TextView

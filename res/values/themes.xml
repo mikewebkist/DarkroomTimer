@@ -2,14 +2,7 @@
 <resources>
 
 	<style name="DarkroomTheme" parent="@android:style/Theme.Black">
-		<item name="android:windowFullscreen">true</item>
 		<item name="android:typeface">sans</item>
-	</style>
-	
-	<style name="DarkroomTheme.Red">
-		<item name="android:windowFullscreen">true</item>
-		<item name="android:windowTitleBackgroundStyle">@style/WindowTitleBackgroundRed</item>
-		<item name="android:windowTitleStyle">@style/WindowTitleRed</item>
 	</style>
 	
 	<style name="DarkroomTheme.StepEditor">

@@ -37,6 +37,7 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 import android.widget.ViewAnimator;
@@ -270,15 +271,22 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 		// In normal mode, use the color from preferences. In redlight mode, force to red, natch.
 		int ledColor;
+		int normalColor;
 		if(normalMode) {
 			ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
+			normalColor = Color.parseColor("#ffffffff");
 		} else {
 			ledColor = Color.parseColor("#ffff0000");
+			normalColor = ledColor;
 		}
+
+		((LinearLayout) findViewById(R.id.stepBlock)).setBackgroundColor(normalColor);
+		((TextView) findViewById(R.id.stepLabel)).setTextColor(normalColor);
 		
 		timerText.setTextColor(ledColor);
 		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
 		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
+		timerTextBG.setTextColor(ledColor & 0x44ffffff);
 
 		String title = preset.name;
 
