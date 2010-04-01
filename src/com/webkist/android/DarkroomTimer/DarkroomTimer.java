@@ -187,16 +187,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-		boolean normalMode = settings.getBoolean("normalmode", true);
-
-		if(normalMode) {
-			setTheme(R.style.DarkroomTheme);
-		} else {
-			setTheme(R.style.DarkroomTheme_Red);
-		}
-
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
 		setContentView(R.layout.main);
 		ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
@@ -256,7 +247,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
 		String ring = settings.getString("alertTone", null);
 		String agitateRing = settings.getString("agitateTone", null);
-		
+		boolean normalMode = settings.getBoolean("normalmode", true);
+
 		ping = null;
 		agitatePing = null;
 		
@@ -276,7 +268,14 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			agitatePing = RingtoneManager.getRingtone(this, Uri.parse(agitateRing));
 		}
 
-		int ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
+		// In normal mode, use the color from preferences. In redlight mode, force to red, natch.
+		int ledColor;
+		if(normalMode) {
+			ledColor = Color.parseColor(settings.getString("ledColor", "#ffff0000"));
+		} else {
+			ledColor = Color.parseColor("#ffff0000");
+		}
+		
 		timerText.setTextColor(ledColor);
 		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
 		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
