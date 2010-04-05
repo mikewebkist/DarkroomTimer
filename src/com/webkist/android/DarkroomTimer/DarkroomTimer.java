@@ -32,18 +32,14 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
-import android.widget.ViewAnimator;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,13 +55,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 	private static final int TICK = 1;
 	private static final int ADJUST_STOPPED_CLOCK = 3;
-	private static final int GET_PRESET = 4;
 	private static final int FAILED_PRESET_PICK = 5;
 	private static final int ADJUST_RUNNING_CLOCK = 6;
-
-	private static final int PROMPT_NONE = 0;
-	private static final int PROMPT_POUR = 1;
-	private static final int PROMPT_AGITATE = 2;
 
 	private static final String SELECTED_PRESET = "selectedPreset";
 	private static final String RUNNING_START_TIME = "runningStartTime";
@@ -88,7 +79,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 	private Thread timer = null;
 	private boolean timerRunning = false;
 
-	private ViewAnimator actionFlipper;
+	private TextView actionFlipper;
 
 	private Ringtone agitatePing = null;
 	private boolean agitatePingPlayed = false;
@@ -110,7 +101,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 						if(preset.steps.size() == (currentStep + 1)) {
 							stepLabel.setText(R.string.prompt_done);
 							timerText.setText(R.string.prompt_done);
-							actionFlipper.setDisplayedChild(PROMPT_NONE);
+							actionFlipper.setText("");
 							ToggleButton startButton = (ToggleButton) findViewById(R.id.toggleButton);
 							startButton.setEnabled(false);
 							// On orientation change, this will restart everything.
@@ -123,7 +114,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 							long dur = stepTimeRemaining() / 1000;
 							stepLabel.setText(preset.steps.get(currentStep).name);
 							timerText.setText(String.format("%02d:%02d", (int) dur / 60, (int) dur % 60));
-							actionFlipper.setDisplayedChild(PROMPT_NONE);
+							actionFlipper.setText("");
 							((ToggleButton) findViewById(R.id.toggleButton)).setChecked(false);
 						}
 						
@@ -144,21 +135,21 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 						// Figure out what the user should be doing now.
 						if (step.pourFor > 0 && elapsedSecs < step.pourFor) {
 							// Pour.
-							actionFlipper.setDisplayedChild(PROMPT_POUR);
+							actionFlipper.setText(R.string.prompt_pour);
 						} else if (step.agitateEvery > 0) {
 							if (elapsedSecs < (step.pourFor + step.agitateFor)) {
 								// Agitate after pour.
-								actionFlipper.setDisplayedChild(PROMPT_AGITATE);
+								actionFlipper.setText(R.string.prompt_agitate);
 							} else if (((elapsedSecs - step.pourFor) % step.agitateEvery) < step.agitateFor) {
 								// Agitate.
-								actionFlipper.setDisplayedChild(PROMPT_AGITATE);
+								actionFlipper.setText(R.string.prompt_agitate);
 								agitatePingPlayed = false;
 							} else {
 								// Nothing.
-								actionFlipper.setDisplayedChild(PROMPT_NONE);
+								actionFlipper.setText("");
 							}
 						} else { // This clears the "Click to start..." prompt.
-							actionFlipper.setDisplayedChild(PROMPT_NONE);
+							actionFlipper.setText("");
 						}
 
 						// What's coming up.
@@ -188,8 +179,6 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		}
 	};
 
-	private TextView customTitle;
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -209,7 +198,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		timerTextBG.setTypeface(face);
 		timerText.setOnClickListener(this);
 		upcomingText = (TextView) findViewById(R.id.upcoming);
-		actionFlipper = (ViewAnimator) findViewById(R.id.actionFlipper);
+		actionFlipper = (TextView) findViewById(R.id.actionFlipper);
 		stepLabel = (TextView) findViewById(R.id.stepLabel);
 
 		if (savedInstanceState != null) {
@@ -294,15 +283,16 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 
 		((LinearLayout) findViewById(R.id.stepBlock)).setBackgroundColor(normalColor);
 		((TextView) findViewById(R.id.stepLabel)).setTextColor(normalColor);
-		
 		((TextView) findViewById(R.id.customTitle)).setTextColor(normalColor);
+		((TextView) findViewById(R.id.actionFlipper)).setTextColor(normalColor & 0xccffffff);
+		((TextView) findViewById(R.id.upcoming)).setTextColor(normalColor & 0xaaffffff);
 		((LinearLayout) findViewById(R.id.customTitleLayout)).setBackgroundColor(normalColor & 0x99ffffff);
 		((LinearLayout) findViewById(R.id.buttonBar)).setBackgroundColor(normalColor & 0x99ffffff);
 		
 		timerText.setTextColor(ledColor);
 		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
 		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
-		timerTextBG.setTextColor(ledColor & 0x44ffffff);
+		timerTextBG.setTextColor(ledColor & 0x33ffffff);
 
 		String title = preset.name;
 
@@ -319,7 +309,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		if (preset.steps.size() == (currentStep + 1) && startTime > 0 && !currentStepRunning) {
 			stepLabel.setText(R.string.prompt_done);
 			timerText.setText(R.string.prompt_done);
-			actionFlipper.setDisplayedChild(PROMPT_NONE);
+			actionFlipper.setText("");
 			toggleButton.setEnabled(false);
 		} else {
 			long dur = stepTimeRemaining() / 1000;
@@ -338,7 +328,7 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 			}
 		} else if (currentStepRunning || (!currentStepRunning && preset.steps.size() <= (currentStep + 1))) {
 			toggleButton.setChecked(false);
-			actionFlipper.setDisplayedChild(PROMPT_NONE);
+			actionFlipper.setText("");
 		}
 
 	}
