@@ -6,70 +6,34 @@
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
+	<include layout="@layout/custom_title" />
+
 	<LinearLayout
+		android:id="@+id/stepBlock"
 		android:orientation="horizontal"
 		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:background="@drawable/gradient_step_bg">
+		android:layout_height="wrap_content">
+		
 		<TextView
 			android:id="@+id/stepLabel"
 			android:text="Dummy Step"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center_horizontal"
+			android:background="@drawable/gradient_step_bg"
 			style="@style/stepText" />
 	</LinearLayout>
 
-	<ViewAnimator
+	<TextView
 		android:id="@+id/actionFlipper"
 		android:layout_weight="1"
 		android:layout_width="fill_parent"
-		android:layout_height="0dip">
+		android:layout_height="0dip"
+		style="@style/actionText"
+		android:gravity="center"
+		android:text="" />
 
-		<TextView
-			android:layout_width="fill_parent"
-			style="@style/actionText"
-			android:layout_height="fill_parent"
-			android:gravity="center"
-			android:text="" />
-		<TextView
-			android:layout_width="fill_parent"
-			style="@style/actionText"
-			android:layout_height="fill_parent"
-			android:gravity="center"
-			android:text="@string/prompt_pour" />
-		<TextView
-			android:layout_width="fill_parent"
-			style="@style/actionText"
-			android:layout_height="fill_parent"
-			android:gravity="center"
-			android:text="@string/prompt_agitate" />
-
-	</ViewAnimator>
-
-<FrameLayout
-			android:layout_height="wrap_content"
-			android:layout_width="fill_parent"
-			android:gravity="right|bottom"
-			android:layout_weight="1">
-
-	<TextView
-		android:id="@+id/stepClockBlack"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center_horizontal"
-		style="@style/timer.black"
-		android:text="88:88" />
-			
-	<TextView
-		android:id="@+id/stepClock"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center_horizontal"
-		style="@style/timer"
-		android:text="00:00" />
-
-</FrameLayout>
+	<include layout="@layout/clock" />
 
 	<TextView
 		android:id="@+id/upcoming"
@@ -79,20 +43,6 @@
 		android:layout_weight="1"
 		style="@style/upcomingText" />
 
+	<include layout="@layout/button" />
 
-	<LinearLayout
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:orientation="horizontal"
-		style="@android:style/ButtonBar">
-
-		<ToggleButton
-			android:textOff="@string/prompt_start"
-			android:textOn="@string/prompt_pause"
-			android:id="@+id/toggleButton"
-			style="@style/startButton"
-			android:layout_width="fill_parent"
-			android:layout_height="wrap_content" />
-
-	</LinearLayout>
 </LinearLayout>
