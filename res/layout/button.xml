@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/buttonBar"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    style="@android:style/ButtonBar">
+
+    <ToggleButton
+	android:textOff="@string/prompt_start"
+	android:textOn="@string/prompt_pause"
+	android:id="@+id/toggleButton"
+	style="@style/startButton"
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content" />
+
+</LinearLayout>
