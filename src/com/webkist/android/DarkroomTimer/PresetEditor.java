@@ -304,7 +304,12 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 			}
 			((TextView) convertView.findViewById(android.R.id.text1)).setText(name);
 
-			String details = step.agitateEvery > 0 ? String.format("agitate: %ds", step.agitateEvery) : "";
+			String details;
+			if(step.agitateEvery == -1) {
+				details = "continuous agitation";
+			} else {
+				details = step.agitateEvery > 0 ? String.format("agitate: %ds", step.agitateEvery) : "";
+			}
 
 			TextView tv = (TextView) convertView.findViewById(android.R.id.text2);
 			tv.setGravity(Gravity.RIGHT);
