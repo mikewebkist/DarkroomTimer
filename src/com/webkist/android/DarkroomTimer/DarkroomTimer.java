@@ -148,6 +148,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 								// Nothing.
 								actionFlipper.setText("");
 							}
+						} else if (step.agitateEvery == -1) {
+							actionFlipper.setText(R.string.prompt_agitate);
 						} else { // This clears the "Click to start..." prompt.
 							actionFlipper.setText("");
 						}
