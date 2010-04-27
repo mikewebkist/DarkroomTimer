@@ -39,6 +39,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -47,8 +48,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
-public class PresetEditor extends Activity implements OnItemClickListener {
+public class PresetEditor extends Activity implements OnItemClickListener, OnCheckedChangeListener {
 	public static final String TAG = "PresetEditor";
 	private static final int EDIT_STEP = 1;
 
@@ -57,6 +59,7 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 	private DarkroomStep selectedStep;
 	private MyAdapter adapter;
 	private DarkroomStep modifiedStep;
+	private EditText agitateEdit;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -197,8 +200,12 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 								modifiedStep.duration = minutes * 60 + seconds;
 
 								try {
-									modifiedStep.agitateEvery = Integer.parseInt(((EditText) v
-											.findViewById(R.id.agitateEdit)).getText().toString());
+									CheckBox agitateCB = (CheckBox) v.findViewById(R.id.agitateCheckbox);
+									if(agitateCB.isChecked()) {
+										modifiedStep.agitateEvery = -1;
+									} else {
+										modifiedStep.agitateEvery = Integer.parseInt(agitateEdit.getText().toString());
+									}
 								} catch (NumberFormatException e) {
 									modifiedStep.agitateEvery = 0;
 								}
@@ -241,8 +248,20 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 						modifiedStep.duration / 60, modifiedStep.duration % 60));
 				((EditText) dialog.findViewById(R.id.durationEdit)).clearFocus();
 
-				((EditText) dialog.findViewById(R.id.agitateEdit)).setText(String.format("%d", modifiedStep.agitateEvery));
-				((EditText) dialog.findViewById(R.id.agitateEdit)).clearFocus();
+				CheckBox agitateCB = (CheckBox) dialog.findViewById(R.id.agitateCheckbox);
+				agitateCB.setOnCheckedChangeListener(this);
+
+				agitateEdit = (EditText) dialog.findViewById(R.id.agitateEdit);
+				if(modifiedStep.agitateEvery == -1) {
+					agitateEdit.setText("");
+					agitateEdit.setEnabled(false);
+					agitateCB.setChecked(true);
+				} else {
+					agitateEdit.setText(String.format("%d", modifiedStep.agitateEvery));
+					agitateEdit.setEnabled(true);
+					agitateCB.setChecked(false);
+				}
+				agitateEdit.clearFocus();
 
 				CheckBox cb = (CheckBox) dialog.findViewById(R.id.pourCheck);
 				if (modifiedStep.pourFor > 0) {
@@ -285,7 +304,12 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 			}
 			((TextView) convertView.findViewById(android.R.id.text1)).setText(name);
 
-			String details = step.agitateEvery > 0 ? String.format("agitate: %ds", step.agitateEvery) : "";
+			String details;
+			if(step.agitateEvery == -1) {
+				details = "continuous agitation";
+			} else {
+				details = step.agitateEvery > 0 ? String.format("agitate: %ds", step.agitateEvery) : "";
+			}
 
 			TextView tv = (TextView) convertView.findViewById(android.R.id.text2);
 			tv.setGravity(Gravity.RIGHT);
@@ -293,5 +317,11 @@ public class PresetEditor extends Activity implements OnItemClickListener {
 
 			return convertView;
 		}
+	}
+
+	@Override
+	public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+		Log.v(TAG, "in obCheckedChanged for button: " + agitateEdit);
+		agitateEdit.setEnabled(!isChecked);
 	}
 }
