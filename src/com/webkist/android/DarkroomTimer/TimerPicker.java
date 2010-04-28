@@ -63,7 +63,6 @@ public class TimerPicker extends ListActivity {
 	private static final int DUPLICATE_ID = 4;
 	private static final int DIALOG_DELETE_CONFIRM = 1;
 	private static final int EDIT_PRESET = 0;
-	private static final int DIALOG_FIRST_RUN = 4;
 	private Cursor listViewCursor;
 
 	Handler threadMessageHandler = new Handler() {
@@ -100,7 +99,7 @@ public class TimerPicker extends ListActivity {
 		settings = PreferenceManager.getDefaultSharedPreferences(this);
 		boolean alreadyRan = settings.getBoolean("AlreadyRanFlag", false);
 		if (!alreadyRan) {
-			showDialog(DIALOG_FIRST_RUN);
+			showDialog(R.id.info);
 		}
 	}
 
@@ -176,7 +175,7 @@ public class TimerPicker extends ListActivity {
 					}
 				}).create();
 				break;
-			case DIALOG_FIRST_RUN:
+			case R.id.info:
 				dialog = new AlertDialog.Builder(TimerPicker.this).setTitle(R.string.app_name).setMessage(
 						R.string.first_run_message).setCancelable(true).setPositiveButton(R.string.time_picker_ok,
 						new DialogInterface.OnClickListener() {
@@ -186,6 +185,15 @@ public class TimerPicker extends ListActivity {
 								editor.commit();
 							}
 						}).create();
+				break;
+			case R.id.export:
+				dialog = new AlertDialog.Builder(TimerPicker.this).setTitle(R.string.app_name).setMessage(
+						R.string.exportMessage).setCancelable(true).setPositiveButton("Export",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int whichButton) {
+								// TODO Save the presets....
+							}
+						}).setNegativeButton("Cancel", null).create();
 				break;
 			default:
 				dialog = null;
@@ -222,7 +230,10 @@ public class TimerPicker extends ListActivity {
 				startActivityForResult(intent, EDIT_PRESET);
 				return true;
 			case R.id.info:
-				showDialog(DIALOG_FIRST_RUN);
+				showDialog(R.id.info);
+				return true;
+			case R.id.export:
+				showDialog(R.id.export);
 				return true;
 		}
 		return false;

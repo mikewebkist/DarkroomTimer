@@ -1,4 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 <item android:id="@+id/add_preset" android:title="Add Preset" android:icon="@android:drawable/ic_menu_add" />
 <item android:id="@+id/info" android:title="Info" android:icon="@android:drawable/ic_menu_info_details" />
+<item android:id="@+id/export" android:title="Export Presets" android:icon="@android:drawable/ic_menu_save" />
 </menu>
