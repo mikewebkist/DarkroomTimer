@@ -16,10 +16,14 @@ limitations under the License.
 
 package com.webkist.android.DarkroomTimer;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset;
 
@@ -37,10 +41,12 @@ import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.Xml;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -191,7 +197,8 @@ public class TimerPicker extends ListActivity {
 						R.string.exportMessage).setCancelable(true).setPositiveButton("Export",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
-								// TODO Save the presets....
+								XmlWriter p = new XmlWriter();
+								p.run();
 							}
 						}).setNegativeButton("Cancel", null).create();
 				break;
@@ -244,7 +251,7 @@ public class TimerPicker extends ListActivity {
 		Intent i = new Intent(this, DarkroomTimer.class);
 		i.setAction(Intent.ACTION_VIEW);
 		i.setData(uri);
-		
+
 		startActivity(i);
 	}
 
@@ -328,4 +335,83 @@ public class TimerPicker extends ListActivity {
 
 		}
 	}
+
+	class XmlWriter implements Runnable {
+
+		public void run() {
+
+			String state = Environment.getExternalStorageState();
+			if (!Environment.MEDIA_MOUNTED.equals(state)) {
+				Toast.makeText(getBaseContext(), "Storage is unavailable for writing!", Toast.LENGTH_LONG).show();
+				return;
+			}
+
+			File path = Environment.getExternalStorageDirectory();
+		    File dir = new File(path, getPackageName());
+		    dir.mkdirs();
+		    File file = new File(dir, "preset_backup.txt");
+		    
+			Log.w(TAG, "Writing DB to XML:" + file.toString());
+			XmlSerializer s = Xml.newSerializer();
+			FileWriter writer;
+			try {
+				writer = new FileWriter(file);
+			} catch (IOException e1) {
+				Toast.makeText(getBaseContext(), "Couldn't open backup file for writing!", Toast.LENGTH_LONG).show();
+				return;
+			}
+			
+			try {
+				s.setOutput(writer);
+				s.startDocument("UTF-8", true);
+				s.text("\n");
+				s.startTag("", "preset-array");
+				s.text("\n");
+				ContentResolver cr = getContentResolver();
+				Cursor cur = cr.query(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, null);
+				if(cur.moveToFirst()) {
+					do {
+						Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, cur.getInt(cur.getColumnIndex(DarkroomPreset._ID)));
+						DarkroomPreset preset = new DarkroomPreset(TimerPicker.this, uri);
+						s.startTag("", "preset");
+						s.attribute("", "name", preset.name);
+						if(preset.temp != null) { 
+							s.attribute("", "temp", preset.temp);
+						}
+						if(preset.iso > 0) {
+							s.attribute("", "iso", String.valueOf(preset.iso));
+						}
+						for(int i=0; i< preset.steps.size(); i++) {
+							DarkroomPreset.DarkroomStep step = preset.steps.get(i);
+							s.text("\n	");
+							s.startTag("", "step");
+							s.attribute("", "name", step.name);
+							if(step.duration > 0) {
+								s.attribute("", "duration", String.valueOf(step.duration));
+							}
+							if(step.agitateEvery != 0) {
+								s.attribute("", "agitate", String.valueOf(step.agitateEvery));
+							}
+							if(step.pourFor > 0) {
+								s.attribute("", "pour", String.valueOf(step.pourFor));
+							}
+							s.endTag("", "step");
+						}
+						s.text("\n");
+						s.endTag("", "preset");
+						s.text("\n");
+					} while(cur.moveToNext());
+				}
+				s.text("\n");
+				s.endTag("", "preset-array");
+				s.flush();
+				Toast.makeText(getBaseContext(), "Backup saved to " + file.toString(), Toast.LENGTH_LONG).show();
+
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+
+		}
+	}
+	
 }
