@@ -82,6 +82,7 @@ public class TimerPicker extends ListActivity {
 	};
 	private DarkroomPreset longClickPreset;
 	private SharedPreferences settings;
+	private CharSequence[] fileList;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -202,6 +203,16 @@ public class TimerPicker extends ListActivity {
 							}
 						}).setNegativeButton("Cancel", null).create();
 				break;
+			case R.id.load:
+				AlertDialog.Builder builder = new AlertDialog.Builder(TimerPicker.this);
+				builder.setTitle("Load from which file?");
+				builder.setItems(fileList, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						Toast.makeText(getApplicationContext(), fileList[item], Toast.LENGTH_SHORT).show();
+					}
+				});
+				dialog = builder.create();
+				break;
 			default:
 				dialog = null;
 		}
@@ -209,9 +220,13 @@ public class TimerPicker extends ListActivity {
 	}
 
 	protected void onPrepareDialog(int id, Dialog dialog) {
-		if (id == DIALOG_DELETE_CONFIRM) {
-			String message = String.format(getResources().getString(R.string.preset_confirm_delete), longClickPreset.name);
-			((AlertDialog) dialog).setMessage(message);
+		switch (id) {
+			case DIALOG_DELETE_CONFIRM:
+				String message = String.format(getResources().getString(R.string.preset_confirm_delete), longClickPreset.name);
+				((AlertDialog) dialog).setMessage(message);
+				break;
+			case R.id.load:
+				break;
 		}
 	}
 
@@ -235,15 +250,25 @@ public class TimerPicker extends ListActivity {
 				Intent intent = new Intent(this, PresetEditor.class);
 				intent.setData(null);
 				startActivityForResult(intent, EDIT_PRESET);
-				return true;
-			case R.id.info:
-				showDialog(R.id.info);
-				return true;
-			case R.id.export:
-				showDialog(R.id.export);
-				return true;
+				break;
+				
+			case R.id.load:
+				String state = Environment.getExternalStorageState();
+				if (!(Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))) {
+					Toast.makeText(getBaseContext(), "Storage is unavailable for reading!", Toast.LENGTH_LONG).show();
+					return false;
+				}
+
+				File path = Environment.getExternalStorageDirectory();
+			    File dir = new File(path, getPackageName());
+			    fileList = dir.list(null);
+				showDialog(R.id.load);
+			    break;
+
+			default:
+				showDialog(item.getItemId());
 		}
-		return false;
+		return true;
 	}
 
 	public void onListItemClick(ListView l, View v, int position, long id) {
@@ -349,7 +374,7 @@ public class TimerPicker extends ListActivity {
 			File path = Environment.getExternalStorageDirectory();
 		    File dir = new File(path, getPackageName());
 		    dir.mkdirs();
-		    File file = new File(dir, "preset_backup.txt");
+		    File file = new File(dir, "preset_backup.xml");
 		    
 			Log.w(TAG, "Writing DB to XML:" + file.toString());
 			XmlSerializer s = Xml.newSerializer();
