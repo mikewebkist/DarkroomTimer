@@ -17,13 +17,17 @@ limitations under the License.
 package com.webkist.android.DarkroomTimer;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset;
@@ -209,13 +213,30 @@ public class TimerPicker extends ListActivity {
 			case R.id.load:
 				AlertDialog.Builder builder = new AlertDialog.Builder(TimerPicker.this);
 				builder.setTitle("Load from which file?");
-				builder.setAdapter(new PresetFilePickerAdapter(this),
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int item) {
-								String filename = (String) ((AlertDialog) dialog).getListView().getAdapter().getItem(item);
-								Toast.makeText(getApplicationContext(), filename, Toast.LENGTH_SHORT).show();
-							}
-						});
+				builder.setAdapter(new PresetFilePickerAdapter(this), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						String filename = (String) ((AlertDialog) dialog).getListView().getAdapter().getItem(item);
+						File dir = new File(Environment.getExternalStorageDirectory(), getPackageName());
+						File file = new File(dir, filename);
+						
+						XmlPullParserFactory factory;
+						try {
+							factory = XmlPullParserFactory.newInstance();
+							factory.setNamespaceAware(true);
+							XmlPullParser xpp = factory.newPullParser();
+							xpp.setInput(new FileReader(file));
+							XmlParser p = new XmlParser(xpp);
+							p.run();
+
+						} catch (XmlPullParserException e) {
+							Toast.makeText(getApplicationContext(), "Problem parsing preset file!", Toast.LENGTH_LONG).show();
+						} catch (FileNotFoundException e) {
+							Toast.makeText(getApplicationContext(), "Problem reading preset file!", Toast.LENGTH_LONG).show();
+						}
+
+						Toast.makeText(getApplicationContext(), filename, Toast.LENGTH_SHORT).show();
+					}
+				});
 				dialog = builder.create();
 				break;
 			default:
@@ -235,7 +256,8 @@ public class TimerPicker extends ListActivity {
 				File path = Environment.getExternalStorageDirectory();
 				File dir = new File(path, getPackageName());
 				fileList = dir.list(null);
-				PresetFilePickerAdapter adapter = (PresetFilePickerAdapter) ((AlertDialog) dialog).getListView().getAdapter();
+				PresetFilePickerAdapter adapter = (PresetFilePickerAdapter) ((AlertDialog) dialog).getListView()
+						.getAdapter();
 				adapter.clear();
 				for (int i = 0; i < fileList.length; i++) {
 					adapter.add(fileList[i]);
@@ -303,11 +325,17 @@ public class TimerPicker extends ListActivity {
 				convertView = getLayoutInflater().inflate(android.R.layout.two_line_list_item, parent, false);
 			}
 
-			((TextView) convertView.findViewById(android.R.id.text1)).setText(fileList[position]);
+			String filename = fileList[position];
+
+			((TextView) convertView.findViewById(android.R.id.text1)).setText(filename);
+
+			File dir = new File(Environment.getExternalStorageDirectory(), getPackageName());
+			File file = new File(dir, filename);
+			String date = (new SimpleDateFormat("EEE, MMM d, yyyy 'at' h:mm aaa")).format(new Date(file.lastModified()));
 
 			TextView tv = (TextView) convertView.findViewById(android.R.id.text2);
 			tv.setGravity(Gravity.RIGHT);
-			tv.setText("<DATE HERE>");
+			tv.setText(date);
 
 			return convertView;
 		}
@@ -345,13 +373,23 @@ public class TimerPicker extends ListActivity {
 	}
 
 	class XmlParser implements Runnable {
-		private XmlResourceParser xrp;
+		private XmlResourceParser xrp = null;
+		private XmlPullParser xpp = null;
 
 		public XmlParser(XmlResourceParser xrp) {
 			this.xrp = xrp;
 		}
 
+		public XmlParser(XmlPullParser xpp) {
+			this.xpp = xpp;
+			Log.w(TAG, "This should be drop-in compatible, right?");
+		}
+
 		public void run() {
+			if(xpp != null && xrp == null) {
+				Log.w(TAG, "Unimplemented!");
+				return;
+			}
 			ContentResolver cr = getContentResolver();
 
 			Log.w(TAG, "Initializing DB from XML resources.");
