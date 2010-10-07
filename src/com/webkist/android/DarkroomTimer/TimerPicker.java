@@ -19,7 +19,6 @@ package com.webkist.android.DarkroomTimer;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -50,6 +49,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Xml;
 import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,6 +57,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.ArrayAdapter;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -84,7 +85,7 @@ public class TimerPicker extends ListActivity {
 	};
 	private DarkroomPreset longClickPreset;
 	private SharedPreferences settings;
-	private CharSequence[] fileList;
+	private String[] fileList;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -208,11 +209,13 @@ public class TimerPicker extends ListActivity {
 			case R.id.load:
 				AlertDialog.Builder builder = new AlertDialog.Builder(TimerPicker.this);
 				builder.setTitle("Load from which file?");
-				builder.setItems(fileList, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int item) {
-						Toast.makeText(getApplicationContext(), fileList[item], Toast.LENGTH_SHORT).show();
-					}
-				});
+				builder.setAdapter(new PresetFilePickerAdapter(this),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int item) {
+								String filename = (String) ((AlertDialog) dialog).getListView().getAdapter().getItem(item);
+								Toast.makeText(getApplicationContext(), filename, Toast.LENGTH_SHORT).show();
+							}
+						});
 				dialog = builder.create();
 				break;
 			default:
@@ -224,10 +227,20 @@ public class TimerPicker extends ListActivity {
 	protected void onPrepareDialog(int id, Dialog dialog) {
 		switch (id) {
 			case DIALOG_DELETE_CONFIRM:
-				String message = String.format(getResources().getString(R.string.preset_confirm_delete), longClickPreset.name);
+				String message = String.format(getResources().getString(R.string.preset_confirm_delete),
+						longClickPreset.name);
 				((AlertDialog) dialog).setMessage(message);
 				break;
 			case R.id.load:
+				File path = Environment.getExternalStorageDirectory();
+				File dir = new File(path, getPackageName());
+				fileList = dir.list(null);
+				PresetFilePickerAdapter adapter = (PresetFilePickerAdapter) ((AlertDialog) dialog).getListView().getAdapter();
+				adapter.clear();
+				for (int i = 0; i < fileList.length; i++) {
+					adapter.add(fileList[i]);
+				}
+				adapter.notifyDataSetChanged();
 				break;
 		}
 	}
@@ -253,7 +266,7 @@ public class TimerPicker extends ListActivity {
 				intent.setData(null);
 				startActivityForResult(intent, EDIT_PRESET);
 				break;
-				
+
 			case R.id.load:
 				String state = Environment.getExternalStorageState();
 				if (!(Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))) {
@@ -261,11 +274,8 @@ public class TimerPicker extends ListActivity {
 					return false;
 				}
 
-				File path = Environment.getExternalStorageDirectory();
-			    File dir = new File(path, getPackageName());
-			    fileList = dir.list(null);
 				showDialog(R.id.load);
-			    break;
+				break;
 
 			default:
 				showDialog(item.getItemId());
@@ -280,6 +290,28 @@ public class TimerPicker extends ListActivity {
 		i.setData(uri);
 
 		startActivity(i);
+	}
+
+	private class PresetFilePickerAdapter extends ArrayAdapter<String> {
+
+		public PresetFilePickerAdapter(Context context) {
+			super(context, 0);
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			if (convertView == null) {
+				convertView = getLayoutInflater().inflate(android.R.layout.two_line_list_item, parent, false);
+			}
+
+			((TextView) convertView.findViewById(android.R.id.text1)).setText(fileList[position]);
+
+			TextView tv = (TextView) convertView.findViewById(android.R.id.text2);
+			tv.setGravity(Gravity.RIGHT);
+			tv.setText("<DATE HERE>");
+
+			return convertView;
+		}
+
 	}
 
 	private class MyOtherAdapter extends CursorAdapter {
@@ -374,11 +406,11 @@ public class TimerPicker extends ListActivity {
 			}
 
 			File path = Environment.getExternalStorageDirectory();
-		    File dir = new File(path, getPackageName());
-		    dir.mkdirs();
-		    String filename = (new SimpleDateFormat("'presets-'yyyyMMddhhmm'.txt'")).format(new Date());
-		    File file = new File(dir, filename);
-		    
+			File dir = new File(path, getPackageName());
+			dir.mkdirs();
+			String filename = (new SimpleDateFormat("'presets-'yyyyMMddhhmm'.txt'")).format(new Date());
+			File file = new File(dir, filename);
+
 			Log.w(TAG, "Writing DB to XML:" + file.toString());
 			XmlSerializer s = Xml.newSerializer();
 			FileWriter writer;
@@ -388,7 +420,7 @@ public class TimerPicker extends ListActivity {
 				Toast.makeText(getBaseContext(), "Couldn't open backup file for writing!", Toast.LENGTH_LONG).show();
 				return;
 			}
-			
+
 			try {
 				s.setOutput(writer);
 				s.startDocument("UTF-8", true);
@@ -397,30 +429,31 @@ public class TimerPicker extends ListActivity {
 				s.text("\n");
 				ContentResolver cr = getContentResolver();
 				Cursor cur = cr.query(DarkroomPreset.CONTENT_URI_PRESET, null, null, null, null);
-				if(cur.moveToFirst()) {
+				if (cur.moveToFirst()) {
 					do {
-						Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, cur.getInt(cur.getColumnIndex(DarkroomPreset._ID)));
+						Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, cur.getInt(cur
+								.getColumnIndex(DarkroomPreset._ID)));
 						DarkroomPreset preset = new DarkroomPreset(TimerPicker.this, uri);
 						s.startTag("", "preset");
 						s.attribute("", "name", preset.name);
-						if(preset.temp != null) { 
+						if (preset.temp != null) {
 							s.attribute("", "temp", preset.temp);
 						}
-						if(preset.iso > 0) {
+						if (preset.iso > 0) {
 							s.attribute("", "iso", String.valueOf(preset.iso));
 						}
-						for(int i=0; i< preset.steps.size(); i++) {
+						for (int i = 0; i < preset.steps.size(); i++) {
 							DarkroomPreset.DarkroomStep step = preset.steps.get(i);
 							s.text("\n	");
 							s.startTag("", "step");
 							s.attribute("", "name", step.name);
-							if(step.duration > 0) {
+							if (step.duration > 0) {
 								s.attribute("", "duration", String.valueOf(step.duration));
 							}
-							if(step.agitateEvery != 0) {
+							if (step.agitateEvery != 0) {
 								s.attribute("", "agitate", String.valueOf(step.agitateEvery));
 							}
-							if(step.pourFor > 0) {
+							if (step.pourFor > 0) {
 								s.attribute("", "pour", String.valueOf(step.pourFor));
 							}
 							s.endTag("", "step");
@@ -428,7 +461,7 @@ public class TimerPicker extends ListActivity {
 						s.text("\n");
 						s.endTag("", "preset");
 						s.text("\n");
-					} while(cur.moveToNext());
+					} while (cur.moveToNext());
 				}
 				s.text("\n");
 				s.endTag("", "preset-array");
@@ -441,5 +474,5 @@ public class TimerPicker extends ListActivity {
 
 		}
 	}
-	
+
 }
