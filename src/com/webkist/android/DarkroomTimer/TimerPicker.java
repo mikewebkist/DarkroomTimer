@@ -20,7 +20,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -374,7 +376,8 @@ public class TimerPicker extends ListActivity {
 			File path = Environment.getExternalStorageDirectory();
 		    File dir = new File(path, getPackageName());
 		    dir.mkdirs();
-		    File file = new File(dir, "preset_backup.xml");
+		    String filename = (new SimpleDateFormat("'presets-'yyyyMMddhhmm'.txt'")).format(new Date());
+		    File file = new File(dir, filename);
 		    
 			Log.w(TAG, "Writing DB to XML:" + file.toString());
 			XmlSerializer s = Xml.newSerializer();
