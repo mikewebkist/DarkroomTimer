@@ -226,6 +226,7 @@ public class TimerPicker extends ListActivity {
 							XmlPullParser xpp = factory.newPullParser();
 							xpp.setInput(new FileReader(file));
 							XmlParser p = new XmlParser(xpp);
+							
 							p.run();
 
 						} catch (XmlPullParserException e) {
@@ -373,24 +374,21 @@ public class TimerPicker extends ListActivity {
 	}
 
 	class XmlParser implements Runnable {
-		private XmlResourceParser xrp = null;
-		private XmlPullParser xpp = null;
+		private XmlPullParser xrp = null;
+//		private XmlPullParser xpp = null;
 
 		public XmlParser(XmlResourceParser xrp) {
 			this.xrp = xrp;
 		}
 
 		public XmlParser(XmlPullParser xpp) {
-			this.xpp = xpp;
+			this.xrp = xpp;
 			Log.w(TAG, "This should be drop-in compatible, right?");
 		}
 
 		public void run() {
-			if(xpp != null && xrp == null) {
-				Log.w(TAG, "Unimplemented!");
-				return;
-			}
 			ContentResolver cr = getContentResolver();
+			String selection = DarkroomPreset.PRESET_NAME + "=?";
 
 			Log.w(TAG, "Initializing DB from XML resources.");
 			ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
@@ -400,13 +398,39 @@ public class TimerPicker extends ListActivity {
 					if (xrp.getEventType() == XmlResourceParser.START_TAG) {
 						String s = xrp.getName();
 						if (s.equals("preset")) {
+							boolean dupe = false;
 							p = new DarkroomPreset(xrp.getAttributeValue(null, "id"), xrp.getAttributeValue(null, "name"),
-									xrp.getAttributeIntValue(null, "iso", 0), xrp.getAttributeValue(null, "temp"));
-							darkroomPresets.add(p);
+									xrp.getAttributeValue(null, "iso"), xrp.getAttributeValue(null, "temp"));
+							Cursor cur = cr.query(DarkroomPreset.CONTENT_URI_PRESET, null, selection, new String[] { p.name }, null);
+							if (cur.moveToFirst()) {
+								Log.w(TAG, "Checking for already existing: " + p.name + ", " + p.iso + ", " + p.temp);
+								do {
+									Uri uri = ContentUris.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, cur.getInt(cur
+											.getColumnIndex(DarkroomPreset._ID)));
+									DarkroomPreset preset = new DarkroomPreset(TimerPicker.this, uri);
+									Log.w(TAG, "Found: " + preset.name + ", " + preset.iso + ", " + preset.temp);
+
+									// If name, ISO & temp are the same, treat as a duplicate.
+									if(preset.name.equals(p.name) && preset.iso == p.iso) {
+										// temp can be a string or null, so be explicit here.
+										if(preset.temp != null && (p.temp == null || !preset.temp.equals(p.temp))) {
+											// not dupe
+										} else if(preset.temp == null && p.temp != null) {
+											// not dupe
+										} else {
+											Log.w(TAG, "Duplicate preset: " + p.name + ", " + p.iso + ", " + p.temp);
+											dupe = true;
+										}
+									}
+								} while (cur.moveToNext());
+							}
+							if(dupe == false) {
+								darkroomPresets.add(p);
+							}
 						} else if (s.equals("step")) {
-							p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeIntValue(null,
-									"duration", 120), xrp.getAttributeIntValue(null, "agitate", 0), xrp
-									.getAttributeIntValue(null, "pour", 0));
+							p.addStep(p.steps.size(), xrp.getAttributeValue(null, "name"), xrp.getAttributeValue(null,
+									"duration"), xrp.getAttributeValue(null, "agitate"), xrp
+									.getAttributeValue(null, "pour"));
 						}
 					}
 					xrp.next();
