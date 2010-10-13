@@ -323,7 +323,7 @@ public class TimerPicker extends ListActivity {
 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null) {
-				convertView = getLayoutInflater().inflate(android.R.layout.two_line_list_item, parent, false);
+				convertView = getLayoutInflater().inflate(R.layout.preset_file_picker, parent, false);
 			}
 
 			String filename = fileList[position];
