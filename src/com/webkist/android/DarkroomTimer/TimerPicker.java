@@ -477,7 +477,7 @@ public class TimerPicker extends ListActivity {
 			File path = Environment.getExternalStorageDirectory();
 			File dir = new File(path, getPackageName());
 			dir.mkdirs();
-			String filename = (new SimpleDateFormat("'presets-'yyyyMMddhhmm'.txt'")).format(new Date());
+			String filename = (new SimpleDateFormat("'presets-'yyyyMMddHHmm'.txt'")).format(new Date());
 			File file = new File(dir, filename);
 
 			Log.w(TAG, "Writing DB to XML:" + file.toString());
