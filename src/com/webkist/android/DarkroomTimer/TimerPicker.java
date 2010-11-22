@@ -71,6 +71,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 public class TimerPicker extends ListActivity {
 	public static final String TAG = "DarkroomTimer.TimerPicker";
 	private static final int XML_IMPORT_DONE = 1;
+	private static final int XML_IMPORT_DUPE = 2;
 	private static final int EDIT_ID = 2;
 	private static final int DELETE_ID = 3;
 	private static final int DUPLICATE_ID = 4;
@@ -87,6 +88,7 @@ public class TimerPicker extends ListActivity {
 			}
 		}
 	};
+
 	private DarkroomPreset longClickPreset;
 	private SharedPreferences settings;
 	private String[] fileList;
@@ -234,8 +236,6 @@ public class TimerPicker extends ListActivity {
 						} catch (FileNotFoundException e) {
 							Toast.makeText(getApplicationContext(), "Problem reading preset file!", Toast.LENGTH_LONG).show();
 						}
-
-						Toast.makeText(getApplicationContext(), filename, Toast.LENGTH_SHORT).show();
 					}
 				});
 				dialog = builder.create();
@@ -392,6 +392,7 @@ public class TimerPicker extends ListActivity {
 
 			Log.w(TAG, "Initializing DB from XML resources.");
 			ArrayList<DarkroomPreset> darkroomPresets = new ArrayList<DarkroomPreset>();
+			ArrayList<DarkroomPreset> duplicates = new ArrayList<DarkroomPreset>();
 			try {
 				DarkroomPreset p = null;
 				while (xrp.getEventType() != XmlResourceParser.END_DOCUMENT) {
@@ -420,11 +421,14 @@ public class TimerPicker extends ListActivity {
 										} else {
 											Log.w(TAG, "Duplicate preset: " + p.name + ", " + p.iso + ", " + p.temp);
 											dupe = true;
+											break;
 										}
 									}
 								} while (cur.moveToNext());
 							}
-							if(dupe == false) {
+							if(dupe) {
+								duplicates.add(p);
+							} else {
 								darkroomPresets.add(p);
 							}
 						} else if (s.equals("step")) {
@@ -452,6 +456,9 @@ public class TimerPicker extends ListActivity {
 
 			Message m = new Message();
 			m.what = TimerPicker.XML_IMPORT_DONE;
+			int num = darkroomPresets.size() + duplicates.size();
+			String message = "Added " + darkroomPresets.size() + " of " + num + " presets found.";
+			Toast.makeText(getBaseContext(), message, Toast.LENGTH_LONG).show();			
 			TimerPicker.this.threadMessageHandler.sendMessage(m);
 
 		}
