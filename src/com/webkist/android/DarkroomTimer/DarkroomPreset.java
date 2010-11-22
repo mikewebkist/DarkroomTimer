@@ -58,6 +58,17 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		this.temp = temp;
 	}
 
+	DarkroomPreset(String id, String name, String iso, String temp) {
+		this.name = name;
+		this.id = id;
+		try {		
+			this.iso = Integer.parseInt(iso);
+		} catch (NumberFormatException e) {
+			this.iso = 0;
+		}
+		this.temp = temp;
+	}
+
 	DarkroomPreset() {
 	}
 
@@ -112,6 +123,17 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 
 	public DarkroomStep addStep(int stepNum, String name, int duration, int agitateEvery, int pourFor) {
 		DarkroomStep s = new DarkroomStep(stepNum, name, duration, agitateEvery, pourFor);
+		steps.add(s);
+		return s;
+	}
+
+	public DarkroomStep addStep(int stepNum, String name, String duration, String agitateEvery, String pourFor) {
+		int duration_i = 120, agitateEvery_i = 0, pourFor_i = 0;
+		try { duration_i = Integer.parseInt(duration); } catch (NumberFormatException e) { };
+		try { agitateEvery_i = Integer.parseInt(agitateEvery); } catch (NumberFormatException e) { };
+		try { pourFor_i = Integer.parseInt(pourFor); } catch (NumberFormatException e) { };
+		
+		DarkroomStep s = new DarkroomStep(stepNum, name, duration_i, agitateEvery_i, pourFor_i);
 		steps.add(s);
 		return s;
 	}

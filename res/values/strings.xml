@@ -34,6 +34,9 @@
 	Choose a preset or press "menu" to add your own. Long-click on a preset to
 	edit or delete it.
 	</string>
+	<string name="exportMessage">
+	Export presets to the SD Card...
+	</string>
 	<string name="sql_presets">
 	CREATE TABLE presets (
 		_id INTEGER PRIMARY KEY,
