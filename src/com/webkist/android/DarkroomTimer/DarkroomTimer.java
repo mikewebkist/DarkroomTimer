@@ -148,6 +148,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 								// Nothing.
 								actionFlipper.setText("");
 							}
+						} else if (step.agitateEvery == -1) {
+							actionFlipper.setText(R.string.prompt_agitate);
 						} else { // This clears the "Click to start..." prompt.
 							actionFlipper.setText("");
 						}
@@ -291,8 +293,8 @@ public class DarkroomTimer extends Activity implements OnClickListener, OnChecke
 		
 		timerText.setTextColor(ledColor);
 		TextView timerTextBG = (TextView) findViewById(R.id.stepClockBlack);
-		timerTextBG.setBackgroundColor(ledColor & 0x22ffffff);
-		timerTextBG.setTextColor(ledColor & 0x33ffffff);
+		timerTextBG.setBackgroundColor(ledColor & 0x11ffffff);
+		timerTextBG.setTextColor(ledColor & 0x22ffffff);
 
 		String title = preset.name;
 

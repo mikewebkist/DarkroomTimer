@@ -1,53 +1,123 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/ScrollView01" android:layout_width="fill_parent"
+<ScrollView
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/ScrollView01"
+	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	
-	<LinearLayout android:layout_width="fill_parent"
-		android:id="@+id/editLayout" android:layout_height="fill_parent"
-		android:orientation="vertical" android:focusable="true"
-		android:focusableInTouchMode="true" android:gravity="center">
 
-		<EditText android:id="@+id/nameEdit" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:layout_marginRight="5dip"
-			android:layout_marginLeft="5dip" android:gravity="center_vertical"
-			android:inputType="textPersonName|textCapWords" android:hint="Step Name" />
+	<LinearLayout
+		android:layout_width="fill_parent"
+		android:id="@+id/editLayout"
+		android:layout_height="fill_parent"
+		android:orientation="vertical"
+		android:focusable="true"
+		android:focusableInTouchMode="true"
+		android:gravity="center">
 
-		<View android:layout_width="fill_parent" android:layout_height="1dip"
+		<EditText
+			android:id="@+id/nameEdit"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="5dip"
+			android:layout_marginLeft="5dip"
+			android:gravity="center_vertical"
+			android:inputType="textPersonName|textCapWords"
+			android:hint="Step Name" />
+
+		<View
+			android:layout_width="fill_parent"
+			android:layout_height="1dip"
 			android:background="@drawable/gradientdivider" />
 
-		<LinearLayout android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:layout_marginRight="5dip"
-			android:layout_marginLeft="5dip" android:orientation="horizontal">
-			<TextView android:id="@+id/duration" android:text="Step duration (MM:SS):"
-				android:layout_width="wrap_content" android:layout_weight="1"
-				android:gravity="left" android:layout_height="wrap_content" />
-			<EditText android:id="@+id/durationEdit" android:maxLength="5"
-				android:layout_width="wrap_content" android:layout_weight="1"
-				android:selectAllOnFocus="true" android:layout_height="wrap_content"
-				android:gravity="center_vertical" android:inputType="time"
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="5dip"
+			android:layout_marginLeft="5dip"
+			android:orientation="horizontal">
+			<TextView
+				android:id="@+id/duration"
+				android:text="Step duration (MM:SS):"
+				android:layout_width="wrap_content"
+				android:layout_weight="1"
+				android:gravity="left"
+				android:layout_height="wrap_content" />
+			<EditText
+				android:id="@+id/durationEdit"
+				android:maxLength="5"
+				android:layout_width="wrap_content"
+				android:layout_weight="1"
+				android:selectAllOnFocus="true"
+				android:layout_height="wrap_content"
+				android:gravity="center_vertical"
+				android:inputType="time"
 				android:hint="MM:SS" />
 		</LinearLayout>
 
-		<View android:layout_width="fill_parent" android:layout_height="1dip"
+		<View
+			android:layout_width="fill_parent"
+			android:layout_height="1dip"
 			android:background="@drawable/gradientdivider" />
 
-		<LinearLayout android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:layout_marginRight="5dip"
-			android:layout_marginLeft="5dip" android:orientation="horizontal">
-			<TextView android:id="@+id/agitate" android:text="Agitate every (seconds):"
-				android:layout_width="wrap_content" android:layout_weight="1"
-				android:gravity="left" android:layout_height="wrap_content" />
-			<EditText android:id="@+id/agitateEdit" android:maxLength="3"
-				android:layout_width="wrap_content" android:layout_weight="1"
-				android:selectAllOnFocus="true" android:layout_height="wrap_content"
-				android:gravity="center_vertical" android:inputType="time"
-				android:hint="seconds" />
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginRight="5dip"
+			android:layout_marginLeft="5dip"
+			android:gravity="center"
+			android:orientation="vertical">
+			<TextView
+				android:id="@+id/agitate"
+				android:text="Agitate:"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+
+			<CheckBox
+				android:text="Continuous"
+				android:id="@+id/agitateCheckbox"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+
+			<LinearLayout
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginRight="5dip"
+				android:layout_marginLeft="5dip"
+				android:gravity="center"
+				android:orientation="horizontal">
+
+				<TextView
+					android:text="Every "
+					android:textSize="16dip"
+					android:textColor="#fff"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content" />
+				<EditText
+					android:id="@+id/agitateEdit"
+					android:maxLength="3"
+					android:layout_width="wrap_content"
+					android:selectAllOnFocus="true"
+					android:layout_height="wrap_content"
+					android:gravity="center_vertical"
+					android:inputType="time" />
+				<TextView
+					android:text=" seconds"
+					android:textSize="16dip"
+					android:textColor="#fff"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content" />
+			</LinearLayout>
+
 		</LinearLayout>
 
-		<View android:layout_width="fill_parent" android:layout_height="1dip"
+		<View
+			android:layout_width="fill_parent"
+			android:layout_height="1dip"
 			android:background="@drawable/gradientdivider" />
 
-		<CheckBox android:id="@+id/pourCheck" android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="add 10 sec pour?" />
+		<CheckBox
+			android:id="@+id/pourCheck"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="add 10 sec pour?" />
 	</LinearLayout>
 </ScrollView>
