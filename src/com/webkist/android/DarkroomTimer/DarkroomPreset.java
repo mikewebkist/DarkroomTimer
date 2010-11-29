@@ -47,7 +47,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	public int iso;
 	public String temp = "";
 	public String id;
-	public Uri uri;
+	public String uri;
 
 	public ArrayList<DarkroomStep> steps = new ArrayList<DarkroomStep>();
 
@@ -73,7 +73,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	}
 
 	public DarkroomPreset(Activity ctx, Uri uri) {
-		this.uri = uri;
+		this.uri = uri.toString();
 		Cursor cur = ctx.managedQuery(uri, null, null, null, DarkroomPreset.PRESET_NAME);
 
 		int idCol = cur.getColumnIndex(DarkroomPreset._ID);
