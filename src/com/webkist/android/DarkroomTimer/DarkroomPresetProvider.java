@@ -149,7 +149,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 					Uri presetUri = ContentUris
 							.withAppendedId(DarkroomPreset.CONTENT_URI_PRESET, Integer.parseInt(presetId));
 					getContext().getContentResolver().notifyChange(presetUri, null);
-					return presetUri;
+					return Uri.withAppendedPath(uri, String.valueOf(rowId));
 				}
 				break;
 			default:
@@ -178,7 +178,7 @@ public class DarkroomPresetProvider extends ContentProvider {
 			case URI_PRESET_STEPS: // Get steps associated with a preset
 				qb.setTables(STEP_TABLE_NAME);
 				qb.appendWhere(DarkroomPreset.DarkroomStep.STEP_PRESET + "=" + uri.getPathSegments().get(1));
-				orderBy = DarkroomPreset.DarkroomStep.STEP_STEP;
+				orderBy = null;
 				break;
 
 			case URI_LIVE_FOLDER:
