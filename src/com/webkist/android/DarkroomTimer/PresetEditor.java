@@ -17,6 +17,7 @@ limitations under the License.
 package com.webkist.android.DarkroomTimer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import com.webkist.android.DarkroomTimer.DarkroomPreset.DarkroomStep;
 
@@ -24,16 +25,20 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -47,12 +52,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class PresetEditor extends Activity implements OnItemClickListener, OnCheckedChangeListener {
 	public static final String TAG = "PresetEditor";
-	private static final int EDIT_STEP = 1;
+	private static final int EDIT_STEP = 0x01;
+	private static final int ADD_STEP  = 0x02;
+	private static final int DUP_STEP  = 0x03;
+	private static final int DEL_STEP  = 0x04;
+	private static final int MOVE_STEP = 0x05;
+	private static final int UP_STEP   = 0x06;
+	private static final int DOWN_STEP = 0x07;
 
 	private Uri uri;
 	private DarkroomPreset preset;
@@ -107,6 +119,7 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 		lv.setAdapter(adapter);
 		lv.setOnItemClickListener(this);
 
+		registerForContextMenu(lv);
 		// Save entire preset.
 		Button saveBtn = (Button) findViewById(R.id.saveButton);
 		saveBtn.setOnClickListener(new OnClickListener() {
@@ -149,7 +162,8 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 					cr.delete(stepUri, null, null);
 					String presetId = uri.getPathSegments().get(1);
 					for (int j = 0; j < preset.steps.size(); j++) {
-						cr.insert(stepUri, preset.steps.get(j).toContentValues(presetId));
+						Uri newUri = cr.insert(stepUri, preset.steps.get(j).toContentValues(presetId));
+						Log.v(TAG, "New URI for " + preset.steps.get(j).name + ": " + newUri);
 					}
 					finish();
 				}
@@ -285,6 +299,48 @@ public class PresetEditor extends Activity implements OnItemClickListener, OnChe
 		showDialog(EDIT_STEP);
 	}
 
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.setHeaderTitle("Modify Step");
+		menu.add(0, ADD_STEP,  0, "Add Step After This");
+		menu.add(0, DUP_STEP,  0, "Duplicate This Step");
+		menu.add(0, UP_STEP, 0, "Move Up");
+		menu.add(0, DOWN_STEP, 0, "Move Down");
+	}
+
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		switch (item.getItemId()) {
+			case ADD_STEP:
+				selectedStep = preset.blankStep();
+				preset.steps.add(info.position + 1, selectedStep);
+				modifiedStep = selectedStep.clone();
+				showDialog(EDIT_STEP);
+				return true;
+			case DUP_STEP:
+				selectedStep = preset.steps.get(info.position).clone();
+				selectedStep.name = selectedStep.name + " copy";
+				preset.steps.add(info.position + 1, selectedStep);
+				modifiedStep = selectedStep.clone();
+				showDialog(EDIT_STEP);
+				return true;
+			case UP_STEP:
+				Collections.swap(preset.steps, info.position, info.position - 1);
+				adapter.notifyDataSetChanged();
+				return true;
+			case DOWN_STEP:
+				Collections.swap(preset.steps, info.position, info.position + 1);
+				adapter.notifyDataSetChanged();
+				return true;
+			case DEL_STEP: // Unreachable right now.
+				preset.steps.remove(preset.steps.get(info.position));
+				adapter.notifyDataSetChanged();
+				return true;
+			default:
+				return super.onContextItemSelected(item);
+		}
+	}
+	
 	private class MyAdapter extends ArrayAdapter<DarkroomPreset.DarkroomStep> {
 
 		public MyAdapter(Context context, ArrayList<DarkroomPreset.DarkroomStep> steps) {

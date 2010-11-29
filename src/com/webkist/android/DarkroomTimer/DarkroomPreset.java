@@ -88,22 +88,20 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 			this.temp = cur.getString(tempCol);
 			this.iso = cur.getInt(isoCol);
 			Log.v(TAG, "Creating " + this.name + " preset.");
-			Cursor step_cur = ctx.managedQuery(stepUri, null, null, null, DarkroomPreset.DarkroomStep.STEP_STEP);
+			Cursor step_cur = ctx.managedQuery(stepUri, null, null, null, null);
 
 			int step_nameCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_NAME);
-			int step_stepNumCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_STEP);
 			int step_durationCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_DURATION);
 			int step_agitageEveryCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_AGITATION);
 			int step_pourForCol = step_cur.getColumnIndex(DarkroomPreset.DarkroomStep.STEP_POUR);
 
 			if (step_cur.moveToFirst()) {
 				do {
-					int stepNum = step_cur.getInt(step_stepNumCol);
 					String name = step_cur.getString(step_nameCol);
 					int duration = step_cur.getInt(step_durationCol);
 					int agitateEvery = step_cur.getInt(step_agitageEveryCol);
 					int pourFor = step_cur.getInt(step_pourForCol);
-					this.addStep(stepNum, name, duration, agitateEvery, pourFor);
+					this.addStep(name, duration, agitateEvery, pourFor);
 
 				} while (step_cur.moveToNext());
 			}
@@ -121,8 +119,8 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		s.fromBlank = false;
 	}
 
-	public DarkroomStep addStep(int stepNum, String name, int duration, int agitateEvery, int pourFor) {
-		DarkroomStep s = new DarkroomStep(stepNum, name, duration, agitateEvery, pourFor);
+	public DarkroomStep addStep(String name, int duration, int agitateEvery, int pourFor) {
+		DarkroomStep s = new DarkroomStep(name, duration, agitateEvery, pourFor);
 		steps.add(s);
 		return s;
 	}
@@ -133,7 +131,7 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		try { agitateEvery_i = Integer.parseInt(agitateEvery); } catch (NumberFormatException e) { };
 		try { pourFor_i = Integer.parseInt(pourFor); } catch (NumberFormatException e) { };
 		
-		DarkroomStep s = new DarkroomStep(stepNum, name, duration_i, agitateEvery_i, pourFor_i);
+		DarkroomStep s = new DarkroomStep(name, duration_i, agitateEvery_i, pourFor_i);
 		steps.add(s);
 		return s;
 	}
@@ -162,7 +160,6 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 	public class DarkroomStep implements BaseColumns, Serializable {
 		private static final long serialVersionUID = 1L;
 		public String name;
-		public int stepNum;
 		public int duration;
 		public int agitateEvery;
 		public int agitateFor = 10;
@@ -170,14 +167,12 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 		public boolean fromBlank;
 
 		public static final String STEP_PRESET = "preset";
-		public static final String STEP_STEP = "step";
 		public static final String STEP_NAME = "name";
 		public static final String STEP_DURATION = "duration";
 		public static final String STEP_AGITATION = "agitation";
 		public static final String STEP_POUR = "pour";
 
-		DarkroomStep(int stepNum, String name, int duration, int agitateEvery, int pourFor) {
-			this.stepNum = stepNum;
+		DarkroomStep(String name, int duration, int agitateEvery, int pourFor) {
 			this.name = name;
 			this.duration = duration;
 			this.agitateEvery = agitateEvery;
@@ -211,7 +206,6 @@ public class DarkroomPreset implements BaseColumns, Serializable {
 			ContentValues vals = new ContentValues();
 			vals.put(STEP_PRESET, presetId);
 			vals.put(STEP_NAME, name);
-			vals.put(STEP_STEP, stepNum);
 			vals.put(STEP_DURATION, duration);
 			vals.put(STEP_AGITATION, agitateEvery);
 			vals.put(STEP_POUR, pourFor);
