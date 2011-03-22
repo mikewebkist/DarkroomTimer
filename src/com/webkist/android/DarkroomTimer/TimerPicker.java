@@ -257,13 +257,16 @@ public class TimerPicker extends ListActivity {
 				File path = Environment.getExternalStorageDirectory();
 				File dir = new File(path, getPackageName());
 				fileList = dir.list(null);
-				PresetFilePickerAdapter adapter = (PresetFilePickerAdapter) ((AlertDialog) dialog).getListView()
-						.getAdapter();
-				adapter.clear();
-				for (int i = 0; i < fileList.length; i++) {
-					adapter.add(fileList[i]);
+				if(fileList != null) {
+					PresetFilePickerAdapter adapter = (PresetFilePickerAdapter) ((AlertDialog) dialog).getListView()
+					.getAdapter();
+					adapter.clear();
+					// TODO: I think this crashes when there are no files found.
+					for (int i = 0; i < fileList.length; i++) {
+						adapter.add(fileList[i]);
+					}
+					adapter.notifyDataSetChanged();
 				}
-				adapter.notifyDataSetChanged();
 				break;
 		}
 	}
